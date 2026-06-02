@@ -11,8 +11,8 @@
     <groupId>com.jiangong</groupId>
     <artifactId>neustudy-admin-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>neumall-admin-backend</name>
-    <description>neumall-admin-backend</description>
+    <name>neustudy-admin-backend</name>
+    <description>neustudy-admin-backend</description>
     <url/>
     <licenses>
         <license/>
@@ -117,6 +117,11 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>9.2.0</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>

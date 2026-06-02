@@ -24,13 +24,38 @@ public class JWTUtil {
     }
 
     public static boolean verifyToken(String token) {
-        return cn.hutool.jwt.JWTUtil.verify(token, getSecret().getBytes(StandardCharsets.UTF_8));
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+        try {
+            JWT jwt = cn.hutool.jwt.JWTUtil.parseToken(token);
+            return jwt.setKey(getSecret().getBytes(StandardCharsets.UTF_8)).verify() && !isExpired(jwt);
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     public static Long getUserId(String token) {
-        JWT jwt = cn.hutool.jwt.JWTUtil.parseToken(token);
-        Object userId = jwt.getPayload(USER_ID);
-        return userId != null ? Long.parseLong(userId.toString()) : null;
+        try {
+            JWT jwt = cn.hutool.jwt.JWTUtil.parseToken(token);
+            Object userId = jwt.getPayload(USER_ID);
+            return userId != null ? Long.parseLong(userId.toString()) : null;
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    private static boolean isExpired(JWT jwt) {
+        Object exp = jwt.getPayload(EXP);
+        if (exp == null) {
+            return true;
+        }
+        try {
+            long expiresAtSeconds = exp instanceof Number number ? number.longValue() : Long.parseLong(exp.toString());
+            return expiresAtSeconds <= System.currentTimeMillis() / 1000;
+        } catch (RuntimeException e) {
+            return true;
+        }
     }
 
     private static String getSecret() {

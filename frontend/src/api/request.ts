@@ -74,8 +74,14 @@ service.interceptors.response.use(
   },
   error => {
     const response = error.response
-    if (response?.data?.code === 403) {
-      message.error((error.response?.data.message ?? '没有权限访问该资源') + ': ' + error.response.config.url)
+    const status = response?.status ?? response?.data?.code
+    const url = response?.config?.url
+
+    if (status === 401) {
+      useAuthStore().logout()
+      message.error(response?.data?.message ?? '登录已失效，请重新登录')
+    } else if (status === 403) {
+      message.error(`${response?.data?.message ?? '没有权限访问该资源'}${url ? `: ${url}` : ''}`)
     }
     return Promise.reject(response ? response.data : error)
   }

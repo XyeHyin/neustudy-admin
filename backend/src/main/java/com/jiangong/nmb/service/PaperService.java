@@ -95,16 +95,17 @@ public class PaperService {
      * 校验当前用户是否有权操作试卷（教师只能操作自己试卷，除非拥有对应的全局管理权限）
      */
     private void checkPaperOwnershipOrAdminPermission(Paper paper, Long currentUserId, String adminPermissionConstant) {
+        if (paper.getTeacher() != null && paper.getTeacher().getId().equals(currentUserId)) {
+            return;
+        }
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean hasAdminPermission = authentication.getAuthorities().stream()
+        boolean hasAdminPermission = authentication != null && authentication.getAuthorities() != null && authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> adminPermissionConstant.equals(grantedAuthority.getAuthority()));
 
-        if (!hasAdminPermission) { // If user does not have the admin_all permission for this action
-            if (paper.getTeacher() == null || !paper.getTeacher().getId().equals(currentUserId)) {
-                throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "无权操作该试卷，非本人操作且无对应管理员权限");
-            }
+        if (!hasAdminPermission) {
+            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "无权操作该试卷，非本人操作且无对应管理员权限");
         }
-        // If user has adminPermissionConstant, or is the owner, proceed.
     }
 
     /**
@@ -428,4 +429,4 @@ public class PaperService {
         }
         return vo;
     }
-} 
+}

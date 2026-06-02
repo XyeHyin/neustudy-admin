@@ -1,6 +1,7 @@
 package com.jiangong.nmb.controller;
 
 import com.jiangong.nmb.common.ApiResponse;
+import com.jiangong.nmb.constant.PermissionConstants;
 import com.jiangong.nmb.dto.question.CreateQuestionDTO;
 import com.jiangong.nmb.entity.Question;
 import com.jiangong.nmb.entity.KnowledgePoint;
@@ -12,21 +13,20 @@ import com.jiangong.nmb.service.KnowledgePointService;
 import com.jiangong.nmb.vo.question.QuestionVO;
 import com.jiangong.nmb.vo.question.QuestionDetailVO;
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -99,9 +99,24 @@ class QuestionControllerTest {
         testQuestionDetailVO.setType(Question.QuestionType.valueOf("SINGLE_CHOICE"));
         testQuestionDetailVO.setDifficulty(Question.Difficulty.valueOf("MEDIUM"));
 
-        // Mock Security Context
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void mockCurrentUser(Long userId) {
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userId);
+    }
+
+    private void mockAuthorities(String... permissions) {
+        List<GrantedAuthority> authorities = Arrays.stream(permissions)
+                .<GrantedAuthority>map(SimpleGrantedAuthority::new)
+                .toList();
+        doReturn(authorities).when(authentication).getAuthorities();
     }
 
     @Test
@@ -131,9 +146,7 @@ class QuestionControllerTest {
         createDTO.setTitle("新题目");
         createDTO.setKnowledgePointId(1L);
 
-        // Mock getCurrentUserId method behavior
-        when(request.getHeader("Authorization")).thenReturn("Bearer token");
-
+        mockCurrentUser(1L);
         when(knowledgePointService.findById(1L)).thenReturn(testKnowledgePoint);
         when(questionMapper.toQuestion(any(CreateQuestionDTO.class))).thenReturn(testQuestion);
         when(questionService.save(any(Question.class))).thenReturn(testQuestion);
@@ -153,13 +166,11 @@ class QuestionControllerTest {
     @Test
     void testDetail() {
         // Given
+        mockCurrentUser(1L);
+        mockAuthorities(PermissionConstants.QUESTION_VIEW_SELF);
         when(questionService.findById(1L)).thenReturn(testQuestion);
+        when(questionService.isQuestionOwnedByTeacher(1L, 1L)).thenReturn(true);
         when(questionMapper.toQuestionDetailVO(any(Question.class))).thenReturn(testQuestionDetailVO);
-
-        // Mock authorities
-        @SuppressWarnings("unchecked")
-        Collection<GrantedAuthority> authorities = mock(Collection.class);
-        when(authorities.stream()).thenReturn(Arrays.stream(new GrantedAuthority[0]));
 
         // When
         ApiResponse<QuestionDetailVO> result = questionController.detail(1L, request);

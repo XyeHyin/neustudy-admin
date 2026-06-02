@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
-    private UserService userService;
+    private final UserService userService;
 
     public JWTAuthenticationFilter(UserService userService) {
         this.userService = userService;
@@ -35,30 +35,36 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            if (JWTUtil.verifyToken(token)) {
-                Long userId = JWTUtil.getUserId(token);
-                User user = userService.findById(userId);
-                if (user == null) {
-                    response.setStatus(HttpStatus.HTTP_UNAUTHORIZED);
-                    response.setCharacterEncoding("UTF-8");
-                    response.setContentType("application/json");
-                    response.getWriter().write(JSONUtil.toJsonStr(ApiResponse.error(HttpStatus.HTTP_UNAUTHORIZED, "用户不存在")));
-                    return;
-                }
-                if (!user.getEnabled()) {
-                    response.setStatus(HttpStatus.HTTP_UNAUTHORIZED);
-                    response.setCharacterEncoding("UTF-8");
-                    response.setContentType("application/json");
-                    response.getWriter().write(JSONUtil.toJsonStr(ApiResponse.error(HttpStatus.HTTP_FORBIDDEN, "用户被禁用")));
-                    return;
-                }
-                Set<String> permissionCodes = user.getRole().getPermissions().stream().map(Permission::getCode).collect(Collectors.toSet());
-                List<SimpleGrantedAuthority> authorities = permissionCodes.stream().map(SimpleGrantedAuthority::new).toList();
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (!JWTUtil.verifyToken(token)) {
+                SecurityContextHolder.clearContext();
+                writeJson(response, HttpStatus.HTTP_UNAUTHORIZED, ApiResponse.error(HttpStatus.HTTP_UNAUTHORIZED, "登录已失效，请重新登录"));
+                return;
             }
+            Long userId = JWTUtil.getUserId(token);
+            User user = userId == null ? null : userService.findById(userId);
+            if (user == null) {
+                writeJson(response, HttpStatus.HTTP_UNAUTHORIZED, ApiResponse.error(HttpStatus.HTTP_UNAUTHORIZED, "用户不存在"));
+                return;
+            }
+            if (!user.getEnabled()) {
+                writeJson(response, HttpStatus.HTTP_FORBIDDEN, ApiResponse.error(HttpStatus.HTTP_FORBIDDEN, "用户被禁用"));
+                return;
+            }
+            Set<String> permissionCodes = user.getRole() == null || user.getRole().getPermissions() == null
+                    ? Set.of()
+                    : user.getRole().getPermissions().stream().map(Permission::getCode).collect(Collectors.toSet());
+            List<SimpleGrantedAuthority> authorities = permissionCodes.stream().map(SimpleGrantedAuthority::new).toList();
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void writeJson(HttpServletResponse response, int status, ApiResponse<?> body) throws IOException {
+        response.setStatus(status);
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(JSONUtil.toJsonStr(body));
     }
 }

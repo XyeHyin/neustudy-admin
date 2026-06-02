@@ -11,9 +11,9 @@
     "typescript",
     "vite"
   ],
-  "repository": "chen-jie_1/neumall-admin-frontend",
+  "repository": "https://github.com/XyeHyin/neustudy-admin.git",
   "license": "MIT",
-  "author": "JianGong",
+  "author": "XyeHyin",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",

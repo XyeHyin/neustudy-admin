@@ -174,8 +174,6 @@ public class UserController extends BaseController {
         if (user == null) {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "用户不存在");
         }
-        System.out.println(user.getPassword());
-        System.out.println(PasswordUtil.encode(updateUserPasswordDTO.getOldPassword()));
         if (!PasswordUtil.matches(updateUserPasswordDTO.getOldPassword(), user.getPassword())) {
             throw new StatefulException(HttpStatus.HTTP_BAD_REQUEST, "旧密码错误");
         }

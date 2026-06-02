@@ -146,7 +146,7 @@ class PaperControllerTest {
         PaperUpdateDTO updateDTO = new PaperUpdateDTO();
         updateDTO.setTitle("更新的试卷");
 
-        when(paperService.updatePaper(anyLong(), any(PaperUpdateDTO.class), anyLong())).thenReturn(testPaper);
+        when(paperService.updatePaper(eq(1L), eq(updateDTO), isNull())).thenReturn(testPaper);
         when(paperMapper.toPaperDetailVO(any(Paper.class))).thenReturn(paperDetailVO);
 
         // When
@@ -156,7 +156,7 @@ class PaperControllerTest {
         assertNotNull(result);
         assertTrue(result.getSuccess());
 
-        verify(paperService).updatePaper(eq(1L), eq(updateDTO), any());
+        verify(paperService).updatePaper(eq(1L), eq(updateDTO), isNull());
     }
 
     @Test

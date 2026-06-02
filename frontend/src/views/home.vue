@@ -468,9 +468,6 @@ const initTrendChart = () => {
   // 获取主题色彩
   const colors = getActualColors()
 
-  // 添加调试日志
-  console.log('趋势图表使用的颜色:', colors)
-
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -579,9 +576,6 @@ const initPieChart = () => {
     colors.successColor, // 青色 #13c2c2 (替换了原来的亮绿色)
     colors.purpleColor // 紫色 #722ed1
   ]
-
-  // 添加调试日志
-  console.log('饼图使用的颜色:', pieColors)
 
   const option = {
     tooltip: {

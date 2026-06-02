@@ -2,11 +2,10 @@ package com.jiangong.nmb.service;
 
 import cn.hutool.core.exceptions.StatefulException;
 import com.jiangong.nmb.dto.practice.PracticeStartDTO;
-import com.jiangong.nmb.dto.practice.PracticeSubmitDTO;
 import com.jiangong.nmb.entity.*;
 import com.jiangong.nmb.repository.*;
 import com.jiangong.nmb.vo.practice.PracticeSessionVO;
-import com.jiangong.nmb.vo.practice.PracticeResultVO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +17,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,10 +69,17 @@ class PracticeServiceTest {
         testSession.setSubmitted(false);
         testSession.setStartTime(LocalDateTime.now());
 
-        // Mock Security Context
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void mockCurrentUser(Long userId) {
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(1L);
+        when(authentication.getPrincipal()).thenReturn(userId);
     }
 
     @Test
@@ -83,6 +88,7 @@ class PracticeServiceTest {
         PracticeStartDTO dto = new PracticeStartDTO();
         dto.setPaperId(1L);
 
+        mockCurrentUser(1L);
         when(paperRepository.findById(1L)).thenReturn(Optional.of(testPaper));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(practiceSessionRepository.findFirstByStudentIdAndPaperIdAndSubmittedFalse(1L, 1L))
@@ -140,6 +146,7 @@ class PracticeServiceTest {
         PracticeStartDTO dto = new PracticeStartDTO();
         dto.setPaperId(1L);
 
+        mockCurrentUser(1L);
         when(paperRepository.findById(1L)).thenReturn(Optional.of(testPaper));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(practiceSessionRepository.findFirstByStudentIdAndPaperIdAndSubmittedFalse(1L, 1L))

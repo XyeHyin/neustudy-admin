@@ -36,7 +36,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useMessage } from 'naive-ui'
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
 import type { FormInst } from 'naive-ui'
@@ -90,8 +89,6 @@ const difficultyOptions = [
   { label: '困难', value: 'HARD' }
 ]
 
-const message = useMessage()
-
 // 关闭弹窗并重置表单
 function handleCancel() {
   emit('update:show', false)
@@ -102,11 +99,8 @@ function handleCancel() {
 function handleSubmit() {
   formRef.value?.validate((errors: any) => {
     if (!errors) {
-      console.log('提交的表单数据:', form.value) // 添加调试日志
       emit('submit', form.value)
       resetForm()
-    } else {
-      console.log('验证错误:', errors) // 添加错误日志
     }
   })
 }
