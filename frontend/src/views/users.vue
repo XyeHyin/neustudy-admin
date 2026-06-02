@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="users-page">
     <n-card :bordered="false" class="users-card">
       <n-h1 class="users-title">用户管理</n-h1>
@@ -49,8 +49,8 @@ import { useRequest } from 'vue-hooks-plus'
 import { uploadFile } from '@/api/file'
 import { getRoles } from '@/api/role'
 import { batchDeleteUsers, createUser, deleteUser, getUserDetail, getUserPage, getUsers, updateUser, updateUserRole, updateUserStatus } from '@/api/user'
-import UserCreateModal from '@/components/user-create-modal.vue'
-import userDetailModal from '@/components/user-detail-modal.vue'
+import UserCreateModal from '@/components/user/user-create-modal.vue'
+import userDetailModal from '@/components/user/user-detail-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { DataTableColumns, DataTableRowKey, SelectOption, UploadCustomRequestOptions } from 'naive-ui'
@@ -384,3 +384,4 @@ function handleSearch() {
   margin-bottom: 12px;
 }
 </style>
+

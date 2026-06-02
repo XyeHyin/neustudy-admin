@@ -1,5 +1,6 @@
 package com.jiangong.nmb.config;
 
+import com.jiangong.nmb.config.properties.AppProperties;
 import com.jiangong.nmb.constant.PermissionConstants;
 import com.jiangong.nmb.entity.Category;
 import com.jiangong.nmb.entity.Permission;
@@ -11,7 +12,6 @@ import com.jiangong.nmb.repository.RoleRepository;
 import com.jiangong.nmb.repository.UserRepository;
 import com.jiangong.nmb.utils.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,27 +28,14 @@ public class DataInitConfig implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final AppProperties appProperties;
 
-    @Value("${app.admin.username:admin}")
-    private String adminUsername;
-
-    @Value("${app.admin.password:change-me}")
-    private String adminPassword;
-
-    @Value("${app.admin.nickname:Super Admin}")
-    private String adminNickname;
-
-    @Value("${app.admin.email:admin@example.com}")
-    private String adminEmail;
-
-    @Value("${app.admin.phone:10000000000}")
-    private String adminPhone;
-
-    public DataInitConfig(PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository, CategoryRepository categoryRepository) {
+    public DataInitConfig(PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository, CategoryRepository categoryRepository, AppProperties appProperties) {
         this.permissionRepository = permissionRepository;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
+        this.appProperties = appProperties;
     }
 
     @Override
@@ -388,16 +375,17 @@ public class DataInitConfig implements CommandLineRunner {
 
     private void initAdminUser() {
         // 初始化管理员用户
-        if (userRepository.findByUsername(adminUsername) == null) {
+        AppProperties.Admin adminConfig = appProperties.getAdmin();
+        if (userRepository.findByUsername(adminConfig.getUsername()) == null) {
             Role admin = roleRepository.findRoleByName("admin");
             User user = User.builder()
-                    .username(adminUsername)
-                    .password(PasswordUtil.encode(adminPassword))
-                    .nickname(adminNickname)
+                    .username(adminConfig.getUsername())
+                    .password(PasswordUtil.encode(adminConfig.getPassword()))
+                    .nickname(adminConfig.getNickname())
                     .role(admin)
                     .enabled(true)
-                    .email(adminEmail)
-                    .phone(adminPhone)
+                    .email(adminConfig.getEmail())
+                    .phone(adminConfig.getPhone())
                     .build();
             userRepository.save(user);
         }

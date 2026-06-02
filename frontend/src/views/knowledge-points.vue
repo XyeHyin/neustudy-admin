@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="knowledge-points-page">
     <n-card :bordered="false" class="knowledge-points-card">
       <n-h1 class="knowledge-points-title">全部知识点</n-h1>
@@ -81,10 +81,10 @@ import {
   updateKnowledgePoint,
   updateKnowledgePointStatus
 } from '@/api/knowledge-point'
-import KnowledgePointCreateModal from '@/components/knowledge-point-create-modal.vue'
-import KnowledgePointDetailModal from '@/components/knowledge-point-detail-modal.vue'
-import KnowledgePointExportModal from '@/components/knowledge-point-export-modal.vue'
-import KnowledgePointImportModal from '@/components/knowledge-point-import-modal.vue'
+import KnowledgePointCreateModal from '@/components/knowledge-point/knowledge-point-create-modal.vue'
+import KnowledgePointDetailModal from '@/components/knowledge-point/knowledge-point-detail-modal.vue'
+import KnowledgePointExportModal from '@/components/knowledge-point/knowledge-point-export-modal.vue'
+import KnowledgePointImportModal from '@/components/knowledge-point/knowledge-point-import-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
@@ -570,3 +570,4 @@ function handleStatusTagClick(enabled: boolean) {
   margin-bottom: 12px;
 }
 </style>
+

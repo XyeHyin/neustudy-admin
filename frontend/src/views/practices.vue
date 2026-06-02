@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="practices-page">
     <n-card :bordered="false" class="practices-card">
       <n-h1 class="practices-title">练习</n-h1>
@@ -58,9 +58,9 @@ import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getAvailablePapersWithStats, getMyPracticeSessions, getPracticeResult, startPractice, submitPractice } from '@/api/practice'
-import PaperAnalysisModal from '@/components/paper-analysis-modal.vue'
-import PracticeResultModal from '@/components/practice-result-modal.vue'
-import PracticeSessionModal from '@/components/practice-session-modal.vue'
+import PaperAnalysisModal from '@/components/paper/paper-analysis-modal.vue'
+import PracticeResultModal from '@/components/practice/practice-result-modal.vue'
+import PracticeSessionModal from '@/components/practice/practice-session-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO, PracticeStartDTO, PracticeSubmitDTO } from '@/api/types'
@@ -513,3 +513,4 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 </style>
+

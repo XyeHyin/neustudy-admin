@@ -5,7 +5,7 @@
 <script lang="ts" setup>
 import { useLoadingBar } from 'naive-ui'
 
-import router from '../router'
+import router from '@/router'
 
 const loadingBar = useLoadingBar()
 

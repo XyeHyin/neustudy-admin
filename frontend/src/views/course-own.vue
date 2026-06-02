@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="course-own-page">
     <n-card :bordered="false" class="course-own-card">
       <n-h1 class="course-own-title">我的课程</n-h1>
@@ -54,8 +54,8 @@ import { useRequest } from 'vue-hooks-plus'
 
 import { getCategories } from '@/api/categories'
 import { adminDeleteCourse, archiveCourse, batchDeleteCourses, createCourse, deleteCourse, getCourseDetail, getMyCoursePage, publishCourse, updateCourse } from '@/api/course'
-import CourseCreateModal from '@/components/course-create-modal.vue'
-import CourseDetailModal from '@/components/course-detail-modal.vue'
+import CourseCreateModal from '@/components/course/course-create-modal.vue'
+import CourseDetailModal from '@/components/course/course-detail-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
@@ -442,3 +442,4 @@ function handleStatusTagClick(status: string) {
   margin-bottom: 12px;
 }
 </style>
+

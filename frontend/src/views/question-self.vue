@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="question-self-page">
     <n-card :bordered="false" class="question-self-card">
       <n-h1 class="question-self-title">我的题目</n-h1>
@@ -67,9 +67,9 @@ import { useRequest } from 'vue-hooks-plus'
 
 import { getKnowledgePoints } from '@/api/knowledge-point'
 import { batchDeleteQuestions, createQuestion, deleteQuestion, getMyQuestionPage, getQuestionDetail, updateQuestion, updateQuestionStatus } from '@/api/question'
-import QuestionCreateModal from '@/components/question-create-modal.vue'
-import QuestionDetailModal from '@/components/question-detail-modal.vue'
-import QuestionHistoryModal from '@/components/question-history-modal.vue'
+import QuestionCreateModal from '@/components/question/question-create-modal.vue'
+import QuestionDetailModal from '@/components/question/question-detail-modal.vue'
+import QuestionHistoryModal from '@/components/question/question-history-modal.vue'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
 import type { CreateQuestionDTO, Difficulty, KnowledgePointVO, QuestionDetailVO, QuestionType, QuestionVO, UpdateQuestionDTO } from '@/api/types'
@@ -503,3 +503,4 @@ onMounted(() => {
   margin-top: 24px;
 }
 </style>
+

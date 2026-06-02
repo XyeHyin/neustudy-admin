@@ -1,7 +1,7 @@
 package com.jiangong.nmb.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,12 +16,10 @@ import java.util.concurrent.TimeUnit;
 public class EmailService {
     private final JavaMailSender mailSender;
     private final RedisTemplate<String, String> redisTemplate;
+    private final MailProperties mailProperties;
 
     private static final int EXPIRE_MINUTES = 5;
     private static final String CODE_PREFIX = "email:code";
-
-    @Value("${spring.mail.username:}")
-    private String mailFrom;
 
     @Async
     public void sendVerifyCode(String email) {
@@ -30,7 +28,7 @@ public class EmailService {
         redisTemplate.opsForValue().set(CODE_PREFIX + email, code, EXPIRE_MINUTES, TimeUnit.MINUTES);
         // 发送邮件
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom(mailFrom);
+        msg.setFrom(mailProperties.getUsername());
         msg.setTo(email);
         msg.setSubject("验证码");
         msg.setText("您的验证码为：" + code + "，有效期 " + EXPIRE_MINUTES + " 分钟。");

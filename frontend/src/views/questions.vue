@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="questions-page">
     <n-card :bordered="false" class="questions-card">
       <n-h1 class="questions-title">题目管理</n-h1>
@@ -76,9 +76,9 @@ import {
   updateQuestion,
   updateQuestionStatus
 } from '@/api/question'
-import QuestionCreateModal from '@/components/question-create-modal.vue'
-import QuestionDetailModal from '@/components/question-detail-modal.vue'
-import QuestionHistoryModal from '@/components/question-history-modal.vue'
+import QuestionCreateModal from '@/components/question/question-create-modal.vue'
+import QuestionDetailModal from '@/components/question/question-detail-modal.vue'
+import QuestionHistoryModal from '@/components/question/question-history-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
@@ -493,3 +493,4 @@ onMounted(() => {
   margin-top: 24px;
 }
 </style>
+

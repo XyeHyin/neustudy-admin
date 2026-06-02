@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="grading-page">
     <n-card :bordered="false" class="grading-card">
       <n-h1 class="grading-title">判分管理</n-h1>
@@ -51,7 +51,7 @@ import { useRequest } from 'vue-hooks-plus'
 
 import { getGradingResult, listGradingReview, listReviewedGradingResult, manualGrading } from '@/api/grading'
 import { getPapers } from '@/api/paper'
-import GradingReviewModal from '@/components/grading-review-modal.vue'
+import GradingReviewModal from '@/components/grading/grading-review-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { GradingResultVO, GradingReviewVO, ManualGradingDTO, PaperListVO } from '@/api/types'
@@ -352,3 +352,4 @@ onMounted(() => {
   letter-spacing: 2px;
 }
 </style>
+

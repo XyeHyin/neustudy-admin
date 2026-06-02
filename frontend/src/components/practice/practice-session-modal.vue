@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <n-modal :show="show" preset="card" title="练习答题" @close="handleClose" style="width: 90vw; max-width: 1200px; height: 80vh">
     <template v-if="practiceDetail">
       <!-- 练习头部信息 -->
@@ -102,7 +102,7 @@ import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getPracticeDetail, markPracticeQuestion } from '@/api/practice'
-import QuestionAnswerInput from '@/components/question-answer-input.vue'
+import QuestionAnswerInput from '@/components/question/question-answer-input.vue'
 
 import type { AnswerDTO, PracticeAnswerVO, PracticeDetailVO, PracticeSubmitDTO } from '@/api/types'
 
@@ -438,3 +438,4 @@ watch(
   height: 200px;
 }
 </style>
+

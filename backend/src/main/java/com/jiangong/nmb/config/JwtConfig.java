@@ -1,18 +1,19 @@
 package com.jiangong.nmb.config;
 
+import com.jiangong.nmb.config.properties.AppProperties;
 import com.jiangong.nmb.utils.JWTUtil;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class JwtConfig {
 
-    @Value("${app.jwt.secret:change-me-jwt-secret}")
-    private String secret;
+    private final AppProperties appProperties;
 
     @PostConstruct
     public void init() {
-        JWTUtil.setSecret(secret);
+        JWTUtil.setSecret(appProperties.getJwt().getSecret());
     }
 }

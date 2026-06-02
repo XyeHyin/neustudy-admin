@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <n-modal :show="show" preset="dialog" title="练习详情" @close="handleClose" style="width: 900px">
     <div v-if="record" style="padding: 16px 24px">
       <!-- 基本信息 -->
@@ -49,7 +49,7 @@ import {
   getPracticeHistory,
   getPracticeResult
 } from '@/api/practice'
-import PracticeResultModal from '@/components/practice-result-modal.vue'
+import PracticeResultModal from '@/components/practice/practice-result-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO } from '@/api/types'
@@ -130,3 +130,4 @@ watch(
   { immediate: true }
 )
 </script>
+

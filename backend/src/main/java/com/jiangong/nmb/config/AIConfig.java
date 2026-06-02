@@ -1,8 +1,9 @@
 package com.jiangong.nmb.config;
 
+import com.jiangong.nmb.config.properties.AiProperties;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,23 +13,17 @@ import java.time.Duration;
  * AI配置类
  */
 @Configuration
+@RequiredArgsConstructor
 public class AIConfig {
 
-    @Value("${ai.openai.baseUrl:https://api.openai.com/v1}")
-    private String baseUrl;
-
-    @Value("${ai.openai.token:change-me}")
-    private String token;
-
-    @Value("${ai.openai.model:gpt-4o-mini}")
-    private String model;
+    private final AiProperties aiProperties;
 
     @Bean
     public ChatLanguageModel chatLanguageModel() {
         return OpenAiChatModel.builder()
-                .baseUrl(baseUrl)
-                .apiKey(token)
-                .modelName(model)
+                .baseUrl(aiProperties.getBaseUrl())
+                .apiKey(aiProperties.getToken())
+                .modelName(aiProperties.getModel())
                 .temperature(1.0)
                 .timeout(Duration.ofSeconds(60))
                 .maxRetries(3)

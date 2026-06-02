@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="practice-records-page">
     <n-card :bordered="false" class="practice-records-card">
       <n-h1 class="practice-records-title">练习记录管理</n-h1>
@@ -57,7 +57,7 @@ import { useRequest } from 'vue-hooks-plus'
 
 import { getPapers } from '@/api/paper'
 import { getPracticeResult, listPracticeRecords } from '@/api/practice'
-import PracticeDetailModal from '@/components/practice-detail-modal.vue'
+import PracticeDetailModal from '@/components/practice/practice-detail-modal.vue'
 
 import type { PaperListVO, PracticeRecordVO } from '@/api/types'
 
@@ -331,3 +331,4 @@ onMounted(() => {
   text-align: center;
 }
 </style>
+

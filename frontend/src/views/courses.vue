@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="courses-page">
     <n-card :bordered="false" class="courses-card">
       <n-h1 class="courses-title">全部课程</n-h1>
@@ -74,8 +74,8 @@ import {
   publishCourse,
   updateCourse
 } from '@/api/course'
-import CourseCreateModal from '@/components/course-create-modal.vue'
-import CourseDetailModal from '@/components/course-detail-modal.vue'
+import CourseCreateModal from '@/components/course/course-create-modal.vue'
+import CourseDetailModal from '@/components/course/course-detail-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
@@ -484,3 +484,4 @@ function handleBatchDelete() {
   margin-bottom: 12px;
 }
 </style>
+

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="roles-page">
     <n-card :bordered="false" class="roles-card">
       <n-h1 class="roles-title">角色管理</n-h1>
@@ -33,7 +33,7 @@ import { useRequest } from 'vue-hooks-plus'
 import { getPermissions } from '@/api/permissions'
 import { assignRolePermissions, batchDeleteRoles, createRole, deleteRole, getRoleDetail, getRoles, updateRole } from '@/api/role'
 import { getCurrentUserDetail } from '@/api/user'
-import RoleCreateModal from '@/components/role-create-modal.vue'
+import RoleCreateModal from '@/components/role/role-create-modal.vue'
 import { buildPermissionTree } from '@/composables'
 import { useAuthStore } from '@/store/auth'
 
@@ -320,3 +320,4 @@ function handleBatchDelete() {
   margin-bottom: 12px;
 }
 </style>
+

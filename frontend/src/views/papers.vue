@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="papers-page">
     <n-card :bordered="false" class="papers-card">
       <n-h1 class="papers-title">试卷管理</n-h1>
@@ -53,10 +53,10 @@ import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { archivePaper, createPaper, deletePaper, getPaperDetail, getPapers, publishPaper, smartGenerate, updatePaper } from '@/api/paper'
-import PaperCreateModal from '@/components/paper-create-modal.vue'
-import PaperDetailModal from '@/components/paper-detail-modal.vue'
-import PaperQuestionsModal from '@/components/paper-questions-modal.vue'
-import SmartPaperModal from '@/components/smart-paper-modal.vue'
+import PaperCreateModal from '@/components/paper/paper-create-modal.vue'
+import PaperDetailModal from '@/components/paper/paper-detail-modal.vue'
+import PaperQuestionsModal from '@/components/paper/paper-questions-modal.vue'
+import SmartPaperModal from '@/components/paper/smart-paper-modal.vue'
 import { useAuthStore } from '@/store/auth'
 
 import type { DataTableColumns } from 'naive-ui'
@@ -456,3 +456,4 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 </style>
+
