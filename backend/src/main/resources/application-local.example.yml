@@ -1,0 +1,41 @@
+# Copy this file to application-local.yml and fill in your own local secrets.
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/neustudy-admin?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: your-db-password
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  mail:
+    host: smtp.example.com
+    port: 465
+    username: your-mail@example.com
+    password: your-mail-authorization-code
+
+app:
+  jwt:
+    secret: change-this-long-random-jwt-secret
+  admin:
+    username: admin
+    password: change-this-admin-password
+    nickname: Super Admin
+    email: admin@example.com
+    phone: "10000000000"
+
+cos:
+  secret-id: your-cos-secret-id
+  secret-key: your-cos-secret-key
+  region: ap-guangzhou
+  bucket: your-cos-bucket
+  prefix: images/
+  url-prefix: https://your-cos-domain.example.com
+
+ai:
+  openai:
+    baseUrl: https://api.openai.com/v1
+    token: your-ai-api-key
+    model: gpt-4o-mini

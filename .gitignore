@@ -1,0 +1,27 @@
+# OS and editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+logs/
+*.log
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+application-local.yml
+application-*.local.yml
+
+# Dependencies and build output
+node_modules/
+dist/
+target/
+coverage/
+*.tsbuildinfo
+
+# Runtime data
+uploads/
