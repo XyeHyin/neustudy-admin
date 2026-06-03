@@ -1,11 +1,11 @@
 import { createApp } from 'vue'
 
 import App from './app.vue'
-import naive from 'naive-ui'
+import naive from './naive'
 import router from './router'
 import pinia from './store'
 import permission from './directives/permission'
-import './assets/scrollbar.css'
+import './styles/scrollbar.css'
 
 const app = createApp(App)
 

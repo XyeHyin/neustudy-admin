@@ -13,6 +13,7 @@ import {
   DocumentTextOutline,
   FlaskOutline,
   FolderOpenOutline,
+  GridOutline,
   HelpCircleOutline,
   KeyOutline,
   ListOutline,
@@ -41,14 +42,16 @@ import {
   WbSunnyOutlined as WeatherSunny,
   AutoAwesomeOutlined as AutoAwesome,
   CheckCircleOutlined as CheckCircle,
+  CloseOutlined as Close,
   SaveOutlined as Save,
+  SearchOutlined as Search,
+  StarOutlined as Star,
   DownloadOutlined as Download,
   DeleteForeverOutlined as DeleteForever,
   DocumentScannerOutlined as DocumentText
 } from '@vicons/material'
 import { NIcon } from 'naive-ui'
-
-import GiteeIcon from './gitee-icon.vue'
+import { computed } from 'vue'
 
 const icons = {
   refresh: RefreshOutline,
@@ -65,9 +68,9 @@ const icons = {
   notifications: NotificationsOutline,
   github: LogoGithub,
   fallback: AlertCircleOutline,
-  gitee: GiteeIcon,
   bulb: BulbOutline,
   list: ListOutline,
+  grid: GridOutline,
   knowledgePoint: BookOutline,
   school: SchoolOutline,
   usersOutline: PeopleOutline,
@@ -88,6 +91,9 @@ const icons = {
   materialWeatherSunny: WeatherSunny,
   materialAutoAwesome: AutoAwesome,
   materialCheckCircle: CheckCircle,
+  materialClose: Close,
+  materialSearch: Search,
+  materialStar: Star,
   materialSave: Save,
   materialDownload: Download,
   materialDeleteForever: DeleteForever,
@@ -104,5 +110,5 @@ const props = defineProps({
   }
 })
 
-const icon = icons[props.type as IconTypes]
+const icon = computed(() => icons[props.type as IconTypes] ?? icons.fallback)
 </script>

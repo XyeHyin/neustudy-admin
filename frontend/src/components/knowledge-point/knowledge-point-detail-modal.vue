@@ -51,6 +51,8 @@
 import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatusType } from '@/utils/status'
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
+import { DIFFICULTY_OPTIONS as difficultyOptions } from '@/constants/options'
+
 import type { CourseVO, KnowledgePointDetailVO, UpdateKnowledgePointDTO } from '@/api/types'
 
 // 组件属性定义
@@ -94,13 +96,6 @@ const rules = {
   description: { required: true, message: '请输入知识点描述', trigger: 'blur' },
   difficulty: { required: true, message: '请选择难度', trigger: 'change' }
 }
-
-// 难度选项
-const difficultyOptions = [
-  { label: '简单', value: 'EASY' },
-  { label: '中等', value: 'MEDIUM' },
-  { label: '困难', value: 'HARD' }
-]
 
 // 关闭弹窗
 function handleCancel() {

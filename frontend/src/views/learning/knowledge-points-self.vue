@@ -82,8 +82,10 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
   import KnowledgePointDetailModal from '@/components/knowledge-point/knowledge-point-detail-modal.vue'
   import KnowledgePointExportModal from '@/components/knowledge-point/knowledge-point-export-modal.vue'
   import KnowledgePointImportModal from '@/components/knowledge-point/knowledge-point-import-modal.vue'
+  import { DIFFICULTY_FILTER_OPTIONS as difficultyOptions, ENABLED_FILTER_OPTIONS as statusOptions } from '@/constants/options'
   import { useAuthStore } from '@/store/auth'
   import { formatDate } from '@/utils/datetime'
+  import { getDifficultyStatusText as getDifficultyText, getDifficultyStatusType as getDifficultyType } from '@/utils/status'
   
   import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
   import type { CourseVO, CreateKnowledgePointDTO, KnowledgePointDetailVO, KnowledgePointVO, UpdateKnowledgePointDTO } from '@/api/types'
@@ -126,18 +128,6 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
   
   const courseOptions = computed(() => [{ label: '全部', value: null }, ...courses.value.map(c => ({ label: c.name, value: c.id }))])
   
-  const difficultyOptions = [
-    { label: '全部', value: null },
-    { label: '简单', value: 'EASY' },
-    { label: '中等', value: 'MEDIUM' },
-    { label: '困难', value: 'HARD' }
-  ]
-  
-  const statusOptions = [
-    { label: '全部', value: null },
-    { label: '启用', value: true },
-    { label: '禁用', value: false }
-  ]
   
   // 加载数据
   const { loading: loadingKnowledgePoints, run: fetchKnowledgePoints } = useRequest(
@@ -181,31 +171,6 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
     fetchCourses()
   })
   
-  function getDifficultyType(difficulty: string) {
-    switch (difficulty) {
-      case 'EASY':
-        return 'success'
-      case 'MEDIUM':
-        return 'warning'
-      case 'HARD':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
-  
-  function getDifficultyText(difficulty: string) {
-    switch (difficulty) {
-      case 'EASY':
-        return '简单'
-      case 'MEDIUM':
-        return '中等'
-      case 'HARD':
-        return '困难'
-      default:
-        return '未知'
-    }
-  }
   
   
   // 表格列定义

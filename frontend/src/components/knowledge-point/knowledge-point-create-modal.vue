@@ -38,6 +38,8 @@
 <script lang="ts" setup>
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
+import { DIFFICULTY_OPTIONS as difficultyOptions } from '@/constants/options'
+
 import type { FormInst } from 'naive-ui'
 import type { CourseVO, CreateKnowledgePointDTO } from '@/api/types'
 
@@ -81,13 +83,6 @@ const rules = {
 
 // 课程选项
 const courseOptions = computed(() => [{ label: '请选择课程', value: 0 }, ...props.courses.map(c => ({ label: c.name, value: c.id }))])
-
-// 难度选项
-const difficultyOptions = [
-  { label: '简单', value: 'EASY' },
-  { label: '中等', value: 'MEDIUM' },
-  { label: '困难', value: 'HARD' }
-]
 
 // 关闭弹窗并重置表单
 function handleCancel() {

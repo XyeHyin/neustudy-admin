@@ -79,6 +79,7 @@ import CourseCreateModal from '@/components/course/course-create-modal.vue'
 import CourseDetailModal from '@/components/course/course-detail-modal.vue'
 import { useAuthStore } from '@/store/auth'
 import { formatDate } from '@/utils/datetime'
+import { COURSE_STATUS_FILTER_OPTIONS as statusOptions } from '@/constants/options'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
 import type { CategoryFlatVO, CourseDetailVO, CourseVO, CreateCourseDTO, UpdateCourseDTO, UserVO } from '@/api/types'
@@ -128,13 +129,7 @@ const gradeOptions = computed(() => {
   return [{ label: '全部', value: null }, ...grades]
 })
 
-const statusOptions = [
-  { label: '全部', value: null },
-  { label: '草稿', value: 'DRAFT' },
-  { label: '已发布', value: 'PUBLISHED' },
-  { label: '已完成', value: 'COMPLETED' },
-  { label: '已归档', value: 'ARCHIVED' }
-]
+
 
 // 获取分类数据
 const { run: fetchCategories } = useRequest(getCategories, {

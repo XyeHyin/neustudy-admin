@@ -48,6 +48,7 @@
 <script lang="ts" setup>
 import { defineEmits, defineProps, ref } from 'vue'
 
+import { PAPER_QUESTION_ORDER_OPTIONS as orderTypeOptions } from '@/constants/options'
 import { useAuthStore } from '@/store/auth'
 
 import type { PaperCreateDTO } from '@/api/types'
@@ -78,12 +79,6 @@ const rules = {
   title: { required: true, message: '请输入试卷标题', trigger: 'blur' },
   timeLimit: { required: true, type: 'number', message: '请输入时间限制', trigger: 'blur' }
 }
-
-// 题目顺序选项
-const orderTypeOptions = [
-  { label: '固定顺序', value: 'FIXED' },
-  { label: '随机顺序', value: 'RANDOM' }
-]
 
 // 事件处理
 function handleSubmit() {

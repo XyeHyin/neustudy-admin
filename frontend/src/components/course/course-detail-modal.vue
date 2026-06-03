@@ -92,6 +92,7 @@ import { useRequest } from 'vue-hooks-plus'
 
 import { getCategories } from '@/api/categories'
 import { uploadFile } from '@/api/file'
+import { SEMESTER_OPTIONS as semesterOptions } from '@/constants/options'
 
 import type { CategoryFlatVO, CourseDetailVO } from '@/api/types'
 
@@ -164,13 +165,6 @@ const gradeOptions = computed(() => {
   const grades = categories.value.filter(cat => cat.parent && typeof cat.parent === 'object' && cat.parent.name === '年级').map(cat => ({ label: cat.name, value: cat.name }))
   return grades
 })
-
-// 学期选项
-const semesterOptions = [
-  { label: '第一学期', value: '第一学期' },
-  { label: '第二学期', value: '第二学期' },
-  { label: '第三学期', value: '第三学期' }
-]
 
 // 教师昵称
 const teacherNickname = computed(() => {

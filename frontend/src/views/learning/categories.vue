@@ -8,9 +8,7 @@
         <n-button v-permission="'category:delete:all'" type="error" :disabled="!selectedRowKeys.length" @click="handleBatchDelete">批量删除</n-button>
         <n-button quaternary circle @click="handleToggleView" style="margin-left: 8px">
           <template #icon>
-            <n-icon>
-              <component :is="treeMode ? FaList : IonGrid" />
-            </n-icon>
+            <Icon :type="treeMode ? 'list' : 'grid'" />
           </template>
         </n-button>
       </div>
@@ -33,13 +31,12 @@
 </template>
 
 <script lang="ts" setup>
-import { List as FaList } from '@vicons/fa'
-import { GridOutline as IonGrid } from '@vicons/ionicons5'
-import { NButton, NForm, NFormItemRow, NIcon, NInput, NSelect, useMessage, useModal } from 'naive-ui'
+import { NButton, NForm, NFormItemRow, NInput, NSelect, useMessage, useModal } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { batchDeleteCategories, createCategory, deleteCategory, getCategories, getCategoryTree, updateCategory } from '@/api/categories'
+import { Icon } from '@/components'
 import { formatDate } from '@/utils/datetime'
 import { useAuthStore } from '@/store/auth'
 

@@ -54,7 +54,7 @@
 
 <script lang="ts" setup>
 import { getPaperStatusText as getStatusText, getPaperStatusType as getStatusType } from '@/utils/status'
-import { NButton, NIcon, NProgress, NTag, useMessage } from 'naive-ui'
+import { NButton, NProgress, NTag, useMessage } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
@@ -62,6 +62,8 @@ import { getAvailablePapersWithStats, getMyPracticeSessions, getPracticeResult, 
 import PaperAnalysisModal from '@/components/paper/paper-analysis-modal.vue'
 import PracticeResultModal from '@/components/practice/practice-result-modal.vue'
 import PracticeSessionModal from '@/components/practice/practice-session-modal.vue'
+import { Icon } from '@/components'
+import { SUBMITTED_FILTER_OPTIONS as submittedOptions } from '@/constants/options'
 import { formatDateTime } from '@/utils/datetime'
 
 import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO, PracticeSubmitDTO } from '@/api/types'
@@ -103,11 +105,7 @@ const currentSessionId = ref<number | null>(null)
 const selectedPaperData = ref<PracticePaperStatVO | null>(null)
 
 // 选项
-const submittedOptions = [
-  { label: '全部', value: null },
-  { label: '已提交', value: true },
-  { label: '未提交', value: false }
-]
+
 
 const paperOptions = computed(() =>
   availablePapers.value.map(paper => ({
@@ -125,10 +123,10 @@ const paperColumns = [
     render: (row: PracticePaperStatVO) => {
       // 全对则显示绿色对勾
       if (row.maxScore === row.totalScore) {
-        return h(NIcon, null, { default: () => h('span', { style: { color: 'green' } }, '✔') })
+        return h(Icon, { type: 'materialCheckCircle', color: 'green' })
       }
       if (row.maxScore === 0) {
-        return h('span', { style: { color: 'red' } }, '❌')
+        return h(Icon, { type: 'materialClose', color: 'red' })
       }
       const percent = Math.floor(((row.maxScore || 0) / (row.totalScore || 1)) * 100)
       let color = ''

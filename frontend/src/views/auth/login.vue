@@ -92,7 +92,7 @@ const handleLogin = (e: MouseEvent) => {
 </script>
 
 <style scoped>
-@import '@/assets/auth.css';
+@import '@/styles/auth.css';
 
 .auth-page {
   min-height: 100vh;

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="practice-records-page">
     <n-card :bordered="false" class="practice-records-card">
       <n-h1 class="practice-records-title">练习记录管理</n-h1>
@@ -9,7 +9,7 @@
         <n-select v-model:value="submittedFilter" :options="submittedOptions" clearable placeholder="提交状态" style="width: 120px" @update:value="handleSearch" />
         <n-button type="primary" @click="handleSearch">
           <template #icon>
-            <n-icon><SearchIcon /></n-icon>
+            <Icon type="materialSearch" />
           </template>
           搜索
         </n-button>
@@ -50,13 +50,14 @@
 </template>
 
 <script lang="ts" setup>
-import { SearchOutlined as SearchIcon } from '@vicons/material'
-import { NButton, NIcon, NProgress, NTag, useMessage } from 'naive-ui'
+import { NButton, NProgress, NTag, useMessage } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getPapers } from '@/api/paper'
 import { listPracticeRecords } from '@/api/practice'
+import { Icon } from '@/components'
+import { SUBMITTED_FILTER_OPTIONS as submittedOptions } from '@/constants/options'
 import PracticeDetailModal from '@/components/practice/practice-detail-modal.vue'
 import { formatDateTime } from '@/utils/datetime'
 
@@ -88,11 +89,7 @@ const pagination = reactive({
 const showDetailModal = ref(false)
 
 // 选项
-const submittedOptions = [
-  { label: '全部', value: null },
-  { label: '已提交', value: true },
-  { label: '未提交', value: false }
-]
+
 
 const paperOptions = computed(() => [
   { label: '全部试卷', value: null },

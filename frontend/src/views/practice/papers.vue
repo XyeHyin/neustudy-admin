@@ -60,6 +60,7 @@ import PaperQuestionsModal from '@/components/paper/paper-questions-modal.vue'
 import SmartPaperModal from '@/components/paper/smart-paper-modal.vue'
 import { useAuthStore } from '@/store/auth'
 import { formatDateTime } from '@/utils/datetime'
+import { PAPER_STATUS_FILTER_OPTIONS as statusOptions } from '@/constants/options'
 
 import type { DataTableColumns } from 'naive-ui'
 import type { PaperCreateDTO, PaperDetailVO, PaperListVO, PaperUpdateDTO, SmartPaperDTO } from '@/api/types'
@@ -92,12 +93,7 @@ const showQuestionsModal = ref(false)
 const selectedPaper = ref<PaperDetailVO | null>(null)
 
 // 状态选项
-const statusOptions = [
-  { label: '全部', value: null },
-  { label: '草稿', value: 'DRAFT' },
-  { label: '已发布', value: 'PUBLISHED' },
-  { label: '已归档', value: 'ARCHIVED' }
-]
+
 
 // 表格列定义
 const columns: DataTableColumns<PaperListVO> = [

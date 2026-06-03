@@ -417,7 +417,7 @@ onMounted(() => {
   min-height: 0;
 }
 
-.right-panel ::v-deep .n-card__content {
+.right-panel :deep(.n-card__content) {
   display: flex;
   flex-direction: column;
   flex: 1;

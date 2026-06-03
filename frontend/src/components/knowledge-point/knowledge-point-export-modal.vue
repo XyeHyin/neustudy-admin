@@ -51,6 +51,7 @@ import { useMessage } from 'naive-ui'
 import { computed, nextTick, ref, watch } from 'vue'
 
 import { getKnowledgePoints } from '@/api/knowledge-point'
+import { DIFFICULTY_FILTER_OPTIONS as difficultyOptions, ENABLED_FILTER_OPTIONS as enabledOptions } from '@/constants/options'
 import { todayKey } from '@/utils/datetime'
 
 import type { CourseVO, KnowledgePointVO } from '@/api/types'
@@ -83,21 +84,6 @@ let jm: any = null
 
 // 课程下拉选项（由 props.data 计算得出）
 const courseOptions = computed(() => props.data.map(course => ({ label: course.name, value: course.id })))
-
-// 启用状态选项
-const enabledOptions = [
-  { label: '全部', value: null },
-  { label: '启用', value: true },
-  { label: '禁用', value: false }
-]
-
-// 难度等级选项
-const difficultyOptions = [
-  { label: '全部', value: null },
-  { label: '简单', value: 'EASY' },
-  { label: '中等', value: 'MEDIUM' },
-  { label: '困难', value: 'HARD' }
-]
 
 // 监听弹窗显示，重置筛选条件
 watch(

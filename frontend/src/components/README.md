@@ -13,3 +13,5 @@ Components are grouped by feature domain:
 - `shared/` - application-wide shell components and icons
 
 Keep feature-specific components inside their domain folder. Put only reusable cross-feature primitives in `shared/`.
+
+Icons should be registered in `shared/icon.vue` and consumed through the exported `Icon` component. Do not import `@vicons/*` or render raw `n-icon` in feature views/components.

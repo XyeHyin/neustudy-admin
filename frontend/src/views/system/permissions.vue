@@ -7,9 +7,7 @@
         <n-select v-model:value="moduleFilter" :options="moduleOptions" clearable placeholder="模块" style="width: 140px" />
         <n-button :disabled="loadingPermissions" quaternary circle @click="treeMode = !treeMode" style="margin-left: 8px">
           <template #icon>
-            <n-icon>
-              <component :is="treeMode ? FaList : IonGrid" />
-            </n-icon>
+            <Icon :type="treeMode ? 'list' : 'grid'" />
           </template>
         </n-button>
       </div>
@@ -40,13 +38,12 @@
 </template>
 
 <script lang="ts" setup>
-import { List as FaList } from '@vicons/fa'
-import { GridOutline as IonGrid } from '@vicons/ionicons5'
-import { NButton, NCard, NDataTable, NH1, NIcon, NInput, NSelect, NTree, useMessage } from 'naive-ui'
+import { NButton, NCard, NDataTable, NH1, NInput, NSelect, NTree, useMessage } from 'naive-ui'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getPermissions } from '@/api/permissions'
+import { Icon } from '@/components'
 import { buildPermissionTree } from '@/composables'
 
 import type { DataTableColumns } from 'naive-ui'

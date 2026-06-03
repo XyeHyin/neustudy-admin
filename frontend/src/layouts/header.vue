@@ -20,11 +20,11 @@
       </n-tooltip>
       <n-tooltip>
         <template #trigger>
-          <n-a href="https://gitee.com" target="_blank">
-            <icon type="gitee" size="22" :depth="2" />
+          <n-a href="https://github.com/XyeHyin/neustudy-admin" target="_blank">
+            <icon type="github" size="22" :depth="2" />
           </n-a>
         </template>
-        查看Gitee仓库
+        查看GitHub仓库
       </n-tooltip>
       <!-- 主题切换按钮 -->
       <n-tooltip>

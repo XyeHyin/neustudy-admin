@@ -1,7 +1,3 @@
-/**
- * Vite configuaration file
- * https://vitejs.dev/config/
- */
 import { fileURLToPath, URL } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
@@ -29,9 +25,14 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'naive-ui': ['naive-ui']
+          'vendor-vue': ['vue', 'vue-router', 'pinia', 'pinia-plugin-persistedstate'],
+          'vendor-naive': ['naive-ui'],
+          'vendor-icons': ['@vicons/ionicons5', '@vicons/material'],
+          'vendor-charts': ['echarts'],
+          'vendor-mindmap': ['jsmind']
         }
       }
-    }
+    },
+    chunkSizeWarningLimit: 1200
   }
 })
