@@ -71,29 +71,23 @@
 
 <script lang="ts" setup>
 import { NButton, NTag, useMessage } from 'naive-ui'
-import { computed, h, nextTick, onMounted, ref } from 'vue'
+import { computed, h, onMounted, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 import { useRouter } from 'vue-router'
 
 import { getAvailablePapersWithStats, listPracticeRecords } from '@/api/practice'
-import { useAuthStore } from '@/store/auth'
 import { formatDateTime } from '@/utils/datetime'
 
 import type { PracticePaperStatVO, PracticeRecordVO } from '@/api/types'
 
 const router = useRouter()
 const message = useMessage()
-const auth = useAuthStore()
 
 // 数据
 const statistics = ref<Record<string, any>>({})
 const paperStatistics = ref<PracticePaperStatVO[]>([])
 const recentRecords = ref<PracticeRecordVO[]>([])
 
-// 图表引用
-const scoreChartRef = ref<HTMLDivElement>()
-const trendChartRef = ref<HTMLDivElement>()
-const chartContainer = ref<HTMLElement>()
 // 试卷统计表格列
 const paperColumns = computed(() => [
   {

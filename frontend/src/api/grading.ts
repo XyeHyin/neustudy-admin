@@ -1,18 +1,13 @@
-import request from './request';
-
-
+import request from './request'
 
 import type {
   AIGradingDTO,
   ApiResponse,
-  ApiResponseListGradingResultVO,
   ApiResponsePageResultGradingResultVO,
   ApiResponsePageResultGradingReviewVO,
   GradingRequestDTO,
   GradingResultVO,
-  GradingReviewVO,
-  ManualGradingDTO,
-  PageResultGradingResultVO
+  ManualGradingDTO
 } from './types'
 
 

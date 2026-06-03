@@ -73,7 +73,6 @@ import {
   deleteQuestion,
   getQuestionDetail,
   getQuestionPage,
-  updateQuestion,
   updateQuestionStatus
 } from '@/api/question'
 import QuestionCreateModal from '@/components/question/question-create-modal.vue'

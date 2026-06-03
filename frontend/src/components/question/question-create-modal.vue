@@ -62,14 +62,14 @@
 </template>
 
 <script lang="ts" setup>
-import { NCheckbox, NCheckboxGroup, NRadio, NRadioGroup, useMessage } from 'naive-ui'
+import { NCheckbox, NCheckboxGroup, NRadio, NRadioGroup } from 'naive-ui'
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
 import QuestionOptionsEditor from './question-options-editor.vue'
 import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_TYPE_OPTIONS as typeOptions } from '@/constants/question'
 
 import type { FormInst } from 'naive-ui'
-import type { CreateQuestionDTO, Difficulty, KnowledgePointVO, QuestionType } from '@/api/types'
+import type { CreateQuestionDTO, KnowledgePointVO } from '@/api/types'
 
 // 表单引用
 const formRef = ref<FormInst>()
@@ -170,8 +170,6 @@ const rules = {
     trigger: 'change'
   }
 }
-
-const message = useMessage()
 
 // 关闭弹窗并重置表单
 function handleCancel() {

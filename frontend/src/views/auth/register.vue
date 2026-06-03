@@ -58,12 +58,12 @@
 
 <script lang="ts" setup>
 import { useMessage } from 'naive-ui'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 import { useRouter } from 'vue-router'
 
 import { register as apiRegister, sendCode } from '@/api/auth'
-import { getCurrentUserDetail, getUserDetail } from '@/api/user'
+import { getCurrentUserDetail } from '@/api/user'
 import { isJwtToken, useAuthStore } from '@/store/auth'
 
 const router = useRouter()
@@ -153,7 +153,7 @@ const handleSendCode = async () => {
   }
 }
 
-const { runAsync: runGetUserDetail, loading: loadingUserDetail } = useRequest(getCurrentUserDetail, {
+const { runAsync: runGetUserDetail } = useRequest(getCurrentUserDetail, {
   manual: true
 })
 const handleRegister = (e: MouseEvent) => {

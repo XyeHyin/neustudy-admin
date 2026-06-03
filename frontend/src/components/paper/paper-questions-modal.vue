@@ -82,8 +82,8 @@
 </template>
 
 <script lang="ts" setup>
-import { NButton, NInputNumber, useMessage } from 'naive-ui'
-import { computed, h, onMounted, reactive, ref, watch } from 'vue'
+import { useMessage } from 'naive-ui'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { VueDraggable as draggable } from 'vue-draggable-plus'
 import { useRequest } from 'vue-hooks-plus'
 
@@ -91,7 +91,6 @@ import { getKnowledgePoints } from '@/api/knowledge-point'
 import { addQuestionsToPaper, getPaperQuestions, removePaperQuestion, updatePaperQuestions } from '@/api/paper'
 import { getQuestionPage } from '@/api/question'
 import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_TYPE_OPTIONS as typeOptions } from '@/constants/question'
-import { useAuthStore } from '@/store/auth'
 
 import type { KnowledgePointVO, PaperQuestionVO, QuestionVO } from '@/api/types'
 
@@ -102,8 +101,6 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:show', 'success'])
 
-const components = { draggable }
-const auth = useAuthStore()
 const message = useMessage()
 
 // 搜索和筛选
@@ -165,97 +162,6 @@ const questionColumns = [
     title: '分值',
     key: 'score',
     width: 60
-  }
-]
-
-// 试卷题目表格列
-const paperQuestionColumns = [
-  {
-    title: '序号',
-    key: 'orderNum',
-    width: 60
-  },
-  {
-    title: '题目',
-    key: 'title',
-    ellipsis: { tooltip: true }
-  },
-  {
-    title: '类型',
-    key: 'type',
-    width: 80,
-    render: (row: PaperQuestionVO) => getQuestionTypeText(row.type)
-  },
-  {
-    title: '分值',
-    key: 'score',
-    width: 120,
-    render: (row: PaperQuestionVO, index: number) =>
-      h(NInputNumber, {
-        value: row.score,
-        min: 1,
-        max: 100,
-        size: 'small',
-        style: 'width: 80px',
-        onUpdateValue: (value: number | null) => {
-          if (typeof value === 'number') {
-            updateQuestionScore(index, value)
-          }
-        }
-      })
-  },
-  {
-    title: '操作',
-    key: 'actions',
-    width: 120,
-    render: (row: PaperQuestionVO, index: number) => {
-      const actions = []
-
-      if (index > 0) {
-        actions.push(
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              onClick: () => moveQuestionUp(index)
-            },
-            { default: () => '上移' }
-          )
-        )
-      }
-
-      if (index < paperQuestions.value.length - 1) {
-        actions.push(
-          h(
-            NButton,
-            {
-              size: 'small',
-              quaternary: true,
-              onClick: () => moveQuestionDown(index)
-            },
-            { default: () => '下移' }
-          )
-        )
-      }
-
-      actions.push(
-        h(
-          NButton,
-          {
-            size: 'small',
-            type: 'error',
-            quaternary: true,
-            loading: row.questionId != null && removingIds.value.has(row.questionId),
-            disabled: row.questionId != null && removingIds.value.has(row.questionId),
-            onClick: () => removeQuestion(row.questionId, index)
-          },
-          { default: () => '移除' }
-        )
-      )
-
-      return h('div', { style: 'display: flex; gap: 4px;' }, actions)
-    }
   }
 ]
 
@@ -410,28 +316,6 @@ async function removeQuestion(questionId: number | null, index: number) {
   }
   paperQuestions.value.splice(index, 1)
   updateOrderNumbers()
-}
-
-function moveQuestionUp(index: number) {
-  if (index > 0) {
-    const temp = paperQuestions.value[index]
-    paperQuestions.value[index] = paperQuestions.value[index - 1]
-    paperQuestions.value[index - 1] = temp
-    updateOrderNumbers()
-  }
-}
-
-function moveQuestionDown(index: number) {
-  if (index < paperQuestions.value.length - 1) {
-    const temp = paperQuestions.value[index]
-    paperQuestions.value[index] = paperQuestions.value[index + 1]
-    paperQuestions.value[index + 1] = temp
-    updateOrderNumbers()
-  }
-}
-
-function updateQuestionScore(index: number, score: number) {
-  paperQuestions.value[index].score = score
 }
 
 function updateOrderNumbers() {

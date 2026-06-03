@@ -1,8 +1,6 @@
 package com.xyehyin.hexuanning.dto.paper;
 
 import lombok.Data;
-import jakarta.validation.constraints.NotNull;
-
 /**
  * 试卷更新DTO
  */

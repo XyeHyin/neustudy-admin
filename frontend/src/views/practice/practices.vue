@@ -20,7 +20,7 @@
             :bordered="false"
             :row-key="paperRowKey"
             @update:page="handlePaperPageChange"
-            @update:page-size="handlePaperPageSizeChange"
+            @update:page-size="handleRecordPageSizeChange"
           />
         </n-tab-pane>
 
@@ -62,12 +62,10 @@ import { getAvailablePapersWithStats, getMyPracticeSessions, getPracticeResult, 
 import PaperAnalysisModal from '@/components/paper/paper-analysis-modal.vue'
 import PracticeResultModal from '@/components/practice/practice-result-modal.vue'
 import PracticeSessionModal from '@/components/practice/practice-session-modal.vue'
-import { useAuthStore } from '@/store/auth'
 import { formatDateTime } from '@/utils/datetime'
 
-import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO, PracticeStartDTO, PracticeSubmitDTO } from '@/api/types'
+import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO, PracticeSubmitDTO } from '@/api/types'
 
-const auth = useAuthStore()
 const message = useMessage()
 
 // 筛选条件
@@ -307,10 +305,10 @@ const { loading: loadingRecords, run: fetchRecords } = useRequest(
 )
 
 // 开始练习
-const { loading: startingPractice, runAsync: runStartPractice } = useRequest(startPractice, { manual: true })
+const { runAsync: runStartPractice } = useRequest(startPractice, { manual: true })
 
 // 提交练习
-const { loading: submittingPractice, runAsync: runSubmitPractice } = useRequest(submitPractice, { manual: true })
+const { runAsync: runSubmitPractice } = useRequest(submitPractice, { manual: true })
 
 // 新增：当前记录的统计
 const currentRecordStats = reactive({ maxScore: 0, minScore: 0 })

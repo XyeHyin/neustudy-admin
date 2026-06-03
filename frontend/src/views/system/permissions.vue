@@ -43,13 +43,13 @@
 import { List as FaList } from '@vicons/fa'
 import { GridOutline as IonGrid } from '@vicons/ionicons5'
 import { NButton, NCard, NDataTable, NH1, NIcon, NInput, NSelect, NTree, useMessage } from 'naive-ui'
-import { computed, onMounted, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getPermissions } from '@/api/permissions'
 import { buildPermissionTree } from '@/composables'
 
-import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
+import type { DataTableColumns } from 'naive-ui'
 import type { PermissionVO } from '@/api/types'
 
 const message = useMessage()

@@ -45,11 +45,9 @@ import { useRequest } from 'vue-hooks-plus'
 
 import {
   getAvailablePapersWithStats,
-  getPracticeHistory,
   getPracticeResult
 } from '@/api/practice'
 import PracticeResultModal from '@/components/practice/practice-result-modal.vue'
-import { useAuthStore } from '@/store/auth'
 import { formatDateTime } from '@/utils/datetime'
 
 import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO } from '@/api/types'
@@ -70,10 +68,6 @@ const stats = reactive({
   avgScore: 0,
   totalAttempts: 0
 })
-
-const { runAsync: fetchStats } = useRequest((studentId: number) => getPracticeHistory(studentId), { manual: true })
-
-const auth = useAuthStore() // 获取当前用户信息
 
 const practiceResult = ref<PracticeResultVO | null>(null)
 const showResultModal = ref(false)

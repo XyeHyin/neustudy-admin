@@ -108,12 +108,12 @@
 
 <script lang="ts" setup>
 import { NButton, NTag, useMessage, useModal } from 'naive-ui'
-import { computed, h, reactive, ref, watch } from 'vue'
+import { h, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getQuestionHistory, revertQuestion } from '@/api/question'
 
-import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
+import type { DataTableColumns } from 'naive-ui'
 import type { QuestionHistoryVO, QuestionType } from '@/api/types'
 
 const props = defineProps<{
@@ -172,7 +172,7 @@ const { loading: loadingHistory, run: fetchHistory } = useRequest(
         message.error(res.message || '获取历史版本失败')
       }
     },
-    onError: error => {
+    onError: () => {
       message.error('获取历史版本失败')
     }
   }

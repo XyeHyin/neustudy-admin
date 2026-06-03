@@ -178,8 +178,8 @@ const { run: fetchUsers } = useRequest(getUsers, {
 })
 
 
-const { loading: creatingCourse, runAsync: runCreateCourse } = useRequest(createCourse, { manual: true })
-const { loading: updatingCourse, runAsync: runUpdateCourse } = useRequest(updateCourse, { manual: true })
+const creatingCourse = ref(false)
+const updatingCourse = ref(false)
 const { loading: publishingCourse, runAsync: runPublishCourse } = useRequest(publishCourse, { manual: true })
 const { loading: archivingCourse, runAsync: runArchiveCourse } = useRequest(archiveCourse, { manual: true })
 
@@ -293,6 +293,7 @@ function handleCreateCourse() {
 }
 
 async function handleCreateCourseSubmit(data: CreateCourseDTO & { teacherId?: number }) {
+  creatingCourse.value = true
   try {
     let res
     if (auth.hasPermission('course:create:all') && data.teacherId) {
@@ -310,6 +311,8 @@ async function handleCreateCourseSubmit(data: CreateCourseDTO & { teacherId?: nu
     }
   } catch (e: any) {
     message.error(e.message || '创建课程异常')
+  } finally {
+    creatingCourse.value = false
   }
 }
 
@@ -329,6 +332,7 @@ async function handleViewCourse(course: CourseVO) {
 }
 
 async function handleUpdateCourse({ id, data }: { id: number; data: UpdateCourseDTO }) {
+  updatingCourse.value = true
   try {
     let res
     if (auth.hasPermission('course:edit:admin')) {
@@ -346,6 +350,8 @@ async function handleUpdateCourse({ id, data }: { id: number; data: UpdateCourse
     }
   } catch (e: any) {
     message.error(e.message || '更新课程异常')
+  } finally {
+    updatingCourse.value = false
   }
 }
 

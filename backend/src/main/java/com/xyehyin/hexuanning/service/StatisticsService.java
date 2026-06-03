@@ -1,7 +1,18 @@
 package com.xyehyin.hexuanning.service;
 
-import com.xyehyin.hexuanning.repository.*;
-import com.xyehyin.hexuanning.vo.statistics.*;
+import com.xyehyin.hexuanning.repository.CourseRepository;
+import com.xyehyin.hexuanning.repository.KnowledgePointRepository;
+import com.xyehyin.hexuanning.repository.PaperRepository;
+import com.xyehyin.hexuanning.repository.PracticeSessionRepository;
+import com.xyehyin.hexuanning.repository.QuestionRepository;
+import com.xyehyin.hexuanning.repository.StudentAnswerRepository;
+import com.xyehyin.hexuanning.repository.UserRepository;
+import com.xyehyin.hexuanning.vo.statistics.DashboardDistributionVO;
+import com.xyehyin.hexuanning.vo.statistics.DashboardStatVO;
+import com.xyehyin.hexuanning.vo.statistics.DashboardTrendVO;
+import com.xyehyin.hexuanning.vo.statistics.PaperStatisticsVO;
+import com.xyehyin.hexuanning.vo.statistics.QuestionStatisticsVO;
+import com.xyehyin.hexuanning.vo.statistics.StudentStatisticsVO;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -11,9 +22,7 @@ import com.xyehyin.hexuanning.entity.Paper;
 import com.xyehyin.hexuanning.entity.Question;
 import com.xyehyin.hexuanning.entity.PracticeSession;
 import com.xyehyin.hexuanning.entity.StudentAnswer;
-import com.xyehyin.hexuanning.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;

@@ -68,7 +68,7 @@
 
 <script lang="ts" setup>
 import { useDialog, useMessage, useOsTheme } from 'naive-ui'
-import { computed, h, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/store/auth'

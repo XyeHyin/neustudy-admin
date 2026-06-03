@@ -79,8 +79,7 @@
 
 <script lang="ts" setup>
 import { getPaperStatusText as getStatusText, getPaperStatusType as getStatusType } from '@/utils/status'
-import { useMessage } from 'naive-ui'
-import { computed, defineEmits, defineProps, ref, watch } from 'vue'
+import { defineEmits, defineProps, ref, watch } from 'vue'
 
 import type { PaperDetailVO, PaperUpdateDTO } from '@/api/types'
 
@@ -121,8 +120,6 @@ const rules = {
   title: { required: true, message: '请输入试卷标题', trigger: 'blur' },
   timeLimit: { required: true, type: 'number', message: '请输入时间限制', trigger: 'blur' }
 }
-
-const message = useMessage()
 
 // 获取题目类型颜色
 function getQuestionTypeColor(type: string) {

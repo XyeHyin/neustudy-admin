@@ -49,7 +49,6 @@
 
 <script lang="ts" setup>
 import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatusType } from '@/utils/status'
-import { useMessage } from 'naive-ui'
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
 import type { CourseVO, KnowledgePointDetailVO, UpdateKnowledgePointDTO } from '@/api/types'
@@ -102,8 +101,6 @@ const difficultyOptions = [
   { label: '中等', value: 'MEDIUM' },
   { label: '困难', value: 'HARD' }
 ]
-
-const message = useMessage()
 
 // 关闭弹窗
 function handleCancel() {

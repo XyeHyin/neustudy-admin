@@ -1,8 +1,20 @@
 package com.xyehyin.hexuanning.service;
 
-import com.xyehyin.hexuanning.entity.*;
-import com.xyehyin.hexuanning.repository.*;
-import com.xyehyin.hexuanning.vo.statistics.*;
+import com.xyehyin.hexuanning.entity.Paper;
+import com.xyehyin.hexuanning.entity.PracticeSession;
+import com.xyehyin.hexuanning.entity.Question;
+import com.xyehyin.hexuanning.entity.StudentAnswer;
+import com.xyehyin.hexuanning.entity.User;
+import com.xyehyin.hexuanning.repository.CourseRepository;
+import com.xyehyin.hexuanning.repository.KnowledgePointRepository;
+import com.xyehyin.hexuanning.repository.PaperRepository;
+import com.xyehyin.hexuanning.repository.PracticeSessionRepository;
+import com.xyehyin.hexuanning.repository.QuestionRepository;
+import com.xyehyin.hexuanning.repository.StudentAnswerRepository;
+import com.xyehyin.hexuanning.repository.UserRepository;
+import com.xyehyin.hexuanning.vo.statistics.DashboardStatVO;
+import com.xyehyin.hexuanning.vo.statistics.PaperStatisticsVO;
+import com.xyehyin.hexuanning.vo.statistics.QuestionStatisticsVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +27,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StatisticsServiceTest {

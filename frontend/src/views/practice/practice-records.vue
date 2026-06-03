@@ -56,7 +56,7 @@ import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getPapers } from '@/api/paper'
-import { getPracticeResult, listPracticeRecords } from '@/api/practice'
+import { listPracticeRecords } from '@/api/practice'
 import PracticeDetailModal from '@/components/practice/practice-detail-modal.vue'
 import { formatDateTime } from '@/utils/datetime'
 
@@ -86,9 +86,6 @@ const pagination = reactive({
 
 // 模态框状态
 const showDetailModal = ref(false)
-
-// 延迟搜索定时器
-let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 // 选项
 const submittedOptions = [
@@ -249,13 +246,6 @@ function rowKey(row: PracticeRecordVO) {
 function handleSearch() {
   pagination.page = 1
   fetchRecords()
-}
-
-function handleSearchDelayed() {
-  if (searchTimer) clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    handleSearch()
-  }, 500)
 }
 
 function handleReset() {

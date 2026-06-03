@@ -1,19 +1,13 @@
 package com.xyehyin.hexuanning.service;
 
-import cn.hutool.core.exceptions.StatefulException;
-import cn.hutool.http.HttpStatus;
 import com.xyehyin.hexuanning.entity.User;
 import com.xyehyin.hexuanning.repository.RoleRepository;
 import com.xyehyin.hexuanning.repository.UserRepository;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service

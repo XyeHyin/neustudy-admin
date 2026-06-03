@@ -108,7 +108,7 @@ const { loading: downloadingTemplate, run: downloadTemplate } = useRequest(
 )
 
 // 文件上传钩子（不自动上传）
-const handleFileUpload = ({ file, onFinish }: any) => {
+const handleFileUpload = ({ onFinish }: any) => {
   onFinish()
 }
 

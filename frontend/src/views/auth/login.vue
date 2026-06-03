@@ -28,16 +28,15 @@
 
 <script lang="ts" setup>
 import { useMessage } from 'naive-ui'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 import { useRouter } from 'vue-router'
 
 import { login as apiLogin } from '@/api/auth'
-import { getCurrentUserDetail, getUserDetail } from '@/api/user'
+import { getCurrentUserDetail } from '@/api/user'
 import { isJwtToken, useAuthStore } from '@/store/auth'
 
 import type { FormInst } from 'naive-ui'
-import type { ApiResponse, LoginVO } from '@/api/types'
 
 const router = useRouter()
 const message = useMessage()
@@ -62,7 +61,7 @@ const { runAsync: runLogin, loading } = useRequest((params: { username: string; 
   manual: true
 })
 
-const { runAsync: runGetUserDetail, loading: loadingUserDetail } = useRequest(getCurrentUserDetail, {
+const { runAsync: runGetUserDetail } = useRequest(getCurrentUserDetail, {
   manual: true
 })
 

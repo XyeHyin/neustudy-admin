@@ -1,6 +1,6 @@
 import request from './request'
 
-import type { ApiResponse, CourseDetailVO, CourseStatisticsVO, CourseVO, CreateCourseDTO, GradeVO, PageResultCourseVO, SubjectVO, UpdateCourseDTO } from './types'
+import type { ApiResponse, CourseDetailVO, CourseStatisticsVO, CourseVO, CreateCourseDTO, PageResultCourseVO, UpdateCourseDTO } from './types'
 
 // 获取所有课程
 export function getCourses() {
@@ -149,7 +149,7 @@ export function getGrades() {
 
 // 获取课程统计 - 修正返回类型
 export function getCourseStatistics() {
-  return request<ApiResponse<Record<string, any>>>({
+  return request<ApiResponse<CourseStatisticsVO>>({
     url: '/courses/statistics',
     method: 'GET'
   })

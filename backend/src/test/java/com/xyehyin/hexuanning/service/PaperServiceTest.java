@@ -5,7 +5,9 @@ import com.xyehyin.hexuanning.dto.paper.PaperCreateDTO;
 import com.xyehyin.hexuanning.entity.Paper;
 import com.xyehyin.hexuanning.entity.User;
 import com.xyehyin.hexuanning.mapper.PaperMapper;
-import com.xyehyin.hexuanning.repository.*;
+import com.xyehyin.hexuanning.repository.PaperQuestionRepository;
+import com.xyehyin.hexuanning.repository.PaperRepository;
+import com.xyehyin.hexuanning.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,9 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaperServiceTest {

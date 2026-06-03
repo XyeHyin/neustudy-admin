@@ -104,7 +104,7 @@ import { useRequest } from 'vue-hooks-plus'
 import { getPracticeDetail, markPracticeQuestion } from '@/api/practice'
 import QuestionAnswerInput from '@/components/question/question-answer-input.vue'
 
-import type { AnswerDTO, PracticeAnswerVO, PracticeDetailVO, PracticeSubmitDTO } from '@/api/types'
+import type { PracticeAnswerVO, PracticeDetailVO, PracticeSubmitDTO } from '@/api/types'
 
 const props = defineProps<{
   show: boolean
@@ -160,7 +160,7 @@ const progressPercentage = computed(() => {
 const isCurrentQuestionMarked = computed(() => markStatus.value.get(currentQuestion.value!.questionId!) || false)
 
 // 获取练习详情
-const { loading: loadingSession, run: fetchPracticeDetail } = useRequest((id: number) => getPracticeDetail(id), {
+const { run: fetchPracticeDetail } = useRequest((id: number) => getPracticeDetail(id), {
   manual: true,
   onSuccess: (res: any) => {
     if (res.code === 200) {
@@ -181,7 +181,7 @@ const { loading: loadingSession, run: fetchPracticeDetail } = useRequest((id: nu
 })
 
 // 标记题目
-const { loading: marking, runAsync: runMarkQuestion } = useRequest(markPracticeQuestion, { manual: true })
+const { runAsync: runMarkQuestion } = useRequest(markPracticeQuestion, { manual: true })
 
 const submitting = ref(false)
 

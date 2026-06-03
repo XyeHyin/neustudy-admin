@@ -71,15 +71,8 @@ import {
   adminDeleteKnowledgePoint,
   adminUpdateKnowledgePoint,
   batchDeleteKnowledgePoints,
-  createKnowledgePoint,
-  deleteKnowledgePoint,
-  exportKnowledgePoints,
-  exportMyKnowledgePoints,
   getKnowledgePointDetail,
   getKnowledgePointPage,
-  getMyKnowledgePointPage,
-  importKnowledgePoints,
-  updateKnowledgePoint,
   updateKnowledgePointStatus
 } from '@/api/knowledge-point'
 import KnowledgePointCreateModal from '@/components/knowledge-point/knowledge-point-create-modal.vue'
@@ -87,10 +80,10 @@ import KnowledgePointDetailModal from '@/components/knowledge-point/knowledge-po
 import KnowledgePointExportModal from '@/components/knowledge-point/knowledge-point-export-modal.vue'
 import KnowledgePointImportModal from '@/components/knowledge-point/knowledge-point-import-modal.vue'
 import { useAuthStore } from '@/store/auth'
-import { formatDate, todayKey } from '@/utils/datetime'
+import { formatDate } from '@/utils/datetime'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
-import type { CourseVO, CreateKnowledgePointDTO, KnowledgePointDetailVO, KnowledgePointVO, UpdateKnowledgePointDTO, UserVO } from '@/api/types'
+import type { CourseVO, CreateKnowledgePointDTO, KnowledgePointDetailVO, KnowledgePointVO, UpdateKnowledgePointDTO } from '@/api/types'
 
 const message = useMessage()
 const modal = useModal()
@@ -461,50 +454,6 @@ function handleBatchDelete() {
       }
     }
   })
-}
-
-async function handleExport() {
-  try {
-    // 公共查询参数
-    const common = {
-      courseId: courseFilter.value || undefined,
-      enabled: statusFilter.value !== null ? statusFilter.value : undefined,
-      difficulty: difficultyFilter.value || undefined
-    }
-    // 根据权限选择导出接口
-    const blob = auth.hasPermission('knowledge_point:export') ? await exportKnowledgePoints({ ...common, format: 'xlsx' }) : await exportMyKnowledgePoints(common)
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `知识点列表_${todayKey()}.xlsx`
-    a.click()
-    window.URL.revokeObjectURL(url)
-    message.success('导出成功')
-  } catch (e: any) {
-    message.error(e.message || '导出失败')
-  }
-}
-
-async function handleImport(data: { file: { file: File } }) {
-  if (!courseFilter.value) {
-    message.error('请先选择课程')
-    return false
-  }
-  try {
-    const res = await importKnowledgePoints(data.file.file, courseFilter.value)
-    if (res.code === 200) {
-      message.success(`导入成功：成功 ${res.data.successCount} 条，失败 ${res.data.failCount} 条`)
-      if (res.data.errorMessages && res.data.errorMessages.length > 0) {
-        console.warn('导入错误详情：', res.data.errorMessages)
-      }
-      fetchKnowledgePoints()
-    } else {
-      message.error(res.message || '导入失败')
-    }
-  } catch (e: any) {
-    message.error(e.message || '导入异常')
-  }
-  return false
 }
 
 // 处理难度标签点击事件

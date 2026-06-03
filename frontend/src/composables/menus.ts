@@ -1,4 +1,3 @@
-import { AudioFileOutlined, BookOutlined, PlayCircleOutlineOutlined } from '@vicons/material'
 import { computed, ref } from 'vue'
 
 import { useAuthStore } from '@/store/auth'

@@ -4,12 +4,10 @@ import cn.hutool.core.exceptions.StatefulException;
 import cn.hutool.http.HttpStatus;
 import com.xyehyin.hexuanning.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice()

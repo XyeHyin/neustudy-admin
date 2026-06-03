@@ -42,20 +42,19 @@
 </template>
 
 <script lang="ts" setup>
-import { NButton, NForm, NInput, NSelect, NSwitch, useDialog, useMessage, useModal } from 'naive-ui'
-import { computed, h, onMounted, reactive, ref, watch } from 'vue'
+import { NButton, NInput, NSelect, NSwitch, useDialog, useMessage } from 'naive-ui'
+import { h, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
-import { uploadFile } from '@/api/file'
 import { getRoles } from '@/api/role'
-import { batchDeleteUsers, createUser, deleteUser, getUserDetail, getUserPage, getUsers, updateUser, updateUserRole, updateUserStatus } from '@/api/user'
+import { batchDeleteUsers, createUser, deleteUser, getUserDetail, getUserPage, updateUser, updateUserRole, updateUserStatus } from '@/api/user'
 import UserCreateModal from '@/components/user/user-create-modal.vue'
 import userDetailModal from '@/components/user/user-detail-modal.vue'
 import { useAuthStore } from '@/store/auth'
 import { formatDateTime } from '@/utils/datetime'
 
-import type { DataTableColumns, DataTableRowKey, SelectOption, UploadCustomRequestOptions } from 'naive-ui'
-import type { CreateUserDTO, PermissionVO, RoleVO, UpdateUserDTO, UserDetailVO, UserVO } from '@/api/types'
+import type { DataTableColumns, DataTableRowKey, SelectOption } from 'naive-ui'
+import type { CreateUserDTO, RoleVO, UpdateUserDTO, UserDetailVO, UserVO } from '@/api/types'
 
 const auth = useAuthStore()
 
@@ -157,9 +156,7 @@ async function handleAddUser(user: CreateUserDTO) {
     message.error(e?.message || '请求异常')
   }
 }
-const { runAsync: getUserDetailReq, loading: loadingUserDetail } = useRequest(getUserDetail, { manual: true })
-const { runAsync: updateUserReq, loading: updatingUser } = useRequest(updateUser, { manual: true })
-const { runAsync: updateUserRoleReq } = useRequest(updateUserRole, { manual: true })
+const updatingUser = ref(false)
 const editData = ref<UserDetailVO>({} as UserDetailVO)
 
 // 更新用户信息
@@ -202,6 +199,7 @@ function updateCreateUserModalShow() {
 
 // 更新用户信息
 async function handleUpdateUser(user: UpdateUserDTO) {
+  updatingUser.value = true
   try {
     const res = await updateUser(editData.value.id, user)
     if (res.code === 200) {
@@ -213,10 +211,12 @@ async function handleUpdateUser(user: UpdateUserDTO) {
     }
   } catch (e: any) {
     message.error(e?.message || '请求异常')
+  } finally {
+    updatingUser.value = false
   }
 }
-const { runAsync: deleteUserReq, loading: deletingUser } = useRequest(deleteUser, { manual: true })
-const { runAsync: batchDeleteUsersReq, loading: batchDeletingUsers } = useRequest(batchDeleteUsers, { manual: true })
+const { runAsync: deleteUserReq } = useRequest(deleteUser, { manual: true })
+const { runAsync: batchDeleteUsersReq } = useRequest(batchDeleteUsers, { manual: true })
 async function handleDeleteUser(id: number) {
   try {
     dialog.warning({
@@ -296,7 +296,9 @@ const columns: DataTableColumns<UserVO> = [
                 } else {
                   message.error(res.message || '操作失败')
                 }
-              } catch {}
+              } catch (e: any) {
+                message.error(e?.message || '操作失败')
+              }
             }
           },
           { default: () => (row.enabled ? '启用中' : '已禁用') }

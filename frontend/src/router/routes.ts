@@ -1,7 +1,5 @@
 import { type RouteRecordRaw } from 'vue-router'
 
-import permission from '@/directives/permission'
-
 const mainRoutes: RouteRecordRaw[] = [
   {
     name: 'home',

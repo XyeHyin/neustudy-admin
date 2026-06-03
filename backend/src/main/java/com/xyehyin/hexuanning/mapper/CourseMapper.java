@@ -6,7 +6,9 @@ import com.xyehyin.hexuanning.entity.Course;
 import com.xyehyin.hexuanning.vo.course.CourseDetailVO;
 import com.xyehyin.hexuanning.vo.course.CourseSimpleVO;
 import com.xyehyin.hexuanning.vo.course.CourseVO;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 /**
  * 课程映射器

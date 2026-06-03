@@ -3,8 +3,6 @@ package com.xyehyin.hexuanning.dto.practice;
 import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
 /**
  * 题目标记DTO
  */

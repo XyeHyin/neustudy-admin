@@ -20,11 +20,10 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint": "eslint \"src/**/*.{vue,js,jsx,cjs,mjs,ts,tsx,cts,mts}\" --fix",
     "format": "prettier --write src/"
   },
   "type": "module",
-  "prettier": "@zce/prettier-config",
   "dependencies": {
     "@vicons/fa": "^0.13.0",
     "@vicons/ionicons5": "^0.12.0",
@@ -51,7 +50,6 @@
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.5.1",
-    "@zce/prettier-config": "^0.2.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",
     "express": "^4.18.2",

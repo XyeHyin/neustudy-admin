@@ -51,7 +51,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useMessage } from 'naive-ui'
 import { defineEmits, defineProps, ref, watch } from 'vue'
 
 import { formatDateTime } from '@/utils/datetime'
@@ -66,7 +65,6 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:show', 'submit'])
 
-const message = useMessage()
 const formRef = ref()
 
 // 表单数据

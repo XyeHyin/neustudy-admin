@@ -2,8 +2,12 @@ package com.xyehyin.hexuanning.service;
 
 import cn.hutool.core.exceptions.StatefulException;
 import com.xyehyin.hexuanning.dto.practice.PracticeStartDTO;
-import com.xyehyin.hexuanning.entity.*;
-import com.xyehyin.hexuanning.repository.*;
+import com.xyehyin.hexuanning.entity.Paper;
+import com.xyehyin.hexuanning.entity.PracticeSession;
+import com.xyehyin.hexuanning.entity.User;
+import com.xyehyin.hexuanning.repository.PaperRepository;
+import com.xyehyin.hexuanning.repository.PracticeSessionRepository;
+import com.xyehyin.hexuanning.repository.UserRepository;
 import com.xyehyin.hexuanning.vo.practice.PracticeSessionVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +23,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PracticeServiceTest {

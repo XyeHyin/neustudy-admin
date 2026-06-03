@@ -46,14 +46,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useMessage } from 'naive-ui'
 import { defineEmits, defineProps, ref } from 'vue'
 
 import { useAuthStore } from '@/store/auth'
 
 import type { PaperCreateDTO } from '@/api/types'
 
-const props = defineProps<{
+defineProps<{
   show: boolean
   loading?: boolean
 }>()
@@ -61,7 +60,6 @@ const props = defineProps<{
 const emit = defineEmits(['update:show', 'submit'])
 
 const auth = useAuthStore()
-const message = useMessage()
 const formRef = ref()
 
 // 表单数据

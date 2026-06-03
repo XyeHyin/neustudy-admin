@@ -26,19 +26,19 @@
 </template>
 
 <script lang="ts" setup>
-import { NButton, NForm, NFormItemRow, NInput, NTree, useMessage, useModal } from 'naive-ui'
-import { computed, h, onMounted, ref } from 'vue'
+import { NButton, NInput, NTree, useMessage, useModal } from 'naive-ui'
+import { h, onMounted, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getPermissions } from '@/api/permissions'
-import { assignRolePermissions, batchDeleteRoles, createRole, deleteRole, getRoleDetail, getRoles, updateRole } from '@/api/role'
+import { assignRolePermissions, batchDeleteRoles, createRole, deleteRole, getRoleDetail, getRoles } from '@/api/role'
 import { getCurrentUserDetail } from '@/api/user'
 import RoleCreateModal from '@/components/role/role-create-modal.vue'
 import { formatDate } from '@/utils/datetime'
 import { buildPermissionTree } from '@/composables'
 import { useAuthStore } from '@/store/auth'
 
-import type { DataTableColumns, DataTableRowKey, FormInst } from 'naive-ui'
+import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
 import type { CreateRoleDTO, PermissionVO, RoleVO } from '@/api/types'
 
 const message = useMessage()
@@ -61,7 +61,7 @@ const { loading: loadingRoles } = useRequest(getRoles, {
   }
 })
 
-const { loading: loadingPermissions } = useRequest(getPermissions, {
+useRequest(getPermissions, {
   onSuccess: (res: any) => {
     if (res.code === 200) {
       permissions.value = res.data
@@ -70,10 +70,6 @@ const { loading: loadingPermissions } = useRequest(getPermissions, {
       message.error(res.message || '获取权限列表失败')
     }
   }
-})
-
-const { loading: loadingAssign, runAsync: runAssign } = useRequest(assignRolePermissions, {
-  manual: true
 })
 
 const { loading: creatingRole, runAsync: runCreateRole } = useRequest(createRole, {
@@ -286,9 +282,13 @@ function handleBatchDelete() {
     onPositiveClick: async () => {
       try {
         const res = await batchDeleteRoles(selectedRowKeys.value.map(Number))
-        message.success('批量删除成功')
-        selectedRowKeys.value = []
-        updateRoles()
+        if (res.code === 200) {
+          message.success('批量删除成功')
+          selectedRowKeys.value = []
+          updateRoles()
+        } else {
+          message.error(res.message || '批量删除失败')
+        }
       } catch (e: any) {
         message.error(e.message || '请求异常')
       }

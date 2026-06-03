@@ -50,7 +50,7 @@
 <script lang="ts" setup>
 import { getPaperStatusText as getStatusText, getPaperStatusType as getStatusType } from '@/utils/status'
 import { NButton, NTag, useMessage, useModal } from 'naive-ui'
-import { computed, h, onMounted, reactive, ref, watch } from 'vue'
+import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { archivePaper, createPaper, deletePaper, getPaperDetail, getPapers, publishPaper, smartGenerate, updatePaper } from '@/api/paper'
@@ -295,10 +295,6 @@ async function handleViewPaper(id: number) {
   } catch (error: any) {
     message.error(error.message || '获取试卷详情失败')
   }
-}
-
-async function handleEditPaper(id: number) {
-  await handleViewPaper(id)
 }
 
 async function handleUpdatePaper(id: number, data: PaperUpdateDTO) {

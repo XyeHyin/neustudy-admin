@@ -76,7 +76,7 @@
           <n-button v-if="canUpdateStatus" :type="form.enabled ? 'warning' : 'success'" :loading="updatingStatus" @click="handleToggleStatus">
             {{ form.enabled ? '禁用' : '启用' }}
           </n-button>
-          <n-button v-if="!editMode" type="info" @click="showHistoryModal = true">
+          <n-button v-if="!editMode" type="info" @click="handleViewHistory">
             查看历史
           </n-button>
         </n-space>
@@ -87,7 +87,8 @@
     <question-history-modal
       :show="showHistoryModal"
       :question-id="form.id"
-      @update:show="val => (showHistoryModal = val)"
+      @update:show="updateHistoryModalShow"
+      @reverted="handleReverted"
     />
   </n-modal>
 </template>

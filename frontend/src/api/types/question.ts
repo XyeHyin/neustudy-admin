@@ -1,5 +1,4 @@
 import type { ApiResponse, PageResult } from './common'
-import type { CourseSimpleVO } from './course'
 import type { KnowledgePointDetailVO, KnowledgePointSimpleVO } from './knowledge-point'
 
 export type QuestionType = 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'FILL_BLANK' | 'SHORT_ANSWER' | 'TRUE_FALSE' | 'ESSAY'

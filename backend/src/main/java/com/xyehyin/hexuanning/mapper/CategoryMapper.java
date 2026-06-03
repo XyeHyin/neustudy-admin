@@ -5,7 +5,6 @@ import com.xyehyin.hexuanning.dto.category.UpdateCategoryDTO;
 import com.xyehyin.hexuanning.entity.Category;
 import com.xyehyin.hexuanning.vo.category.CategoryFlatVO;
 import com.xyehyin.hexuanning.vo.category.CategoryTreeVO;
-import jakarta.validation.Valid;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

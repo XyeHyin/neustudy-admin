@@ -4,14 +4,22 @@ import cn.hutool.core.exceptions.StatefulException;
 import cn.hutool.http.HttpStatus;
 import com.xyehyin.hexuanning.entity.PracticeSession;
 import com.xyehyin.hexuanning.repository.PracticeSessionRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.xyehyin.hexuanning.dto.practice.*;
-import com.xyehyin.hexuanning.vo.practice.*;
+import com.xyehyin.hexuanning.dto.practice.PracticeMarkDTO;
+import com.xyehyin.hexuanning.dto.practice.PracticeStartDTO;
+import com.xyehyin.hexuanning.dto.practice.PracticeSubmitDTO;
+import com.xyehyin.hexuanning.vo.practice.PracticeAnswerVO;
+import com.xyehyin.hexuanning.vo.practice.PracticeDetailVO;
+import com.xyehyin.hexuanning.vo.practice.PracticeOverviewVO;
+import com.xyehyin.hexuanning.vo.practice.PracticePaperStatVO;
+import com.xyehyin.hexuanning.vo.practice.PracticeQuestionVO;
+import com.xyehyin.hexuanning.vo.practice.PracticeRecordVO;
+import com.xyehyin.hexuanning.vo.practice.PracticeResultVO;
+import com.xyehyin.hexuanning.vo.practice.PracticeSessionVO;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,23 +34,16 @@ import com.xyehyin.hexuanning.entity.Paper;
 import com.xyehyin.hexuanning.entity.PaperQuestion;
 import com.xyehyin.hexuanning.repository.PaperRepository;
 import com.xyehyin.hexuanning.repository.PaperQuestionRepository;
-import com.xyehyin.hexuanning.vo.paper.PaperQuestionVO;
 import com.xyehyin.hexuanning.entity.StudentAnswer;
 import com.xyehyin.hexuanning.repository.StudentAnswerRepository;
 import org.springframework.validation.annotation.Validated;
 import com.xyehyin.hexuanning.service.GradingService;
 import com.xyehyin.hexuanning.dto.grading.GradingRequestDTO;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.validation.Valid;
 import com.xyehyin.hexuanning.entity.Question;
 import com.xyehyin.hexuanning.repository.QuestionRepository;
 import com.xyehyin.hexuanning.repository.UserRepository;
-import com.xyehyin.hexuanning.vo.practice.PracticeDetailVO;
-import com.xyehyin.hexuanning.vo.practice.PracticeQuestionVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * 练习流程服务
  */

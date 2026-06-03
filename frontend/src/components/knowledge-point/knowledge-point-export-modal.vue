@@ -164,7 +164,7 @@ function buildJsMindData(tree: any[], rootText: string) {
     })
   })
   return {
-    meta: { name: rootText, author: '', version: '1.0' },
+    meta: { name: rootText, author: 'XyeHyin', version: '1.0' },
     format: 'node_array',
     data
   }
@@ -217,28 +217,6 @@ async function showMindMap() {
       }
     }
   }, 500) // 延长等待时间
-}
-
-// 导出思维导图为图片（未在 UI 中使用，保留）
-function exportMindMapImg() {
-  // 确保已渲染思维导图
-  const container = document.getElementById('jsmind_container')
-  if (!container) {
-    message.error('请先预览思维导图')
-    return
-  }
-  const snapshot = jm.get_snapshot()
-  // 兼容插件返回值：可能是字符串，也可能是 { dataURL: string }
-  const imgData = typeof snapshot === 'string' ? snapshot : snapshot.dataURL || snapshot.data
-  if (!imgData) {
-    message.error('截图失败，请重试')
-    return
-  }
-  const a = document.createElement('a')
-  a.href = imgData
-  a.download = `知识点导图_${todayKey()}.png`
-  a.click()
-  message.success('图片已导出')
 }
 
 // 生成 FreeMind 格式的 XML

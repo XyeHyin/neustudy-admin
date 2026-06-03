@@ -1,37 +1,25 @@
 package com.xyehyin.hexuanning.controller;
 
 import com.xyehyin.hexuanning.common.ApiResponse;
-import com.xyehyin.hexuanning.dto.practice.PracticeStartDTO;
-import com.xyehyin.hexuanning.entity.GradingResult;
-import com.xyehyin.hexuanning.service.GradingService;
-import com.xyehyin.hexuanning.service.PracticeService;
-import com.xyehyin.hexuanning.vo.practice.PracticeSessionVO;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-import cn.hutool.core.exceptions.StatefulException;
-import cn.hutool.http.HttpStatus;
-import com.xyehyin.hexuanning.dto.grading.GradingRequestDTO;
-import com.xyehyin.hexuanning.dto.grading.AIGradingDTO;
-import com.xyehyin.hexuanning.dto.grading.ManualGradingDTO;
-import com.xyehyin.hexuanning.dto.grading.BatchGradingRequestDTO;
-import com.xyehyin.hexuanning.vo.grading.GradingResultVO;
 import com.xyehyin.hexuanning.common.PageResult;
+import com.xyehyin.hexuanning.constant.PermissionConstants;
+import com.xyehyin.hexuanning.service.GradingService;
+import com.xyehyin.hexuanning.dto.grading.ManualGradingDTO;
+import com.xyehyin.hexuanning.vo.grading.GradingResultVO;
 import com.xyehyin.hexuanning.vo.grading.GradingReviewVO;
-
-import java.util.List;
-
-import org.springframework.scheduling.annotation.Scheduled;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import com.xyehyin.hexuanning.constant.PermissionConstants;
-import com.xyehyin.hexuanning.controller.BaseController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 判分管理控制器
@@ -42,28 +30,6 @@ import com.xyehyin.hexuanning.controller.BaseController;
 @RequiredArgsConstructor
 public class GradingController extends BaseController {
     private final GradingService gradingService;
-    private final PracticeService practiceService;
-
-//    @Operation(summary = "自动判分", description = "对学生答案进行自动判分（客观题/主观题分流）")
-//    @PreAuthorize("hasAuthority('" + PermissionConstants.GRADING_AUTO + "')")
-//    @PostMapping("/auto")
-//    public ApiResponse<GradingResultVO> autoGrading(@RequestBody @Valid GradingRequestDTO dto) {
-//        return ApiResponse.success(gradingService.autoGrading(dto));
-//    }
-//
-//    @Operation(summary = "批量自动判分", description = "对多道学生答案进行批量自动判分（包含客观题和主观题）")
-//    @PreAuthorize("hasAuthority('" + PermissionConstants.GRADING_AUTO + "')")
-//    @PostMapping("/auto/batch")
-//    public ApiResponse<List<GradingResultVO>> batchAutoGrading(@RequestBody @Valid BatchGradingRequestDTO dto) {
-//        return ApiResponse.success(gradingService.batchAutoGrading(dto));
-//    }
-//
-//    @Operation(summary = "AI判分", description = "对学生答案进行AI判分")
-//    @PreAuthorize("hasAuthority('" + PermissionConstants.GRADING_AI + "')")
-//    @PostMapping("/ai")
-//    public ApiResponse<GradingResultVO> aiGrading(@RequestBody @Valid AIGradingDTO dto) {
-//        return ApiResponse.success(gradingService.aiGrading(dto));
-//    }
 
     @Operation(summary = "人工复核", description = "教师对AI判分结果进行人工复核")
     @PreAuthorize("hasAuthority('" + PermissionConstants.GRADING_MANUAL + "')")
@@ -101,4 +67,4 @@ public class GradingController extends BaseController {
             @RequestParam(required = false) String questionTitle) {
         return ApiResponse.success(gradingService.listReviewed(page, size, paperId, questionTitle));
     }
-} 
+}
