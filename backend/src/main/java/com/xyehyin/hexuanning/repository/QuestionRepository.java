@@ -3,12 +3,14 @@ package com.xyehyin.hexuanning.repository;
 import com.xyehyin.hexuanning.entity.Question;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 题目数据访问层
@@ -16,24 +18,40 @@ import java.util.List;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
+    @Override
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
+    List<Question> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
+    List<Question> findAllById(Iterable<Long> ids);
+
+    @Override
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
+    Optional<Question> findById(Long id);
+
     /**
      * 根据知识点ID查找题目
      */
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
     List<Question> findByKnowledgePointId(Long knowledgePointId);
 
     /**
      * 根据知识点ID和启用状态查找题目
      */
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
     List<Question> findByKnowledgePointIdAndEnabled(Long knowledgePointId, Boolean enabled);
 
     /**
      * 根据题目类型查找题目
      */
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
     List<Question> findByType(Question.QuestionType type);
 
     /**
      * 根据难度查找题目
      */
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
     List<Question> findByDifficulty(Question.Difficulty difficulty);
 
     /**
@@ -56,6 +74,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "(:type IS NULL OR q.type = :type) AND " +
            "(:difficulty IS NULL OR q.difficulty = :difficulty) AND " +
            "(:knowledgePointId IS NULL OR q.knowledgePoint.id = :knowledgePointId)")
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
     Page<Question> findAllWithFilters(@Param("keyword") String keyword,
                                      @Param("enabled") Boolean enabled,
                                      @Param("type") Question.QuestionType type,
@@ -72,6 +91,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "(:type IS NULL OR q.type = :type) AND " +
            "(:difficulty IS NULL OR q.difficulty = :difficulty) AND " +
            "(:knowledgePointId IS NULL OR q.knowledgePoint.id = :knowledgePointId)")
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
     Page<Question> findByTeacherIdWithFilters(@Param("teacherId") Long teacherId,
                                              @Param("keyword") String keyword,
                                              @Param("enabled") Boolean enabled,
@@ -88,6 +108,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "(:difficulty IS NULL OR q.difficulty = :difficulty) AND " +
            "q.enabled = true AND " +
            "(:excludeIds IS NULL OR q.id NOT IN :excludeIds)")
+    @EntityGraph(attributePaths = {"knowledgePoint", "knowledgePoint.course", "knowledgePoint.course.teacher", "knowledgePoint.course.category", "knowledgePoint.course.category.parent"})
     List<Question> findQuestionsForPaper(@Param("categoryId") Long categoryId,
                                         @Param("difficulty") Question.Difficulty difficulty,
                                         @Param("excludeIds") List<Long> excludeIds,

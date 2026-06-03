@@ -4,6 +4,7 @@ import com.xyehyin.hexuanning.entity.Course;
 import com.xyehyin.hexuanning.entity.KnowledgePoint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 知识点数据访问层
@@ -19,34 +21,48 @@ import java.util.List;
 @Repository
 public interface KnowledgePointRepository extends JpaRepository<KnowledgePoint, Long> {
 
+    @Override
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
+    List<KnowledgePoint> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
+    Optional<KnowledgePoint> findById(Long id);
+
     /**
      * 根据课程查找知识点
      */
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     List<KnowledgePoint> findByCourse(Course course);
 
     /**
      * 根据课程ID查找知识点
      */
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     List<KnowledgePoint> findByCourseId(Long courseId);
 
     /**
      * 根据课程ID和启用状态查找知识点
      */
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     List<KnowledgePoint> findByCourseIdAndEnabled(Long courseId, Boolean enabled);
 
     /**
      * 根据知识点名称查找（模糊匹配）
      */
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     List<KnowledgePoint> findByNameContainingIgnoreCase(String name);
 
     /**
      * 根据难度查找知识点
      */
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     List<KnowledgePoint> findByDifficulty(KnowledgePoint.Difficulty difficulty);
 
     /**
      * 根据启用状态查找知识点
      */
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     List<KnowledgePoint> findByEnabled(Boolean enabled);
 
     /**
@@ -67,6 +83,7 @@ public interface KnowledgePointRepository extends JpaRepository<KnowledgePoint, 
            "AND (:enabled IS NULL OR kp.enabled = :enabled) " +
            "AND (:courseId IS NULL OR kp.course.id = :courseId) " +
            "AND (:difficulty IS NULL OR kp.difficulty = :difficulty)")
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     Page<KnowledgePoint> findAllWithFilters(
             @Param("keyword") String keyword,
             @Param("enabled") Boolean enabled,
@@ -83,6 +100,7 @@ public interface KnowledgePointRepository extends JpaRepository<KnowledgePoint, 
            "AND (:enabled IS NULL OR kp.enabled = :enabled) " +
            "AND (:courseId IS NULL OR kp.course.id = :courseId) " +
            "AND (:difficulty IS NULL OR kp.difficulty = :difficulty)")
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     Page<KnowledgePoint> findByTeacherIdWithFilters(
             @Param("teacherId") Long teacherId,
             @Param("keyword") String keyword,
@@ -101,6 +119,7 @@ public interface KnowledgePointRepository extends JpaRepository<KnowledgePoint, 
     /**
      * 根据课程ID排序查找知识点
      */
+    @EntityGraph(attributePaths = {"course", "course.teacher", "course.category", "course.category.parent"})
     List<KnowledgePoint> findByCourseIdOrderByOrderNumAsc(Long courseId);
 
     /**
