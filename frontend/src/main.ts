@@ -5,6 +5,7 @@ import naive from './naive'
 import router from './router'
 import pinia from './store'
 import permission from './directives/permission'
+import './styles/admin-page.css'
 import './styles/scrollbar.css'
 
 const app = createApp(App)

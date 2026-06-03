@@ -1,8 +1,8 @@
-﻿<template>
-  <div class="question-self-page">
-    <n-card :bordered="false" class="question-self-card">
-      <n-h1 class="question-self-title">我的题目</n-h1>
-      <div class="question-self-toolbar">
+<template>
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">我的题目</n-h1>
+      <div class="admin-toolbar">
         <n-input v-model:value="searchKeyword" placeholder="搜索题目标题/内容" clearable style="width: 240px" @input="handleSearch" />
         <n-select v-model:value="typeFilter" :options="typeOptions" clearable placeholder="题型" style="width: 120px" @update:value="handleSearch" />
         <n-select v-model:value="difficultyFilter" :options="difficultyOptions" clearable placeholder="难度" style="width: 100px" @update:value="handleSearch" />
@@ -452,36 +452,3 @@ onMounted(() => {
   fetchKnowledgePoints()
 })
 </script>
-
-<style scoped>
-.question-self-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-
-.question-self-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-
-.question-self-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-
-.question-self-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-.questions-self-card > .n-data-table {
-  margin-top: 24px;
-}
-</style>
-

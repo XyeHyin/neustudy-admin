@@ -1,8 +1,8 @@
-﻿<template>
-  <div class="users-page">
-    <n-card :bordered="false" class="users-card">
-      <n-h1 class="users-title">用户管理</n-h1>
-      <div class="users-toolbar">
+<template>
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">用户管理</n-h1>
+      <div class="admin-toolbar">
         <n-input v-model:value="searchKeyword" placeholder="搜索用户名/邮箱" clearable style="width: 240px" @input="handleSearch" />
         <n-select v-model:value="statusFilter" :options="statusOptions" clearable placeholder="状态" style="width: 100px" @update:value="handleSearch" />
         <n-button v-permission="'user:create:all'" type="primary" @click="handleAddUserBtn">新增用户</n-button>
@@ -362,29 +362,3 @@ function handleSearch() {
   pagination.page = 1
 }
 </script>
-
-<style scoped>
-.users-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px 0;
-}
-.users-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-.users-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-.users-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-</style>
-

@@ -1,8 +1,8 @@
 <template>
-  <div class="practices-page">
-    <n-card :bordered="false" class="practices-card">
-      <n-h1 class="practices-title">练习</n-h1>
-      <div class="practices-toolbar">
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">练习</n-h1>
+      <div class="admin-toolbar">
         <n-select v-model:value="paperFilter" :options="paperOptions" clearable placeholder="选择试卷" style="width: 200px" @update:value="handleSearch" />
         <n-select v-model:value="submittedFilter" :options="submittedOptions" clearable placeholder="提交状态" style="width: 120px" @update:value="handleSearch" />
         <n-button type="primary" @click="handleStartPractice" :disabled="!paperFilter">开始练习</n-button>
@@ -460,33 +460,3 @@ onMounted(() => {
   fetchRecords()
 })
 </script>
-
-<style scoped>
-.practices-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-
-.practices-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-
-.practices-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-
-.practices-toolbar {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-</style>
-

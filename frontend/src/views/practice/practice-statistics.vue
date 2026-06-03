@@ -1,5 +1,5 @@
 <template>
-  <div class="practice-statistics-page">
+  <div class="admin-page">
     <n-card :bordered="false" class="overview-card" title="练习统计概览">
       <n-grid :cols="4" :x-gap="16">
         <n-grid-item>
@@ -241,12 +241,6 @@ function goToAllRecords() {
 </script>
 
 <style scoped>
-.practice-statistics-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-
 .overview-card {
   margin-bottom: 16px;
   box-shadow: 0 2px 12px #0001;

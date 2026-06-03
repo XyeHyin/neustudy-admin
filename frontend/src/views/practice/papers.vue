@@ -1,8 +1,8 @@
 <template>
-  <div class="papers-page">
-    <n-card :bordered="false" class="papers-card">
-      <n-h1 class="papers-title">试卷管理</n-h1>
-      <div class="papers-toolbar">
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">试卷管理</n-h1>
+      <div class="admin-toolbar">
         <n-input v-model:value="searchKeyword" placeholder="搜索试卷" clearable style="width: 200px" @input="handleSearch" />
         <n-select v-model:value="statusFilter" :options="statusOptions" clearable placeholder="状态" style="width: 120px" @update:value="handleSearch" />
         <n-button v-permission="'paper:create'" type="primary" @click="handleCreatePaper">新建试卷</n-button>
@@ -399,33 +399,3 @@ onMounted(() => {
 //   fetchPapers()
 // })
 </script>
-
-<style scoped>
-.papers-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-
-.papers-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-
-.papers-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-
-.papers-toolbar {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-</style>
-

@@ -1,10 +1,10 @@
 <template>
-  <div class="practice-records-page">
-    <n-card :bordered="false" class="practice-records-card">
-      <n-h1 class="practice-records-title">练习记录管理</n-h1>
+  <div class="admin-page admin-page-wide">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">练习记录管理</n-h1>
 
       <!-- 筛选工具栏 -->
-      <div class="practice-records-toolbar">
+      <div class="admin-toolbar">
         <n-select v-model:value="paperFilter" :options="paperOptions" clearable placeholder="选择试卷" style="width: 200px" @update:value="handleSearch" />
         <n-select v-model:value="submittedFilter" :options="submittedOptions" clearable placeholder="提交状态" style="width: 120px" @update:value="handleSearch" />
         <n-button type="primary" @click="handleSearch">
@@ -281,33 +281,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.practice-records-page {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-
-.practice-records-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-
-.practice-records-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-
-.practice-records-toolbar {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

@@ -1,8 +1,8 @@
 <template>
-  <div class="courses-page">
-    <n-card :bordered="false" class="courses-card">
-      <n-h1 class="courses-title">全部课程</n-h1>
-      <div class="courses-toolbar">
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">全部课程</n-h1>
+      <div class="admin-toolbar">
         <n-input v-model:value="searchKeyword" placeholder="搜索课程标题/描述" clearable style="width: 240px" @input="handleSearch" />
         <n-select v-model:value="subjectFilter" :options="subjectOptions" clearable placeholder="学科" style="width: 120px" @update:value="handleSearch" />
         <n-select v-model:value="gradeFilter" :options="gradeOptions" clearable placeholder="年级" style="width: 120px" @update:value="handleSearch" />
@@ -436,29 +436,3 @@ function handleBatchDelete() {
   })
 }
 </script>
-
-<style scoped>
-.courses-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-.courses-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-.courses-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-.courses-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-</style>
-

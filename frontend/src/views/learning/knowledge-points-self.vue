@@ -1,8 +1,8 @@
 <template>
-    <div class="knowledge-points-page">
-      <n-card :bordered="false" class="knowledge-points-card">
-        <n-h1 class="knowledge-points-title">我的知识点</n-h1>
-        <div class="knowledge-points-toolbar">
+    <div class="admin-page">
+      <n-card :bordered="false" class="admin-card">
+        <n-h1 class="admin-title">我的知识点</n-h1>
+        <div class="admin-toolbar">
           <n-input v-model:value="searchKeyword" placeholder="搜索知识点名称/描述" clearable style="width: 240px" @input="handleSearch" />
           <n-select v-model:value="courseFilter" :options="courseOptions" clearable placeholder="课程" style="width: 180px" @update:value="handleSearch" />
           <n-select v-model:value="difficultyFilter" :options="difficultyOptions" clearable placeholder="难度" style="width: 120px" @update:value="handleSearch" />
@@ -459,29 +459,3 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
     handleSearch()
   }
   </script>
-  
-  <style scoped>
-  .knowledge-points-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 0 24px;
-  }
-  .knowledge-points-card {
-    width: 100%;
-    box-shadow: 0 2px 12px #0001;
-    border-radius: 12px;
-    padding: 24px 32px;
-  }
-  .knowledge-points-title {
-    margin-bottom: 16px;
-    font-size: 2.2rem;
-    letter-spacing: 2px;
-  }
-  .knowledge-points-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 12px;
-  }
-  </style>
-  

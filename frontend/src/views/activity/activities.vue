@@ -1,7 +1,7 @@
 <template>
-  <div class="activities-page">
-    <n-card :bordered="false" class="activities-card">
-      <n-h1 class="activities-title">活动记录</n-h1>
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">活动记录</n-h1>
       <n-data-table
         ref="dataTableRef"
         :columns="columns"
@@ -84,22 +84,3 @@ onMounted(() => {
   fetchActivities()
 })
 </script>
-
-<style scoped>
-.activities-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px 0;
-}
-.activities-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-.activities-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-</style>

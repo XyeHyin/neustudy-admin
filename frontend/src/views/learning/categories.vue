@@ -1,8 +1,8 @@
 <template>
-  <div class="categories-page">
-    <n-card :bordered="false" class="categories-card">
-      <n-h1 class="categories-title">分类管理</n-h1>
-      <div class="categories-toolbar">
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">分类管理</n-h1>
+      <div class="admin-toolbar">
         <n-input v-model:value="searchKeyword" placeholder="搜索分类名称/描述" clearable style="width: 240px" @input="handleSearch" />
         <n-button v-permission="'category:create:all'" type="primary" @click="handleAddCategory">新增分类</n-button>
         <n-button v-permission="'category:delete:all'" type="error" :disabled="!selectedRowKeys.length" @click="handleBatchDelete">批量删除</n-button>
@@ -389,28 +389,3 @@ function handleBatchDelete() {
   })
 }
 </script>
-
-<style scoped>
-.categories-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-.categories-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-.categories-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-.categories-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-</style>

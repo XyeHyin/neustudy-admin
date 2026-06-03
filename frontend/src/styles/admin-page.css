@@ -1,0 +1,53 @@
+.admin-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 0 24px;
+}
+
+.admin-page-wide {
+  max-width: 1400px;
+}
+
+.admin-card {
+  width: 100%;
+  box-shadow: 0 2px 12px #0001;
+  border-radius: 12px;
+  padding: 24px 32px;
+}
+
+.admin-title {
+  margin-bottom: 16px;
+  font-size: 2.2rem;
+  letter-spacing: 2px;
+}
+
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.admin-pagination {
+  margin-top: 16px;
+  text-align: right;
+}
+
+.admin-card > .n-data-table {
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 20px 0 16px;
+  }
+
+  .admin-card {
+    padding: 18px 20px;
+  }
+
+  .admin-title {
+    font-size: 1.8rem;
+  }
+}

@@ -1,8 +1,8 @@
 <template>
-  <div class="permissions-page">
-    <n-card :bordered="false" class="permissions-card">
-      <n-h1 class="permissions-title">权限管理</n-h1>
-      <div class="permissions-toolbar" v-permission="'permission:list:all'">
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">权限管理</n-h1>
+      <div class="admin-toolbar" v-permission="'permission:list:all'">
         <n-input v-model:value="searchKeyword" placeholder="搜索权限标识/名称" clearable style="width: 240px" @input="handleSearch" />
         <n-select v-model:value="moduleFilter" :options="moduleOptions" clearable placeholder="模块" style="width: 140px" />
         <n-button :disabled="loadingPermissions" quaternary circle @click="treeMode = !treeMode" style="margin-left: 8px">
@@ -136,34 +136,6 @@ function handleSearch() {
 </script>
 
 <style scoped>
-.permissions-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px 0;
-}
-.permissions-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-.permissions-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-.permissions-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-.permissions-pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-  gap: 8px;
-}
 .permissions-tree {
   background: #fff;
   border-radius: 12px;

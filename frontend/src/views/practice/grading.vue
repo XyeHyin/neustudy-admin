@@ -1,7 +1,7 @@
-﻿<template>
-  <div class="grading-page">
-    <n-card :bordered="false" class="grading-card">
-      <n-h1 class="grading-title">判分管理</n-h1>
+<template>
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card">
+      <n-h1 class="admin-title">判分管理</n-h1>
       <n-space :size="16" style="margin-bottom: 16px">
         <!-- 新：试卷下拉 -->
         <n-select v-model:value="filterPaperId" :options="paperOptions" placeholder="请选择试卷" clearable style="width: 200px" @update:value="handleSearch" />
@@ -332,25 +332,3 @@ onMounted(() => {
   fetchGradingResults(buildResultParams(pagination.page, pagination.pageSize))
 })
 </script>
-
-<style scoped>
-.grading-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-
-.grading-card {
-  width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-
-.grading-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
-}
-</style>
-
