@@ -15,11 +15,17 @@ interface SystemStatusItem {
 interface BrowserConnection {
   downlink?: number
   effectiveType?: string
+  rtt?: number
+  saveData?: boolean
+  addEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void
+  removeEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void
 }
 
 interface BrowserBattery {
   level: number
   charging: boolean
+  addEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void
+  removeEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void
 }
 
 interface NavigatorWithStatus extends Navigator {
@@ -37,6 +43,22 @@ interface PerformanceWithMemory extends Performance {
   }
 }
 
+const HEALTHY_COLOR = '#18a058'
+const WARNING_COLOR = '#f0a020'
+const ERROR_COLOR = '#d03050'
+
+function getStatusItem(items: SystemStatusItem[], key: string) {
+  return items.find(status => status.key === key)
+}
+
+function setUnsupported(status: SystemStatusItem, detail: string) {
+  status.percentage = 0
+  status.status = 'warning'
+  status.statusText = '不可用'
+  status.color = WARNING_COLOR
+  status.detail = detail
+}
+
 export function useSystemStatus() {
   const weatherData = ref({
     city: '大连',
@@ -47,115 +69,143 @@ export function useSystemStatus() {
   const systemStatus = ref<SystemStatusItem[]>([
     {
       key: 'memory',
-      label: '内存使用率',
+      label: 'JS 内存',
       percentage: 0,
-      status: 'healthy',
-      statusText: '正常',
-      color: '#18a058',
-      detail: '正在获取...'
+      status: 'warning',
+      statusText: '获取中',
+      color: WARNING_COLOR,
+      detail: '正在读取浏览器内存信息'
     },
     {
       key: 'network',
       label: '网络状态',
-      percentage: 100,
-      status: 'healthy',
-      statusText: '正常',
-      color: '#18a058',
-      detail: '连接正常'
+      percentage: navigator.onLine ? 100 : 0,
+      status: navigator.onLine ? 'healthy' : 'error',
+      statusText: navigator.onLine ? '在线' : '离线',
+      color: navigator.onLine ? HEALTHY_COLOR : ERROR_COLOR,
+      detail: navigator.onLine ? '浏览器报告网络在线' : '浏览器报告网络离线'
+    },
+    {
+      key: 'battery',
+      label: '电池电量',
+      percentage: 0,
+      status: 'warning',
+      statusText: '获取中',
+      color: WARNING_COLOR,
+      detail: '正在读取电池信息'
     }
   ])
 
-  const getMemoryInfo = async () => {
+  const getMemoryInfo = () => {
+    const memoryStatus = getStatusItem(systemStatus.value, 'memory')
+    if (!memoryStatus) return
+
     try {
       const browserPerformance = performance as PerformanceWithMemory
-      if (browserPerformance.memory) {
-        const memory = browserPerformance.memory
-        const used = memory.usedJSHeapSize
-        const total = memory.totalJSHeapSize
-
-        const percentage = Math.round((used / total) * 100)
-        const usedMB = Math.round(used / 1048576)
-        const totalMB = Math.round(total / 1048576)
-
-        const memoryStatus = systemStatus.value.find(status => status.key === 'memory')
-        if (memoryStatus) {
-          memoryStatus.percentage = percentage
-          memoryStatus.detail = `已使用 ${usedMB}MB / ${totalMB}MB`
-          memoryStatus.status = percentage > 80 ? 'error' : percentage > 60 ? 'warning' : 'healthy'
-          memoryStatus.statusText = percentage > 80 ? '危险' : percentage > 60 ? '注意' : '正常'
-          memoryStatus.color = percentage > 80 ? '#d03050' : percentage > 60 ? '#f0a020' : '#18a058'
-        }
+      if (!browserPerformance.memory) {
+        setUnsupported(memoryStatus, '当前浏览器不提供 JS Heap 内存信息')
+        return
       }
+
+      const { usedJSHeapSize, jsHeapSizeLimit } = browserPerformance.memory
+      const percentage = Math.round((usedJSHeapSize / jsHeapSizeLimit) * 100)
+      const usedMB = Math.round(usedJSHeapSize / 1048576)
+      const limitMB = Math.round(jsHeapSizeLimit / 1048576)
+
+      memoryStatus.percentage = percentage
+      memoryStatus.detail = `JS Heap 已用 ${usedMB}MB / 上限 ${limitMB}MB`
+      memoryStatus.status = percentage > 80 ? 'error' : percentage > 60 ? 'warning' : 'healthy'
+      memoryStatus.statusText = percentage > 80 ? '偏高' : percentage > 60 ? '注意' : '正常'
+      memoryStatus.color = percentage > 80 ? ERROR_COLOR : percentage > 60 ? WARNING_COLOR : HEALTHY_COLOR
     } catch (error) {
       console.warn('获取内存信息失败:', error)
+      setUnsupported(memoryStatus, '读取内存信息失败')
     }
   }
 
   const getNetworkInfo = () => {
+    const networkStatus = getStatusItem(systemStatus.value, 'network')
+    if (!networkStatus) return
+
     try {
       const browserNavigator = navigator as NavigatorWithStatus
       const connection =
         browserNavigator.connection || browserNavigator.mozConnection || browserNavigator.webkitConnection
-      const networkStatus = systemStatus.value.find(status => status.key === 'network')
 
-      if (networkStatus) {
-        if (navigator.onLine) {
-          networkStatus.percentage = 100
-          networkStatus.status = 'healthy'
-          networkStatus.statusText = '在线'
-          networkStatus.color = '#18a058'
-
-          if (connection) {
-            const speed = connection.downlink || 0
-            const type = connection.effectiveType || 'unknown'
-            networkStatus.detail = `${type.toUpperCase()} - ${speed}Mbps`
-          } else {
-            networkStatus.detail = '网络连接正常'
-          }
-        } else {
-          networkStatus.percentage = 0
-          networkStatus.status = 'error'
-          networkStatus.statusText = '离线'
-          networkStatus.color = '#d03050'
-          networkStatus.detail = '网络连接断开'
-        }
+      if (!navigator.onLine) {
+        networkStatus.percentage = 0
+        networkStatus.status = 'error'
+        networkStatus.statusText = '离线'
+        networkStatus.color = ERROR_COLOR
+        networkStatus.detail = '浏览器报告网络连接断开'
+        return
       }
+
+      networkStatus.percentage = 100
+      networkStatus.status = 'healthy'
+      networkStatus.statusText = '在线'
+      networkStatus.color = HEALTHY_COLOR
+
+      if (!connection) {
+        networkStatus.detail = '浏览器报告网络在线，当前浏览器不提供带宽信息'
+        return
+      }
+
+      const parts = [
+        connection.effectiveType ? `类型 ${connection.effectiveType.toUpperCase()}` : null,
+        typeof connection.downlink === 'number' ? `下行约 ${connection.downlink}Mbps` : null,
+        typeof connection.rtt === 'number' ? `延迟约 ${connection.rtt}ms` : null,
+        connection.saveData ? '省流量模式' : null
+      ].filter(Boolean)
+
+      networkStatus.detail = parts.length ? parts.join(' · ') : '浏览器报告网络在线'
     } catch (error) {
       console.warn('获取网络信息失败:', error)
+      networkStatus.percentage = navigator.onLine ? 100 : 0
+      networkStatus.status = navigator.onLine ? 'warning' : 'error'
+      networkStatus.statusText = navigator.onLine ? '在线' : '离线'
+      networkStatus.color = navigator.onLine ? WARNING_COLOR : ERROR_COLOR
+      networkStatus.detail = '读取网络详细信息失败'
     }
   }
 
+  let batteryManager: BrowserBattery | null = null
+
+  const updateBatteryStatus = (battery: BrowserBattery) => {
+    const batteryStatus = getStatusItem(systemStatus.value, 'battery')
+    if (!batteryStatus) return
+
+    const percentage = Math.round(battery.level * 100)
+    batteryStatus.percentage = percentage
+    batteryStatus.status = percentage <= 15 && !battery.charging ? 'error' : percentage <= 30 && !battery.charging ? 'warning' : 'healthy'
+    batteryStatus.statusText = battery.charging ? '充电中' : percentage <= 15 ? '电量低' : '正常'
+    batteryStatus.color = batteryStatus.status === 'error' ? ERROR_COLOR : batteryStatus.status === 'warning' ? WARNING_COLOR : HEALTHY_COLOR
+    batteryStatus.detail = `${percentage}%${battery.charging ? ' · 正在充电' : ''}`
+  }
+
   const getBatteryInfo = async () => {
+    const batteryStatus = getStatusItem(systemStatus.value, 'battery')
+    if (!batteryStatus) return
+
     try {
       const browserNavigator = navigator as NavigatorWithStatus
-      if (browserNavigator.getBattery) {
-        const battery = await browserNavigator.getBattery()
-
-        const batteryStatus: SystemStatusItem = {
-          key: 'battery',
-          label: '电池电量',
-          percentage: Math.round(battery.level * 100),
-          status: battery.level > 0.2 ? 'healthy' : 'warning',
-          statusText: battery.charging ? '充电中' : battery.level > 0.2 ? '正常' : '低电量',
-          color: battery.level > 0.2 ? '#18a058' : '#f0a020',
-          detail: `${Math.round(battery.level * 100)}% ${battery.charging ? '(充电中)' : ''}`
-        }
-
-        const existingBatteryIndex = systemStatus.value.findIndex(status => status.key === 'battery')
-        if (existingBatteryIndex >= 0) {
-          systemStatus.value[existingBatteryIndex] = batteryStatus
-        } else {
-          systemStatus.value.push(batteryStatus)
-        }
+      if (!browserNavigator.getBattery) {
+        setUnsupported(batteryStatus, '当前浏览器不支持 Battery Status API')
+        return
       }
+
+      batteryManager = await browserNavigator.getBattery()
+      updateBatteryStatus(batteryManager)
     } catch (error) {
       console.warn('获取电池信息失败:', error)
+      setUnsupported(batteryStatus, '读取电池信息失败')
     }
   }
 
   const initSystemStatus = async () => {
-    await Promise.all([getMemoryInfo(), getBatteryInfo()])
+    getMemoryInfo()
     getNetworkInfo()
+    await getBatteryInfo()
   }
 
   let statusUpdateTimer: number | null = null
@@ -163,8 +213,17 @@ export function useSystemStatus() {
   const startStatusUpdates = () => {
     initSystemStatus()
 
+    const browserNavigator = navigator as NavigatorWithStatus
+    const connection =
+      browserNavigator.connection || browserNavigator.mozConnection || browserNavigator.webkitConnection
+    connection?.addEventListener?.('change', getNetworkInfo)
+
     statusUpdateTimer = window.setInterval(() => {
-      initSystemStatus()
+      getMemoryInfo()
+      getNetworkInfo()
+      if (batteryManager) {
+        updateBatteryStatus(batteryManager)
+      }
     }, 30000)
   }
 
@@ -173,6 +232,11 @@ export function useSystemStatus() {
       window.clearInterval(statusUpdateTimer)
       statusUpdateTimer = null
     }
+
+    const browserNavigator = navigator as NavigatorWithStatus
+    const connection =
+      browserNavigator.connection || browserNavigator.mozConnection || browserNavigator.webkitConnection
+    connection?.removeEventListener?.('change', getNetworkInfo)
   }
 
   return {

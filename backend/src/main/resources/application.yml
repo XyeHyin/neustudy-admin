@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:application-local.yml
   application:
     name: neustudy-admin-backend
   servlet:
