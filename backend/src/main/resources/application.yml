@@ -11,7 +11,7 @@ spring:
       static-locations: classpath:/static/,file:${APP_UPLOAD_DIR:uploads/}
   devtools:
     restart:
-      enabled: ${SPRING_DEVTOOLS_RESTART_ENABLED:true}
+      enabled: ${SPRING_DEVTOOLS_RESTART_ENABLED:false}
       additional-paths: src/main/java
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/neustudy-admin?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8}
@@ -19,6 +19,7 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:update}
     properties:
