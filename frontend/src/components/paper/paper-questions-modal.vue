@@ -90,6 +90,7 @@ import { useRequest } from 'vue-hooks-plus'
 import { getKnowledgePoints } from '@/api/knowledge-point'
 import { addQuestionsToPaper, getPaperQuestions, removePaperQuestion, updatePaperQuestions } from '@/api/paper'
 import { getQuestionPage } from '@/api/question'
+import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_TYPE_OPTIONS as typeOptions } from '@/constants/question'
 import { useAuthStore } from '@/store/auth'
 
 import type { KnowledgePointVO, PaperQuestionVO, QuestionVO } from '@/api/types'
@@ -128,22 +129,6 @@ const questionPagination = reactive({
 })
 
 const saving = ref(false)
-
-// 选项
-const typeOptions = [
-  { label: '单选题', value: 'SINGLE_CHOICE' },
-  { label: '多选题', value: 'MULTIPLE_CHOICE' },
-  { label: '判断题', value: 'TRUE_FALSE' },
-  { label: '填空题', value: 'FILL_BLANK' },
-  { label: '简答题', value: 'SHORT_ANSWER' },
-  { label: '论述题', value: 'ESSAY' }
-]
-
-const difficultyOptions = [
-  { label: '简单', value: 'EASY' },
-  { label: '中等', value: 'MEDIUM' },
-  { label: '困难', value: 'HARD' }
-]
 
 const knowledgePointOptions = computed(() =>
   knowledgePoints.value.map(kp => ({

@@ -66,6 +66,7 @@ import { NCheckbox, NCheckboxGroup, NRadio, NRadioGroup, useMessage } from 'naiv
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
 import QuestionOptionsEditor from './question-options-editor.vue'
+import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_TYPE_OPTIONS as typeOptions } from '@/constants/question'
 
 import type { FormInst } from 'naive-ui'
 import type { CreateQuestionDTO, Difficulty, KnowledgePointVO, QuestionType } from '@/api/types'
@@ -139,23 +140,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:show', 'submit'])
-
-// 题型选项
-const typeOptions = [
-  { label: '单选题', value: 'SINGLE_CHOICE' },
-  { label: '多选题', value: 'MULTIPLE_CHOICE' },
-  { label: '填空题', value: 'FILL_BLANK' },
-  { label: '简答题', value: 'SHORT_ANSWER' },
-  { label: '判断题', value: 'TRUE_FALSE' },
-  { label: '论述题', value: 'ESSAY' }
-]
-
-// 难度选项
-const difficultyOptions = [
-  { label: '简单', value: 'EASY' },
-  { label: '中等', value: 'MEDIUM' },
-  { label: '困难', value: 'HARD' }
-]
 
 // 知识点下拉选项
 const knowledgePointOptions = computed(() => [...props.knowledgePoints.filter(kp => kp.enabled).map(kp => ({ label: kp.name, value: kp.id }))])

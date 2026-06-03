@@ -57,6 +57,7 @@ import { computed, defineEmits, defineProps, onMounted, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { getKnowledgePoints } from '@/api/knowledge-point'
+import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_TYPE_OPTIONS as questionTypeOptions } from '@/constants/question'
 import { useAuthStore } from '@/store/auth'
 
 import type { KnowledgePointVO, SmartPaperDTO } from '@/api/types'
@@ -96,22 +97,6 @@ const rules = {
   totalQuestions: { required: true, type: 'number', message: '请输入总题数', trigger: 'blur' },
   timeLimit: { required: true, type: 'number', message: '请输入时间限制', trigger: 'blur' }
 }
-
-// 选项
-const difficultyOptions = [
-  { label: '简单', value: 'EASY' },
-  { label: '中等', value: 'MEDIUM' },
-  { label: '困难', value: 'HARD' }
-]
-
-const questionTypeOptions = [
-  { label: '单选题', value: 'SINGLE_CHOICE' },
-  { label: '多选题', value: 'MULTIPLE_CHOICE' },
-  { label: '判断题', value: 'TRUE_FALSE' },
-  { label: '填空题', value: 'FILL_BLANK' },
-  { label: '简答题', value: 'SHORT_ANSWER' },
-  { label: '论述题', value: 'ESSAY' }
-]
 
 const knowledgePointOptions = computed(() =>
   knowledgePoints.value.map(kp => ({
