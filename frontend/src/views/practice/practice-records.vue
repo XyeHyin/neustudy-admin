@@ -58,6 +58,7 @@ import { useRequest } from 'vue-hooks-plus'
 import { getPapers } from '@/api/paper'
 import { getPracticeResult, listPracticeRecords } from '@/api/practice'
 import PracticeDetailModal from '@/components/practice/practice-detail-modal.vue'
+import { formatDateTime } from '@/utils/datetime'
 
 import type { PaperListVO, PracticeRecordVO } from '@/api/types'
 
@@ -162,13 +163,13 @@ const columns = [
     title: '开始时间',
     key: 'startTime',
     width: 180,
-    render: (row: PracticeRecordVO) => new Date(row.startTime).toLocaleString()
+    render: (row: PracticeRecordVO) => formatDateTime(row.startTime)
   },
   {
     title: '提交时间',
     key: 'submitTime',
     width: 180,
-    render: (row: PracticeRecordVO) => (row.submitTime ? new Date(row.submitTime).toLocaleString() : '-')
+    render: (row: PracticeRecordVO) => formatDateTime(row.submitTime)
   },
   {
     title: '操作',

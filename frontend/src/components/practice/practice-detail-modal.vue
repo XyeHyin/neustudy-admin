@@ -11,9 +11,9 @@
             {{ record.submitted ? '已提交' : '未提交' }}
           </n-tag>
         </n-descriptions-item>
-        <n-descriptions-item label="开始时间">{{ new Date(record.startTime).toLocaleString() }}</n-descriptions-item>
+        <n-descriptions-item label="开始时间">{{ formatDateTime(record.startTime) }}</n-descriptions-item>
         <n-descriptions-item label="提交时间">
-          {{ record.submitTime ? new Date(record.submitTime).toLocaleString() : '-' }}
+          {{ formatDateTime(record.submitTime) }}
         </n-descriptions-item>
       </n-descriptions>
 
@@ -39,22 +39,20 @@
 </template>
 
 <script lang="ts" setup>
-// filepath: t:\codeSpace\java\idea\neustudy-admin-frontend\src\components\practice-detail-modal.vue
 import { useMessage } from 'naive-ui'
 import { reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import {
-  getAvailablePapersWithStats, // 新增引入
+  getAvailablePapersWithStats,
   getPracticeHistory,
   getPracticeResult
 } from '@/api/practice'
 import PracticeResultModal from '@/components/practice/practice-result-modal.vue'
 import { useAuthStore } from '@/store/auth'
+import { formatDateTime } from '@/utils/datetime'
 
 import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO } from '@/api/types'
-
-// 新增引入
 
 const props = defineProps<{
   show: boolean

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="courses-page">
     <n-card :bordered="false" class="courses-card">
       <n-h1 class="courses-title">全部课程</n-h1>
@@ -55,6 +55,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getCourseStatusText as getStatusText, getCourseStatusType as getStatusType } from '@/utils/status'
 import { NButton, NTag, useMessage, useModal } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
@@ -77,6 +78,7 @@ import {
 import CourseCreateModal from '@/components/course/course-create-modal.vue'
 import CourseDetailModal from '@/components/course/course-detail-modal.vue'
 import { useAuthStore } from '@/store/auth'
+import { formatDate } from '@/utils/datetime'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
 import type { CategoryFlatVO, CourseDetailVO, CourseVO, CreateCourseDTO, UpdateCourseDTO, UserVO } from '@/api/types'
@@ -189,32 +191,6 @@ onMounted(() => {
   }
 })
 
-function getStatusType(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'success'
-    case 'ARCHIVED':
-      return 'warning'
-    case 'COMPLETED':
-      return 'info' // 新增已完成类型
-    default:
-      return 'default'
-  }
-}
-
-function getStatusText(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return '已发布'
-    case 'ARCHIVED':
-      return '已归档'
-    case 'COMPLETED':
-      return '已完成' // 新增已完成文本
-    default:
-      return '草稿'
-  }
-}
-
 // 表格列定义
 const columns: DataTableColumns<CourseVO> = [
   { type: 'selection' },
@@ -241,7 +217,7 @@ const columns: DataTableColumns<CourseVO> = [
   { title: '总学时', key: 'totalHours', width: 80, render: (row: CourseVO) => `${row.totalHours || 0}h` },
   { title: '已完成', key: 'completedHours', width: 80, render: (row: CourseVO) => `${row.completedHours || 0}h` },
   { title: '创建者', key: 'teacherName', width: 120 },
-  { title: '创建时间', key: 'createTime', width: 120, render: (row: CourseVO) => row.createTime.slice(0, 10) },
+  { title: '创建时间', key: 'createTime', width: 120, render: (row: CourseVO) => formatDate(row.createTime) },
   {
     title: '操作',
     key: 'actions',

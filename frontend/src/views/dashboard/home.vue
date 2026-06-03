@@ -147,6 +147,7 @@ import { useRouter } from 'vue-router'
 import { getEventLogs } from '@/api/event-log'
 import { getDashboardDistribution, getDashboardStats, getDashboardTrend } from '@/api/statistics'
 import { Icon } from '@/components'
+import { useSystemStatus } from '@/composables/dashboard/useSystemStatus'
 import { useAuthStore } from '@/store/auth'
 
 const router = useRouter()
@@ -183,13 +184,8 @@ const getGreeting = computed(() => {
 })
 
 // 天气信息（模拟数据）
-const weatherData = ref({
-  city: '大连',
-  weather: '晴',
-  temperature: 22
-})
+const { weatherData, systemStatus, getNetworkInfo, startStatusUpdates, stopStatusUpdates } = useSystemStatus()
 
-// 统计数据
 const statsData = ref<any[]>([])
 const trendData = ref<{ categories: string[]; values: number[] }>({ categories: [], values: [] })
 const pieData = ref<any[]>([])
@@ -232,145 +228,6 @@ const quickActions = ref([
 
 // 最近活动
 const recentActivities = ref<any[]>([])
-
-// 系统状态
-const systemStatus = ref([
-  {
-    key: 'memory',
-    label: '内存使用率',
-    percentage: 0,
-    status: 'healthy',
-    statusText: '正常',
-    color: '#18a058',
-    detail: '正在获取...'
-  },
-  {
-    key: 'network',
-    label: '网络状态',
-    percentage: 100,
-    status: 'healthy',
-    statusText: '正常',
-    color: '#18a058',
-    detail: '连接正常'
-  }
-])
-
-// 获取内存信息
-const getMemoryInfo = async () => {
-  try {
-    if ('memory' in performance) {
-      const memory = (performance as any).memory
-      const used = memory.usedJSHeapSize
-      const total = memory.totalJSHeapSize
-      const limit = memory.jsHeapSizeLimit
-
-      const percentage = Math.round((used / total) * 100)
-      const usedMB = Math.round(used / 1048576)
-      const totalMB = Math.round(total / 1048576)
-
-      const memoryStatus = systemStatus.value.find(s => s.key === 'memory')
-      if (memoryStatus) {
-        memoryStatus.percentage = percentage
-        memoryStatus.detail = `已使用 ${usedMB}MB / ${totalMB}MB`
-        memoryStatus.status = percentage > 80 ? 'error' : percentage > 60 ? 'warning' : 'healthy'
-        memoryStatus.statusText = percentage > 80 ? '危险' : percentage > 60 ? '注意' : '正常'
-        memoryStatus.color = percentage > 80 ? '#d03050' : percentage > 60 ? '#f0a020' : '#18a058'
-      }
-    }
-  } catch (error) {
-    console.warn('获取内存信息失败:', error)
-  }
-}
-
-// 获取网络信息
-const getNetworkInfo = () => {
-  try {
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
-    const networkStatus = systemStatus.value.find(s => s.key === 'network')
-
-    if (networkStatus) {
-      if (navigator.onLine) {
-        networkStatus.percentage = 100
-        networkStatus.status = 'healthy'
-        networkStatus.statusText = '在线'
-        networkStatus.color = '#18a058'
-
-        if (connection) {
-          const speed = connection.downlink || 0
-          const type = connection.effectiveType || 'unknown'
-          networkStatus.detail = `${type.toUpperCase()} - ${speed}Mbps`
-        } else {
-          networkStatus.detail = '网络连接正常'
-        }
-      } else {
-        networkStatus.percentage = 0
-        networkStatus.status = 'error'
-        networkStatus.statusText = '离线'
-        networkStatus.color = '#d03050'
-        networkStatus.detail = '网络连接断开'
-      }
-    }
-  } catch (error) {
-    console.warn('获取网络信息失败:', error)
-  }
-}
-
-// 获取电池信息（如果支持）
-const getBatteryInfo = async () => {
-  try {
-    // @ts-ignore
-    if ('getBattery' in navigator) {
-      // @ts-ignore
-      const battery = await navigator.getBattery()
-
-      const batteryStatus = {
-        key: 'battery',
-        label: '电池电量',
-        percentage: Math.round(battery.level * 100),
-        status: battery.level > 0.2 ? 'healthy' : 'warning',
-        statusText: battery.charging ? '充电中' : battery.level > 0.2 ? '正常' : '低电量',
-        color: battery.level > 0.2 ? '#18a058' : '#f0a020',
-        detail: `${Math.round(battery.level * 100)}% ${battery.charging ? '(充电中)' : ''}`
-      }
-
-      // 如果已存在电池状态，更新它；否则添加
-      const existingBatteryIndex = systemStatus.value.findIndex(s => s.key === 'battery')
-      if (existingBatteryIndex >= 0) {
-        systemStatus.value[existingBatteryIndex] = batteryStatus
-      } else {
-        systemStatus.value.push(batteryStatus)
-      }
-    }
-  } catch (error) {
-    console.warn('获取电池信息失败:', error)
-  }
-}
-
-// 初始化系统状态
-const initSystemStatus = async () => {
-  await Promise.all([getMemoryInfo(), getBatteryInfo()])
-  getNetworkInfo()
-}
-
-// 定时更新系统状态
-let statusUpdateTimer: number | null = null
-
-const startStatusUpdates = () => {
-  // 立即获取一次
-  initSystemStatus()
-
-  // 每30秒更新一次
-  statusUpdateTimer = window.setInterval(() => {
-    initSystemStatus()
-  }, 30000)
-}
-
-const stopStatusUpdates = () => {
-  if (statusUpdateTimer) {
-    window.clearInterval(statusUpdateTimer)
-    statusUpdateTimer = null
-  }
-}
 
 // 图表相关
 const trendChartRef = ref()

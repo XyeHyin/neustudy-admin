@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="papers-page">
     <n-card :bordered="false" class="papers-card">
       <n-h1 class="papers-title">试卷管理</n-h1>
@@ -48,6 +48,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getPaperStatusText as getStatusText, getPaperStatusType as getStatusType } from '@/utils/status'
 import { NButton, NTag, useMessage, useModal } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
@@ -58,6 +59,7 @@ import PaperDetailModal from '@/components/paper/paper-detail-modal.vue'
 import PaperQuestionsModal from '@/components/paper/paper-questions-modal.vue'
 import SmartPaperModal from '@/components/paper/smart-paper-modal.vue'
 import { useAuthStore } from '@/store/auth'
+import { formatDateTime } from '@/utils/datetime'
 
 import type { DataTableColumns } from 'naive-ui'
 import type { PaperCreateDTO, PaperDetailVO, PaperListVO, PaperUpdateDTO, SmartPaperDTO } from '@/api/types'
@@ -125,7 +127,7 @@ const columns: DataTableColumns<PaperListVO> = [
     title: '创建时间',
     key: 'createTime',
     width: 180,
-    render: row => new Date(row.createTime).toLocaleString()
+    render: row => formatDateTime(row.createTime)
   },
   {
     title: '操作',
@@ -221,28 +223,6 @@ const { loading: smartGenerating, runAsync: runSmartGenerate } = useRequest(smar
 // 工具函数
 function rowKey(row: PaperListVO) {
   return row.id
-}
-
-function getStatusType(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'success'
-    case 'ARCHIVED':
-      return 'warning'
-    default:
-      return 'default'
-  }
-}
-
-function getStatusText(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return '已发布'
-    case 'ARCHIVED':
-      return '已归档'
-    default:
-      return '草稿'
-  }
 }
 
 // 事件处理

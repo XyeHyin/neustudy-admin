@@ -51,6 +51,7 @@ import { useMessage } from 'naive-ui'
 import { computed, nextTick, ref, watch } from 'vue'
 
 import { getKnowledgePoints } from '@/api/knowledge-point'
+import { todayKey } from '@/utils/datetime'
 
 import type { CourseVO, KnowledgePointVO } from '@/api/types'
 
@@ -235,7 +236,7 @@ function exportMindMapImg() {
   }
   const a = document.createElement('a')
   a.href = imgData
-  a.download = `知识点导图_${new Date().toISOString().slice(0, 10)}.png`
+  a.download = `知识点导图_${todayKey()}.png`
   a.click()
   message.success('图片已导出')
 }
@@ -293,7 +294,7 @@ async function doExport() {
       } else {
         fileName += '_全部课程'
       }
-      fileName += `_${new Date().toISOString().slice(0, 10)}.mm`
+      fileName += `_${todayKey()}.mm`
       a.download = fileName
       a.click()
       URL.revokeObjectURL(url)
@@ -321,7 +322,7 @@ async function doExport() {
     } else {
       fileName += '_全部课程'
     }
-    fileName += `_${new Date().toISOString().slice(0, 10)}.xlsx`
+    fileName += `_${todayKey()}.xlsx`
     a.download = fileName
     a.click()
     URL.revokeObjectURL(url)

@@ -71,6 +71,7 @@ import QuestionCreateModal from '@/components/question/question-create-modal.vue
 import QuestionDetailModal from '@/components/question/question-detail-modal.vue'
 import QuestionHistoryModal from '@/components/question/question-history-modal.vue'
 import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_ENABLED_OPTIONS as enabledOptions, QUESTION_TYPE_OPTIONS as typeOptions } from '@/constants/question'
+import { formatDate } from '@/utils/datetime'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
 import type { CreateQuestionDTO, Difficulty, KnowledgePointVO, QuestionDetailVO, QuestionType, QuestionVO, UpdateQuestionDTO } from '@/api/types'
@@ -240,7 +241,7 @@ const columns: DataTableColumns<QuestionVO> = [
       })
   },
   { title: '知识点', key: 'knowledgePoint', width: 150, render: (row: QuestionVO) => row.knowledgePoint?.name || '-' },
-  { title: '创建时间', key: 'createTime', width: 120, render: (row: QuestionVO) => row.createTime?.slice(0, 10) || '-' },
+  { title: '创建时间', key: 'createTime', width: 120, render: (row: QuestionVO) => formatDate(row.createTime) },
   {
     title: '操作',
     key: 'actions',

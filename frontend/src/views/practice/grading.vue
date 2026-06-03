@@ -52,6 +52,7 @@ import { useRequest } from 'vue-hooks-plus'
 import { getGradingResult, listGradingReview, listReviewedGradingResult, manualGrading } from '@/api/grading'
 import { getPapers } from '@/api/paper'
 import GradingReviewModal from '@/components/grading/grading-review-modal.vue'
+import { formatDateTime } from '@/utils/datetime'
 import { useAuthStore } from '@/store/auth'
 
 import type { GradingResultVO, GradingReviewVO, ManualGradingDTO, PaperListVO } from '@/api/types'
@@ -125,7 +126,7 @@ const reviewColumns = [
     title: 'AI判分时间',
     key: 'aiGradingTime',
     width: 180,
-    render: (row: GradingReviewVO) => new Date(row.aiGradingTime).toLocaleString()
+    render: (row: GradingReviewVO) => formatDateTime(row.aiGradingTime)
   },
   {
     title: '状态',
@@ -185,7 +186,7 @@ const resultColumns = [
     title: '复核时间',
     key: 'reviewTime',
     width: 180,
-    render: (row: GradingResultVO) => (row.reviewTime ? new Date(row.reviewTime).toLocaleString() : '-')
+    render: (row: GradingResultVO) => formatDateTime(row.reviewTime)
   }
 ]
 

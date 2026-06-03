@@ -40,6 +40,7 @@ import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
 import { batchDeleteCategories, createCategory, deleteCategory, getCategories, getCategoryTree, updateCategory } from '@/api/categories'
+import { formatDate } from '@/utils/datetime'
 import { useAuthStore } from '@/store/auth'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
@@ -137,8 +138,8 @@ const columns: DataTableColumns<CategoryFlatVO> = [
   { title: 'ID', key: 'id', width: 60 },
   { title: '分类名称', key: 'name', minWidth: 120 },
   { title: '描述', key: 'description', minWidth: 200 },
-  { title: '创建时间', key: 'createTime', minWidth: 120, render: (row: CategoryFlatVO) => row.createTime?.slice(0, 10) || '-' },
-  { title: '更新时间', key: 'updateTime', minWidth: 120, render: (row: CategoryFlatVO) => row.updateTime?.slice(0, 10) || '-' },
+  { title: '创建时间', key: 'createTime', minWidth: 120, render: (row: CategoryFlatVO) => formatDate(row.createTime) },
+  { title: '更新时间', key: 'updateTime', minWidth: 120, render: (row: CategoryFlatVO) => formatDate(row.updateTime) },
   {
     title: '操作',
     key: 'actions',

@@ -85,6 +85,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getCourseStatusText as getStatusText, getCourseStatusType as getStatusType } from '@/utils/status'
 import { useMessage } from 'naive-ui'
 import { computed, defineEmits, defineProps, onMounted, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
@@ -281,34 +282,6 @@ const handleRemove = () => {
   form.value.coverImage = ''
   coverImageList.value = []
   return true
-}
-
-// 获取课程状态类型
-function getStatusType(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'success'
-    case 'ARCHIVED':
-      return 'warning'
-    case 'COMPLETED':
-      return 'info'
-    default:
-      return 'default'
-  }
-}
-
-// 获取课程状态文本
-function getStatusText(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return '已发布'
-    case 'ARCHIVED':
-      return '已归档'
-    case 'COMPLETED':
-      return '已完成'
-    default:
-      return '草稿'
-  }
 }
 
 // 关闭弹窗

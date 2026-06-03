@@ -81,6 +81,7 @@ import QuestionDetailModal from '@/components/question/question-detail-modal.vue
 import QuestionHistoryModal from '@/components/question/question-history-modal.vue'
 import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_ENABLED_OPTIONS as enabledOptions, QUESTION_TYPE_OPTIONS as typeOptions } from '@/constants/question'
 import { useAuthStore } from '@/store/auth'
+import { formatDate } from '@/utils/datetime'
 
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
 import type { CreateQuestionDTO, Difficulty, KnowledgePointVO, QuestionDetailVO, QuestionType, QuestionVO, UpdateQuestionDTO } from '@/api/types'
@@ -266,7 +267,7 @@ const columns: DataTableColumns<QuestionVO> = [
         'onUpdate:value': (v: boolean) => handleToggleStatus({ id: row.id, enabled: v })
       })
   },
-  { title: '创建时间', key: 'createTime', width: 120, render: row => row.createTime?.slice(0, 10) || '-' },
+  { title: '创建时间', key: 'createTime', width: 120, render: row => formatDate(row.createTime) },
   {
     title: '操作',
     key: 'actions',

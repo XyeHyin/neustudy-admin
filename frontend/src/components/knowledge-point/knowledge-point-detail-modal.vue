@@ -48,6 +48,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatusType } from '@/utils/status'
 import { useMessage } from 'naive-ui'
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
@@ -103,16 +104,6 @@ const difficultyOptions = [
 ]
 
 const message = useMessage()
-
-// 获取状态标签类型
-function getStatusType(enabled: boolean) {
-  return enabled ? 'success' : 'warning'
-}
-
-// 获取状态文本
-function getStatusText(enabled: boolean) {
-  return enabled ? '启用' : '禁用'
-}
 
 // 关闭弹窗
 function handleCancel() {

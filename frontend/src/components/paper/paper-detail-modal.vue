@@ -78,6 +78,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getPaperStatusText as getStatusText, getPaperStatusType as getStatusType } from '@/utils/status'
 import { useMessage } from 'naive-ui'
 import { computed, defineEmits, defineProps, ref, watch } from 'vue'
 
@@ -122,30 +123,6 @@ const rules = {
 }
 
 const message = useMessage()
-
-// 获取状态类型
-function getStatusType(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'success'
-    case 'ARCHIVED':
-      return 'warning'
-    default:
-      return 'default'
-  }
-}
-
-// 获取状态文本
-function getStatusText(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return '已发布'
-    case 'ARCHIVED':
-      return '已归档'
-    default:
-      return '草稿'
-  }
-}
 
 // 获取题目类型颜色
 function getQuestionTypeColor(type: string) {

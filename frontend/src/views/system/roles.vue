@@ -34,6 +34,7 @@ import { getPermissions } from '@/api/permissions'
 import { assignRolePermissions, batchDeleteRoles, createRole, deleteRole, getRoleDetail, getRoles, updateRole } from '@/api/role'
 import { getCurrentUserDetail } from '@/api/user'
 import RoleCreateModal from '@/components/role/role-create-modal.vue'
+import { formatDate } from '@/utils/datetime'
 import { buildPermissionTree } from '@/composables'
 import { useAuthStore } from '@/store/auth'
 
@@ -128,8 +129,8 @@ const columns: DataTableColumns<RoleVO> = [
   { title: 'ID', key: 'id', width: 60 },
   { title: '角色名称', key: 'name', minWidth: 120 },
   { title: '描述', key: 'description', minWidth: 200 },
-  { title: '创建时间', key: 'createTime', minWidth: 120, render: (row: RoleVO) => row.createTime?.slice(0, 10) || '-' },
-  { title: '更新时间', key: 'updateTime', minWidth: 120, render: (row: RoleVO) => row.updateTime?.slice(0, 10) || '-' },
+  { title: '创建时间', key: 'createTime', minWidth: 120, render: (row: RoleVO) => formatDate(row.createTime) },
+  { title: '更新时间', key: 'updateTime', minWidth: 120, render: (row: RoleVO) => formatDate(row.updateTime) },
   {
     title: '操作',
     key: 'actions',

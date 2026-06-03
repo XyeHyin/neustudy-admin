@@ -77,6 +77,7 @@ import { useRouter } from 'vue-router'
 
 import { getAvailablePapersWithStats, listPracticeRecords } from '@/api/practice'
 import { useAuthStore } from '@/store/auth'
+import { formatDateTime } from '@/utils/datetime'
 
 import type { PracticePaperStatVO, PracticeRecordVO } from '@/api/types'
 
@@ -162,7 +163,7 @@ const recordColumns = computed(() => [
     title: '练习时间',
     key: 'startTime',
     width: 160,
-    render: (row: PracticeRecordVO) => new Date(row.startTime).toLocaleString()
+    render: (row: PracticeRecordVO) => formatDateTime(row.startTime)
   }
 ])
 

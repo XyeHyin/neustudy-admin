@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="knowledge-points-page">
       <n-card :bordered="false" class="knowledge-points-card">
         <n-h1 class="knowledge-points-title">我的知识点</n-h1>
@@ -60,6 +60,7 @@
   </template>
   
   <script lang="ts" setup>
+import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatusType } from '@/utils/status'
   import { NButton, NSwitch, NTag, useMessage, useModal } from 'naive-ui'
   import { computed, h, onMounted, reactive, ref } from 'vue'
   import { useRequest } from 'vue-hooks-plus'
@@ -73,10 +74,10 @@
     createKnowledgePoint,
     deleteKnowledgePoint,
     exportKnowledgePoints,
-    exportMyKnowledgePoints, // 新增
+    exportMyKnowledgePoints,
     getKnowledgePointDetail,
     getKnowledgePointPage,
-    getMyKnowledgePointPage, // 新增
+    getMyKnowledgePointPage,
     importKnowledgePoints,
     updateKnowledgePoint,
     updateKnowledgePointStatus
@@ -86,6 +87,7 @@
   import KnowledgePointExportModal from '@/components/knowledge-point/knowledge-point-export-modal.vue'
   import KnowledgePointImportModal from '@/components/knowledge-point/knowledge-point-import-modal.vue'
   import { useAuthStore } from '@/store/auth'
+  import { formatDate, todayKey } from '@/utils/datetime'
   
   import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
   import type { CourseVO, CreateKnowledgePointDTO, KnowledgePointDetailVO, KnowledgePointVO, UpdateKnowledgePointDTO, UserVO } from '@/api/types'
@@ -209,13 +211,6 @@
     }
   }
   
-  function getStatusType(enabled: boolean) {
-    return enabled ? 'success' : 'warning'
-  }
-  
-  function getStatusText(enabled: boolean) {
-    return enabled ? '启用' : '禁用'
-  }
   
   // 表格列定义
   const columns: DataTableColumns<KnowledgePointVO> = [
@@ -284,7 +279,7 @@
         }
       }
     },
-    { title: '创建时间', key: 'createTime', width: 120, render: (row: KnowledgePointVO) => row.createTime.slice(0, 10) },
+    { title: '创建时间', key: 'createTime', width: 120, render: (row: KnowledgePointVO) => formatDate(row.createTime) },
     {
       title: '操作',
       key: 'actions',
@@ -483,7 +478,7 @@
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `知识点列表_${new Date().toISOString().slice(0, 10)}.xlsx`
+      a.download = `知识点列表_${todayKey()}.xlsx`
       a.click()
       window.URL.revokeObjectURL(url)
       message.success('导出成功')

@@ -168,6 +168,7 @@ import { getKnowledgePoints } from '@/api/knowledge-point'
 import { batchCreateQuestions } from '@/api/question'
 import { Icon } from '@/components'
 import { QUESTION_DIFFICULTY_OPTIONS as difficultyOptions, QUESTION_TYPE_OPTIONS as typeOptions } from '@/constants/question'
+import { todayKey } from '@/utils/datetime'
 
 import type { DataTableColumns, DataTableRowKey, FormRules } from 'naive-ui'
 import type { AIGeneratedQuestionVO, AIGenerateQuestionDTO, CreateQuestionDTO, Difficulty, KnowledgePointVO, QuestionType } from '@/api/types'
@@ -441,7 +442,7 @@ function handleExportQuestions() {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `AI生成题目_${new Date().toISOString().slice(0, 10)}.csv`
+    link.download = `AI生成题目_${todayKey()}.csv`
     link.click()
     window.URL.revokeObjectURL(url)
 

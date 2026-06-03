@@ -56,6 +56,8 @@
 <script lang="ts" setup>
 import { defineEmits, defineProps } from 'vue'
 
+import { formatDateTime } from '@/utils/datetime'
+
 import type { PracticeResultVO } from '@/api/types'
 
 const props = defineProps<{
@@ -101,7 +103,7 @@ function getQuestionTypeText(type: string) {
 }
 
 function formatTime(timeStr: string) {
-  return new Date(timeStr).toLocaleString()
+  return formatDateTime(timeStr)
 }
 
 function handleClose() {

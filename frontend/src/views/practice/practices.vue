@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="practices-page">
     <n-card :bordered="false" class="practices-card">
       <n-h1 class="practices-title">练习</n-h1>
@@ -53,6 +53,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getPaperStatusText as getStatusText, getPaperStatusType as getStatusType } from '@/utils/status'
 import { NButton, NIcon, NProgress, NTag, useMessage } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
@@ -62,6 +63,7 @@ import PaperAnalysisModal from '@/components/paper/paper-analysis-modal.vue'
 import PracticeResultModal from '@/components/practice/practice-result-modal.vue'
 import PracticeSessionModal from '@/components/practice/practice-session-modal.vue'
 import { useAuthStore } from '@/store/auth'
+import { formatDateTime } from '@/utils/datetime'
 
 import type { PracticePaperStatVO, PracticeRecordVO, PracticeResultVO, PracticeStartDTO, PracticeSubmitDTO } from '@/api/types'
 
@@ -253,7 +255,7 @@ const recordColumns = [
     title: '开始时间',
     key: 'startTime',
     width: 180,
-    render: (row: PracticeRecordVO) => new Date(row.startTime).toLocaleString()
+    render: (row: PracticeRecordVO) => formatDateTime(row.startTime)
   },
   {
     title: '操作',
@@ -319,28 +321,6 @@ function paperRowKey(row: PracticePaperStatVO) {
 
 function recordRowKey(row: PracticeRecordVO) {
   return row.practiceSessionId
-}
-
-function getStatusType(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'success'
-    case 'ARCHIVED':
-      return 'warning'
-    default:
-      return 'default'
-  }
-}
-
-function getStatusText(status: string) {
-  switch (status) {
-    case 'PUBLISHED':
-      return '已发布'
-    case 'ARCHIVED':
-      return '已归档'
-    default:
-      return '草稿'
-  }
 }
 
 // 事件处理

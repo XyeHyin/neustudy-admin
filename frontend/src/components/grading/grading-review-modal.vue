@@ -54,6 +54,8 @@
 import { useMessage } from 'naive-ui'
 import { defineEmits, defineProps, ref, watch } from 'vue'
 
+import { formatDateTime } from '@/utils/datetime'
+
 import type { GradingReviewVO, ManualGradingDTO } from '@/api/types'
 
 const props = defineProps<{
@@ -86,7 +88,7 @@ const rules = {
 
 // 工具函数
 function formatTime(timeStr: string) {
-  return new Date(timeStr).toLocaleString()
+  return formatDateTime(timeStr)
 }
 
 // 事件处理

@@ -52,6 +52,7 @@ import { batchDeleteUsers, createUser, deleteUser, getUserDetail, getUserPage, g
 import UserCreateModal from '@/components/user/user-create-modal.vue'
 import userDetailModal from '@/components/user/user-detail-modal.vue'
 import { useAuthStore } from '@/store/auth'
+import { formatDateTime } from '@/utils/datetime'
 
 import type { DataTableColumns, DataTableRowKey, SelectOption, UploadCustomRequestOptions } from 'naive-ui'
 import type { CreateUserDTO, PermissionVO, RoleVO, UpdateUserDTO, UserDetailVO, UserVO } from '@/api/types'
@@ -310,7 +311,7 @@ const columns: DataTableColumns<UserVO> = [
     key: 'createTime',
     minWidth: 120,
     render: (row: UserVO) => {
-      return new Date(row.createTime).toLocaleString()
+      return formatDateTime(row.createTime)
     }
   },
   {
@@ -318,7 +319,7 @@ const columns: DataTableColumns<UserVO> = [
     key: 'updateTime',
     minWidth: 120,
     render: (row: UserVO) => {
-      return new Date(row.updateTime).toLocaleString()
+      return formatDateTime(row.updateTime)
     }
   },
   {
