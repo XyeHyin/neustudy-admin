@@ -1,91 +1,83 @@
 <template>
-  <!-- 导出知识点弹窗 -->
-  <n-modal :show="show" title="导出知识点" preset="dialog" style="width: 500px" @update:show="emit('update:show', $event)">
-    <n-form label-width="80px">
-      <!-- 课程选择 -->
+  <n-modal :show="show" title="导出知识点" preset="dialog" style="width: 560px" @update:show="emit('update:show', $event)">
+    <n-form label-width="88px">
       <n-form-item label="选择课程">
         <n-select v-model:value="selectedCourseId" :options="[{ label: '全部课程', value: null }, ...courseOptions]" placeholder="请选择课程" show-search filterable />
       </n-form-item>
-      <!-- 知识点状态选择 -->
       <n-form-item label="知识点状态">
         <n-select v-model:value="selectedEnabled" :options="enabledOptions" placeholder="请选择状态" />
       </n-form-item>
-      <!-- 难度等级选择 -->
       <n-form-item label="难度等级">
         <n-select v-model:value="selectedDifficulty" :options="difficultyOptions" placeholder="请选择难度" />
       </n-form-item>
-      <!-- 导出格式选择 -->
       <n-form-item label="导出格式">
         <n-select v-model:value="exportFormat" :options="exportFormatOptions" />
       </n-form-item>
       <n-space justify="end" style="width: 100%; margin-top: 16px">
         <n-button @click="emitClose">取消</n-button>
+        <n-button v-if="isMindMapFormat" secondary @click="showMindMap">预览思维导图</n-button>
         <n-button type="primary" :loading="loading" @click="doExport">导出</n-button>
-        <!-- 仅当选择思维导图格式时显示预览按钮 -->
-        <n-button v-if="exportFormat === 'mm'" @click="showMindMap">预览思维导图</n-button>
       </n-space>
     </n-form>
-    <!-- 思维导图预览弹窗 -->
-    <n-modal v-model:show="mindMapVisible" title="思维导图预览" style="width: 900px">
-      <template #default>
-        <div style="display: flex; flex-direction: column; align-items: stretch">
-          <div id="jsmind_container" style="width: 800px; height: 600px; border: 1px solid #ccc; background-color: #2c2c32"></div>
-          <n-space justify="end" style="margin-top: 16px">
-            <!-- 关闭按钮 -->
-            <n-button @click="mindMapVisible = false">关闭</n-button>
-          </n-space>
-        </div>
+
+    <n-modal v-model:show="mindMapVisible" title="思维导图预览" preset="card" style="width: min(1080px, calc(100vw - 32px))">
+      <div class="mindmap-preview">
+        <svg ref="mindMapSvgRef" class="mindmap-preview__svg" />
+      </div>
+      <template #footer>
+        <n-space justify="end">
+          <n-button @click="mindMapVisible = false">关闭</n-button>
+          <n-button secondary @click="downloadMindMap('svg')">导出 SVG</n-button>
+          <n-button type="primary" @click="downloadMindMap('png')">导出 PNG</n-button>
+        </n-space>
       </template>
     </n-modal>
   </n-modal>
 </template>
 
 <script lang="ts" setup>
-// 引入 jsMind 及其截图插件和样式
-import jsMind from 'jsmind'
-
-import 'jsmind/js/jsmind.screenshot.js'
-import 'jsmind/style/jsmind.css'
-
+import { Transformer } from 'markmap-lib'
+import { Markmap } from 'markmap-view'
 import { useMessage } from 'naive-ui'
 import { computed, nextTick, ref, watch } from 'vue'
 
-import { getKnowledgePoints } from '@/api/knowledge-point'
+import { exportKnowledgePoints, exportMyKnowledgePoints, getKnowledgePoints, getMyKnowledgePoints } from '@/api/knowledge-point'
 import { DIFFICULTY_FILTER_OPTIONS as difficultyOptions, ENABLED_FILTER_OPTIONS as enabledOptions } from '@/constants/options'
+import { useAuthStore } from '@/store/auth'
 import { todayKey } from '@/utils/datetime'
 
 import type { CourseVO, KnowledgePointVO } from '@/api/types'
 
-// 组件属性和事件定义
+type MindMapExportFormat = 'markdown' | 'svg' | 'png'
+
 const props = defineProps<{ show: boolean; data: CourseVO[] }>()
 const emit = defineEmits<{ (e: 'update:show', v: boolean): void; (e: 'success'): void }>()
 
-// 消息提示实例
 const message = useMessage()
-// 导出按钮 loading 状态
+const auth = useAuthStore()
+const transformer = new Transformer()
+
 const loading = ref(false)
-// 选中的课程ID
 const selectedCourseId = ref<number | null>(null)
-// 选中的知识点启用状态
 const selectedEnabled = ref<boolean | null>(null)
-// 选中的难度等级
 const selectedDifficulty = ref<string | null>(null)
-// 导出格式（xlsx 或 mm）
-const exportFormat = ref('xlsx')
-// 导出格式选项
+const exportFormat = ref<'xlsx' | MindMapExportFormat>('xlsx')
+const mindMapVisible = ref(false)
+const mindMapSvgRef = ref<SVGSVGElement | null>(null)
+const latestMindMapMarkdown = ref('')
+let markmap: Markmap | null = null
+
 const exportFormatOptions = [
   { label: 'Excel (.xlsx)', value: 'xlsx' },
-  { label: '思维导图 (.mm)', value: 'mm' }
+  { label: '思维导图 Markdown (.md)', value: 'markdown' },
+  { label: '思维导图 SVG 图片 (.svg)', value: 'svg' },
+  { label: '思维导图 PNG 图片 (.png)', value: 'png' }
 ]
-// 思维导图弹窗显示状态
-const mindMapVisible = ref(false)
-// jsMind 实例
-let jm: any = null
 
-// 课程下拉选项（由 props.data 计算得出）
 const courseOptions = computed(() => props.data.map(course => ({ label: course.name, value: course.id })))
+const isMindMapFormat = computed(() => ['markdown', 'svg', 'png'].includes(exportFormat.value))
+const canListAllKnowledgePoints = computed(() => auth.hasPermission('knowledge_point:list:all'))
 
-// 监听弹窗显示，重置筛选条件
 watch(
   () => props.show,
   v => {
@@ -94,209 +86,240 @@ watch(
       selectedEnabled.value = null
       selectedDifficulty.value = null
       exportFormat.value = 'xlsx'
+      latestMindMapMarkdown.value = ''
     }
   }
 )
 
-// 关闭弹窗
 function emitClose() {
   emit('update:show', false)
 }
 
-// 构建知识点树结构（按课程分组）
-function buildTree(flatList: KnowledgePointVO[], courseMap: Record<number, string>) {
-  // 按课程分组
-  const courseGroups: Record<number, KnowledgePointVO[]> = {}
-  flatList.forEach((kp: KnowledgePointVO) => {
-    // 显式声明类型
-    if (!courseGroups[kp.courseId]) courseGroups[kp.courseId] = []
-    courseGroups[kp.courseId].push(kp)
-  })
-  // 构造树
-  return Object.entries(courseGroups).map(([courseId, kps]) => ({
-    name: courseMap[Number(courseId)] || `课程${courseId}`,
-    children: kps.map((kp: KnowledgePointVO) => ({
-      // 显式声明类型
-      name: kp.name
-    }))
-  }))
+function sanitizeFileName(value: string) {
+  return value.replace(/[\\/:*?"<>|]/g, '_')
 }
 
-// XML 字符串转义
-function escapeXML(str: string) {
-  return str.replace(
-    /[<>&'"]/g,
-    c =>
-      ({
-        '<': '&lt;',
-        '>': '&gt;',
-        '&': '&amp;',
-        "'": '&apos;',
-        '"': '&quot;'
-      })[c] || c
-  )
-}
-
-// 构建 jsMind 数据结构
-function buildJsMindData(tree: any[], rootText: string) {
-  // 转为 jsmind node_array 格式
-  const data: any[] = [{ id: 'root', isroot: true, topic: rootText }]
-  let id = 1
-  tree.forEach(course => {
-    const courseId = `c${id++}`
-    data.push({ id: courseId, parentid: 'root', topic: course.name })
-    course.children.forEach((kp: KnowledgePointVO) => {
-      data.push({ id: `k${id++}`, parentid: courseId, topic: kp.name })
-    })
-  })
-  return {
-    meta: { name: rootText, author: 'XyeHyin', version: '1.0' },
-    format: 'node_array',
-    data
+function buildFileName(extension: string) {
+  let fileName = '知识点导出'
+  if (selectedCourseId.value) {
+    const course = props.data.find(c => c.id === selectedCourseId.value)
+    if (course) fileName += `_${course.name}`
+  } else {
+    fileName += '_全部课程'
   }
+  return `${sanitizeFileName(fileName)}_${todayKey()}.${extension}`
 }
 
-// 预览思维导图
-async function showMindMap() {
-  // 获取知识点并筛选
-  const res = await getKnowledgePoints()
+async function fetchFilteredKnowledgePoints() {
+  const res = canListAllKnowledgePoints.value ? await getKnowledgePoints() : await getMyKnowledgePoints()
   if (!res || res.code !== 200) {
-    message.error(res?.message || '获取知识点失败')
-    return
+    throw new Error(res?.message || '获取知识点失败')
   }
+
   let list: KnowledgePointVO[] = res.data || []
   if (selectedCourseId.value) list = list.filter(kp => kp.courseId === selectedCourseId.value)
   if (selectedEnabled.value !== null) list = list.filter(kp => kp.enabled === selectedEnabled.value)
   if (selectedDifficulty.value) list = list.filter(kp => kp.difficulty === selectedDifficulty.value)
-  const courseMap: Record<number, string> = {}
-  props.data.forEach(c => {
-    courseMap[c.id] = c.name
+
+  return list.sort((a, b) => {
+    if (a.courseId !== b.courseId) return a.courseId - b.courseId
+    return (a.orderNum || 0) - (b.orderNum || 0)
   })
-  const tree = buildTree(list, courseMap)
+}
+
+function buildCourseMap() {
+  const courseMap: Record<number, string> = {}
+  props.data.forEach(course => {
+    courseMap[course.id] = course.name
+  })
+  return courseMap
+}
+
+function buildMindMapMarkdown(list: KnowledgePointVO[]) {
+  const courseMap = buildCourseMap()
   const rootName = selectedCourseId.value ? courseMap[selectedCourseId.value] || '知识点' : '全部课程知识点'
-  // 渲染 jsmind
+  const grouped = new Map<number, KnowledgePointVO[]>()
+
+  list.forEach(item => {
+    if (!grouped.has(item.courseId)) grouped.set(item.courseId, [])
+    grouped.get(item.courseId)?.push(item)
+  })
+
+  const lines = [`# ${rootName}`]
+  grouped.forEach((items, courseId) => {
+    lines.push(`## ${courseMap[courseId] || `课程${courseId}`}`)
+    items.forEach(item => {
+      lines.push(`### ${item.name}`)
+      lines.push(`- 难度：${item.difficulty || '-'}`)
+      lines.push(`- 状态：${item.enabled ? '启用' : '禁用'}`)
+      if (item.description) lines.push(`- 描述：${item.description}`)
+      if (item.keywords) lines.push(`- 关键词：${item.keywords}`)
+    })
+  })
+
+  return lines.join('\n')
+}
+
+async function renderMindMap(markdown: string) {
   mindMapVisible.value = true
   await nextTick()
-  setTimeout(() => {
-    const container = document.getElementById('jsmind_container')
-    if (!container) {
-      message.error('思维导图容器未挂载，请重试')
-      return
-    }
-    // 如果旧实例有 destroy 方法则调用，否则直接清空容器
-    if (jm && typeof jm.destroy === 'function') {
-      jm.destroy()
-    }
-    container.innerHTML = '' // 清空上次渲染的画布
-    jm = new jsMind({
-      container: 'jsmind_container',
-      editable: false,
-      theme: 'primary'
-    })
-    jm.show(buildJsMindData(tree, rootName))
-    // 兼容性处理：确保 get_snapshot 方法存在
-    {
-      // 先尝试取 import jsMind 的 prototype，再 fallback 到全局 window.jsMind
-      const proto = (jsMind as any).prototype || (window as any).jsMind?.prototype
-      if (typeof jm.get_snapshot !== 'function' && typeof proto?.get_snapshot === 'function') {
-        jm.get_snapshot = proto.get_snapshot.bind(jm)
-      }
-    }
-  }, 500) // 延长等待时间
-}
 
-// 生成 FreeMind 格式的 XML
-function generateFreeMindXML(tree: any[], rootText: string) {
-  function nodeToXML(node: any): string {
-    if (!node.children || node.children.length === 0) {
-      return `<node TEXT="${escapeXML(node.name)}"/>`
-    }
-    return `<node TEXT="${escapeXML(node.name)}">${node.children.map(nodeToXML).join('')}</node>`
+  const svg = mindMapSvgRef.value
+  if (!svg) {
+    throw new Error('思维导图容器未挂载，请重试')
   }
-  return `<?xml version="1.0" encoding="UTF-8"?><map version="1.0.1"><node TEXT="${escapeXML(rootText)}">${tree.map(nodeToXML).join('')}</node></map>`
+
+  svg.innerHTML = ''
+  svg.setAttribute('viewBox', '0 0 1200 760')
+  svg.setAttribute('width', '1200')
+  svg.setAttribute('height', '760')
+
+  const { root } = transformer.transform(markdown)
+  markmap = Markmap.create(svg, {
+    autoFit: true,
+    duration: 220,
+    paddingX: 18
+  }, root)
+  await nextTick()
+  markmap.fit()
 }
 
-// 导出主逻辑（支持 Excel 和思维导图）
+async function prepareMindMap() {
+  const list = await fetchFilteredKnowledgePoints()
+  if (!list.length) {
+    throw new Error('没有符合条件的知识点可导出')
+  }
+  latestMindMapMarkdown.value = buildMindMapMarkdown(list)
+  return latestMindMapMarkdown.value
+}
+
+async function showMindMap() {
+  loading.value = true
+  try {
+    const markdown = await prepareMindMap()
+    await renderMindMap(markdown)
+  } catch (error: any) {
+    message.error(error.message || '预览思维导图失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function serializeSvg() {
+  const svg = mindMapSvgRef.value
+  if (!svg) {
+    throw new Error('请先预览思维导图')
+  }
+  const cloned = svg.cloneNode(true) as SVGSVGElement
+  cloned.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  cloned.setAttribute('width', '1600')
+  cloned.setAttribute('height', '1000')
+  return new XMLSerializer().serializeToString(cloned)
+}
+
+async function downloadSvg() {
+  const svgText = serializeSvg()
+  downloadBlob(new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' }), buildFileName('svg'))
+}
+
+async function downloadPng() {
+  const svgText = serializeSvg()
+  const image = new Image()
+  const svgUrl = URL.createObjectURL(new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' }))
+  image.src = svgUrl
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve()
+    image.onerror = () => reject(new Error('思维导图图片生成失败'))
+  })
+
+  const canvas = document.createElement('canvas')
+  canvas.width = 1600
+  canvas.height = 1000
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('浏览器不支持图片导出')
+  context.fillStyle = '#ffffff'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.drawImage(image, 0, 0, canvas.width, canvas.height)
+  URL.revokeObjectURL(svgUrl)
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(result => (result ? resolve(result) : reject(new Error('思维导图图片生成失败'))), 'image/png')
+  })
+  downloadBlob(blob, buildFileName('png'))
+}
+
+async function downloadMindMap(format: MindMapExportFormat) {
+  try {
+    if (format === 'markdown') {
+      const markdown = latestMindMapMarkdown.value || (await prepareMindMap())
+      downloadBlob(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }), buildFileName('md'))
+    } else if (format === 'svg') {
+      await downloadSvg()
+    } else {
+      await downloadPng()
+    }
+    message.success('思维导图导出成功')
+  } catch (error: any) {
+    message.error(error.message || '思维导图导出失败')
+  }
+}
+
 async function doExport() {
   loading.value = true
   try {
-    // 如果选择思维导图图片，先预览
-    if (exportFormat.value === 'jsmind-img') {
-      await showMindMap()
-      loading.value = false
-      return
-    }
-    // 导出思维导图 .mm 文件
-    if (exportFormat.value === 'mm') {
-  
-      const res = await getKnowledgePoints()
-      if (!res || res.code !== 200) throw new Error(res?.message || '获取知识点失败')
-      let list: KnowledgePointVO[] = res.data || []
-    
-      if (selectedCourseId.value) list = list.filter(kp => kp.courseId === selectedCourseId.value)
-      if (selectedEnabled.value !== null) list = list.filter(kp => kp.enabled === selectedEnabled.value)
-      if (selectedDifficulty.value) list = list.filter(kp => kp.difficulty === selectedDifficulty.value)
-    
-      const courseMap: Record<number, string> = {}
-      props.data.forEach(c => {
-        courseMap[c.id] = c.name
+    if (exportFormat.value === 'xlsx') {
+      const exportApi = canListAllKnowledgePoints.value ? exportKnowledgePoints : exportMyKnowledgePoints
+      const blob = await exportApi({
+        courseId: selectedCourseId.value || undefined,
+        enabled: selectedEnabled.value !== null ? selectedEnabled.value : undefined,
+        difficulty: selectedDifficulty.value || undefined
       })
-     
-      const tree = buildTree(list, courseMap)
-   
-      const rootName = selectedCourseId.value ? courseMap[selectedCourseId.value] || '知识点' : '全部课程知识点'
-      const xml = generateFreeMindXML(tree, rootName)
-    
-      const blob = new Blob([xml], { type: 'text/xml' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      let fileName = '知识点导出'
-      if (selectedCourseId.value) {
-        const course = props.data.find(c => c.id === selectedCourseId.value)
-        if (course) fileName += `_${course.name}`
-      } else {
-        fileName += '_全部课程'
-      }
-      fileName += `_${todayKey()}.mm`
-      a.download = fileName
-      a.click()
-      URL.revokeObjectURL(url)
-      message.success('思维导图导出成功')
+      downloadBlob(blob, buildFileName('xlsx'))
+      message.success('导出成功')
       emit('success')
       emitClose()
       return
     }
 
-    // Excel 导出
-    const { exportKnowledgePoints } = await import('@/api/knowledge-point')
-    const blob = await exportKnowledgePoints({
-      courseId: selectedCourseId.value || undefined,
-      enabled: selectedEnabled.value !== null ? selectedEnabled.value : undefined,
-      difficulty: selectedDifficulty.value || undefined,
-      format: 'xlsx'
-    })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    let fileName = '知识点导出'
-    if (selectedCourseId.value) {
-      const course = props.data.find(c => c.id === selectedCourseId.value)
-      if (course) fileName += `_${course.name}`
+    const markdown = await prepareMindMap()
+    if (exportFormat.value === 'markdown') {
+      downloadBlob(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }), buildFileName('md'))
     } else {
-      fileName += '_全部课程'
+      await renderMindMap(markdown)
+      await downloadMindMap(exportFormat.value)
     }
-    fileName += `_${todayKey()}.xlsx`
-    a.download = fileName
-    a.click()
-    URL.revokeObjectURL(url)
-    message.success('导出成功')
     emit('success')
-    emitClose()
-  } catch (e: any) {
-    message.error(e.message || '导出失败')
+    if (exportFormat.value === 'markdown') emitClose()
+  } catch (error: any) {
+    message.error(error.message || '导出失败')
   } finally {
     loading.value = false
   }
 }
 </script>
+
+<style scoped>
+.mindmap-preview {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--surface-radius-sm);
+  background: #fff;
+}
+
+.mindmap-preview__svg {
+  display: block;
+  width: 100%;
+  min-width: 900px;
+  height: 620px;
+}
+</style>

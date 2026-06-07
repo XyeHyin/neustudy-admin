@@ -20,21 +20,26 @@
 
 <script lang="ts" setup>
 import { darkTheme, dateZhCN, NConfigProvider, useOsTheme, zhCN } from 'naive-ui'
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 
 import { useThemeStore } from '@/store/theme'
 
 const osTheme = useOsTheme()
 const themeStore = useThemeStore()
 
-const theme = computed(() => {
-  // 如果用户手动设置了主题，使用用户设置
+const isDarkTheme = computed(() => {
   if (themeStore.themeMode === 'dark') {
-    return darkTheme
-  } else if (themeStore.themeMode === 'light') {
-    return null
+    return true
   }
-  // 否则跟随系统主题
-  return osTheme.value === 'dark' ? darkTheme : null
+  if (themeStore.themeMode === 'light') {
+    return false
+  }
+  return osTheme.value === 'dark'
+})
+
+const theme = computed(() => (isDarkTheme.value ? darkTheme : null))
+
+watchEffect(() => {
+  document.documentElement.dataset.theme = isDarkTheme.value ? 'dark' : 'light'
 })
 </script>

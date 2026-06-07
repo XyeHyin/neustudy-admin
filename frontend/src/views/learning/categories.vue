@@ -35,7 +35,7 @@ import { NButton, NForm, NFormItemRow, NInput, NSelect, useMessage, useModal } f
 import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
-import { batchDeleteCategories, createCategory, deleteCategory, getCategories, getCategoryTree, updateCategory } from '@/api/categories'
+import { batchDeleteCategories, createCategory, deleteCategory, getCategories, updateCategory } from '@/api/categories'
 import { Icon } from '@/components'
 import { formatDate } from '@/utils/datetime'
 import { useAuthStore } from '@/store/auth'
@@ -52,21 +52,57 @@ const searchKeyword = ref('')
 const selectedRowKeys = ref<DataTableRowKey[]>([])
 
 const treeMode = ref(false)
-const categoryTree = ref<CategoryTreeVO[]>([])
+type CategoryTreeNode = CategoryTreeVO & { children?: CategoryTreeNode[] }
+const categoryTree = computed<CategoryTreeNode[]>(() => buildCategoryTree(categories.value))
 
 const auth = useAuthStore()
 
-async function fetchCategoryTree() {
-  const res = await getCategoryTree()
-  if (res.code === 200) {
-    categoryTree.value = res.data || []
+function buildCategoryTree(list: CategoryFlatVO[]): CategoryTreeNode[] {
+  const nodeMap = new Map<number, CategoryTreeNode>()
+  const roots: CategoryTreeNode[] = []
+
+  list.forEach(item => {
+    nodeMap.set(item.id, {
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      enabled: item.enabled,
+      createTime: item.createTime,
+      updateTime: item.updateTime,
+      children: []
+    })
+  })
+
+  list.forEach(item => {
+    const node = nodeMap.get(item.id)
+    if (!node) return
+    const parentId = item.parent?.id
+    const parent = parentId ? nodeMap.get(parentId) : null
+    if (parent) {
+      parent.children = parent.children || []
+      parent.children.push(node)
+    } else {
+      roots.push(node)
+    }
+  })
+
+  const prune = (node: CategoryTreeNode): CategoryTreeNode => {
+    if (!node.children?.length) {
+      const { children, ...rest } = node
+      return rest
+    }
+    return {
+      ...node,
+      children: node.children.map(prune)
+    }
   }
+
+  return roots.map(prune)
 }
 
 // 切换树/表格视图
 function handleToggleView() {
   treeMode.value = !treeMode.value
-  if (treeMode.value) fetchCategoryTree()
 }
 
 const pagination = reactive({

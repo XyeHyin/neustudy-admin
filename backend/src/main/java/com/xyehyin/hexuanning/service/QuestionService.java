@@ -215,6 +215,32 @@ public class QuestionService extends BaseService<Question, Long> {
     }
 
     /**
+     * AI流式生成时按单题生成，便于前端一题完成就展示一题。
+     */
+    public CreateQuestionDTO generateSingleQuestionWithAI(AIGenerateQuestionDTO requestDTO, int index, int total) {
+        AIGenerateQuestionDTO singleRequest = new AIGenerateQuestionDTO();
+        singleRequest.setKnowledgePointId(requestDTO.getKnowledgePointId());
+        singleRequest.setType(requestDTO.getType());
+        singleRequest.setDifficulty(requestDTO.getDifficulty());
+        singleRequest.setCount(1);
+
+        String baseRequirement = requestDTO.getExtraRequirement() == null ? "" : requestDTO.getExtraRequirement().trim();
+        String sequenceRequirement = "这是本次批量生成的第 " + index + "/" + total + " 道题，请避免与前面题目重复。";
+        singleRequest.setExtraRequirement(baseRequirement.isEmpty()
+                ? sequenceRequirement
+                : baseRequirement + "；" + sequenceRequirement);
+
+        List<CreateQuestionDTO> questions = generateQuestionsWithAI(singleRequest);
+        if (questions.isEmpty()) {
+            throw new StatefulException(HttpStatus.HTTP_BAD_GATEWAY, "AI未生成任何题目");
+        }
+        CreateQuestionDTO question = questions.get(0);
+        question.setKnowledgePointId(requestDTO.getKnowledgePointId());
+        question.setIsAiGenerated(true);
+        return question;
+    }
+
+    /**
      * 构造AI Prompt
      */
     private String buildPrompt(KnowledgePoint knowledgePoint, AIGenerateQuestionDTO requestDTO) {

@@ -42,11 +42,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 题目管理控制器
@@ -576,6 +579,58 @@ public class QuestionController extends BaseController {
     public ApiResponse<List<CreateQuestionDTO>> generateQuestionsWithAI(@Valid @RequestBody AIGenerateQuestionDTO requestDTO,
                                                                         HttpServletRequest request) {
         return ApiResponse.success(questionService.generateQuestionsWithAI(requestDTO));
+    }
+
+    @Operation(summary = "AI流式生成题目", description = "按题目逐条生成并通过SSE推送")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.AI_GENERATE_QUESTION + "')")
+    @PostMapping(value = "/generate/ai/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamGenerateQuestionsWithAI(@Valid @RequestBody AIGenerateQuestionDTO requestDTO,
+                                                   HttpServletRequest request) {
+        int total = Math.min(Math.max(requestDTO.getCount(), 1), 20);
+        SseEmitter emitter = new SseEmitter(Math.max(180000L, total * 120000L));
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("start")
+                        .data(Map.of("total", total)));
+
+                for (int index = 1; index <= total; index++) {
+                    CreateQuestionDTO question = questionService.generateSingleQuestionWithAI(requestDTO, index, total);
+                    emitter.send(SseEmitter.event()
+                            .name("question")
+                            .id(String.valueOf(index))
+                            .data(Map.of(
+                                    "index", index,
+                                    "total", total,
+                                    "question", question
+                            )));
+                    emitter.send(SseEmitter.event()
+                            .name("progress")
+                            .data(Map.of(
+                                    "generated", index,
+                                    "total", total
+                            )));
+                }
+
+                emitter.send(SseEmitter.event()
+                        .name("done")
+                        .data(Map.of("total", total)));
+                emitter.complete();
+            } catch (Exception ex) {
+                log.error("AI流式生成题目失败", ex);
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("error")
+                            .data(Map.of("message", ex.getMessage())));
+                } catch (Exception ignored) {
+                    // 客户端断开时不再重复处理。
+                }
+                emitter.complete();
+            }
+        });
+
+        return emitter;
     }
 
     @Operation(summary = "获取题目历史版本", description = "分页获取题目修改历史")

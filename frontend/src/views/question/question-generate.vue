@@ -30,19 +30,36 @@
               <template #icon>
                 <icon type="materialAutoAwesome" />
               </template>
-              AI智能生成
+              {{ generating ? `生成中 ${streamProgress.generated}/${streamProgress.total || form.count}` : 'AI智能生成' }}
             </n-button>
+            <n-button v-if="generating" type="warning" secondary @click="stopGenerate">停止生成</n-button>
             <n-button @click="resetForm" :disabled="generating">重置</n-button>
           </n-space>
         </n-form-item>
       </n-form>
 
+      <div v-if="generating || streamProgress.generated > 0" class="stream-progress">
+        <div class="stream-progress__top">
+          <span>{{ streamStatusText }}</span>
+          <span>{{ streamPercentage }}%</span>
+        </div>
+        <n-progress
+          type="line"
+          :percentage="streamPercentage"
+          :processing="generating"
+          :show-indicator="false"
+          :height="8"
+          :border-radius="4"
+          :fill-border-radius="4"
+        />
+      </div>
+
       <!-- 生成结果展示 -->
-      <div v-if="generatedQuestions.length" class="generated-results">
+      <div v-if="generatedQuestions.length || generating" ref="resultsRef" class="generated-results">
         <n-divider>
-          <n-text type="success">
+          <n-text :type="generating ? 'info' : 'success'">
             <icon type="materialCheckCircle" style="margin-right: 8px" />
-            已生成 {{ generatedQuestions.length }} 道题目
+            {{ generating ? `已实时生成 ${generatedQuestions.length} 道题目` : `已生成 ${generatedQuestions.length} 道题目` }}
           </n-text>
         </n-divider>
 
@@ -159,11 +176,12 @@
 </template>
 
 <script lang="ts" setup>
+import { animate } from 'animejs'
 import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NSpace, NTag, useDialog, useMessage } from 'naive-ui'
-import { computed, h, onMounted, reactive, ref } from 'vue'
+import { computed, h, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
 
-import { generateQuestions } from '@/api/ai'
+import { streamGenerateQuestions } from '@/api/ai'
 import { getKnowledgePoints } from '@/api/knowledge-point'
 import { batchCreateQuestions } from '@/api/question'
 import { Icon } from '@/components'
@@ -181,6 +199,7 @@ const editFormRef = ref()
 const editForm = reactive<Partial<AIGeneratedQuestionVO>>({})
 
 const formRef = ref()
+const resultsRef = ref<HTMLElement | null>(null)
 const form = ref<AIGenerateQuestionDTO>({
   knowledgePointId: null,
   type: null,
@@ -284,25 +303,108 @@ const knowledgePointOptions = computed(() => [
 
 // 生成题目
 const generatedQuestions = ref<AIGeneratedQuestionVO[]>([])
-const { runAsync: generateQuestionsAPI, loading: generating } = useRequest(generateQuestions, { manual: true })
+const generating = ref(false)
+const streamProgress = reactive({
+  generated: 0,
+  total: 0
+})
+const activeAnimations: Array<{ revert: () => unknown }> = []
+let generateAbortController: AbortController | null = null
+
+const streamPercentage = computed(() => {
+  if (!streamProgress.total) return 0
+  return Math.min(100, Math.round((streamProgress.generated / streamProgress.total) * 100))
+})
+
+const streamStatusText = computed(() => {
+  if (generating.value) {
+    if (streamProgress.total > 0 && streamProgress.generated >= streamProgress.total) {
+      return '题目已生成，正在完成收尾'
+    }
+    const nextIndex = Math.min(streamProgress.generated + 1, streamProgress.total || form.value.count)
+    return streamProgress.generated > 0
+      ? `第 ${nextIndex} 道题正在生成，已完成 ${streamProgress.generated} 道`
+      : '正在连接 AI，准备生成第 1 道题'
+  }
+  return streamProgress.generated > 0 ? `本次生成完成，共 ${streamProgress.generated} 道题` : ''
+})
 
 async function handleGenerate() {
   formRef.value?.validate(async (errors: any) => {
     if (!errors) {
-      try {
-        const res = await generateQuestionsAPI(form.value)
-        if (res.code === 200) {
-          generatedQuestions.value = [...generatedQuestions.value, ...(res.data || [])]
-          selectedRowKeys.value = []
-          message.success(`成功生成 ${res.data?.length || 0} 道题目`)
-        } else {
-          message.error(res.message || 'AI生成失败')
-        }
-      } catch (error: any) {
-        message.error('生成失败: ' + (error.message || '网络错误'))
-      }
+      await startStreamGenerate()
     }
   })
+}
+
+async function startStreamGenerate() {
+  if (generating.value) return
+
+  const requestData = { ...form.value }
+  generating.value = true
+  selectedRowKeys.value = []
+  streamProgress.generated = 0
+  streamProgress.total = requestData.count || 0
+  generateAbortController = new AbortController()
+
+  try {
+    await streamGenerateQuestions(
+      requestData,
+      {
+        onStart(event) {
+          streamProgress.total = event.total
+        },
+        onQuestion(event) {
+          generatedQuestions.value = [...generatedQuestions.value, event.question]
+          streamProgress.generated = event.index
+          void animateLatestQuestion()
+        },
+        onProgress(event) {
+          streamProgress.generated = event.generated
+          streamProgress.total = event.total
+        },
+        onDone(event) {
+          streamProgress.generated = event.total
+          streamProgress.total = event.total
+        },
+        onError() {}
+      },
+      generateAbortController.signal
+    )
+    message.success(`成功生成 ${streamProgress.generated} 道题目`)
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      message.info('已停止生成')
+    } else {
+      message.error('生成失败: ' + (error.message || '网络错误'))
+    }
+  } finally {
+    generating.value = false
+    generateAbortController = null
+  }
+}
+
+function stopGenerate() {
+  generateAbortController?.abort()
+}
+
+async function animateLatestQuestion() {
+  await nextTick()
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+  const rows = resultsRef.value?.querySelectorAll<HTMLElement>('.generated-table .n-data-table-tbody .n-data-table-tr')
+  const latestRow = rows?.[rows.length - 1]
+  if (!latestRow) return
+
+  activeAnimations.push(
+    animate(latestRow, {
+      opacity: [0, 1],
+      translateY: [12, 0],
+      scale: [0.985, 1],
+      duration: 320,
+      ease: 'out(4)'
+    })
+  )
 }
 
 // 题目管理
@@ -453,6 +555,7 @@ function handleExportQuestions() {
 }
 
 function resetForm() {
+  stopGenerate()
   form.value = {
     knowledgePointId: null,
     type: null,
@@ -578,6 +681,11 @@ const columns: DataTableColumns<AIGeneratedQuestionVO> = [
 onMounted(() => {
   // 页面加载时获取知识点数据
 })
+
+onBeforeUnmount(() => {
+  stopGenerate()
+  activeAnimations.splice(0).forEach(animation => animation.revert())
+})
 </script>
 
 <style scoped>
@@ -587,7 +695,8 @@ onMounted(() => {
 }
 
 .question-generate-form {
-  max-width: 800px;
+  width: min(100%, 960px);
+  max-width: 960px;
   margin-bottom: var(--content-gap-xl);
 }
 
@@ -601,11 +710,39 @@ onMounted(() => {
 }
 
 .generated-results {
+  width: min(100%, 960px);
+  max-width: 960px;
+  min-width: 0;
   margin-top: var(--content-gap-xl);
 }
 
+.stream-progress {
+  width: min(100%, 960px);
+  max-width: 960px;
+  margin: 0 0 var(--content-gap-lg);
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--brand-link) 22%, transparent);
+  border-radius: var(--surface-radius-sm);
+  background: color-mix(in srgb, var(--brand-link) 8%, transparent);
+}
+
+.stream-progress__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: var(--text-color-2);
+  font-size: 13px;
+}
+
 .generated-table {
+  max-width: 100%;
   margin-top: var(--content-gap);
+}
+
+.generated-table :deep(.n-data-table-wrapper) {
+  overflow-x: auto;
 }
 
 .question-generate-toolbar {

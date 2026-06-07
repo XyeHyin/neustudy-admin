@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class KnowledgePointImportDTO {
+    private Integer rowNumber;
     private String name;
     private String description;
     private KnowledgePoint.Difficulty difficulty;

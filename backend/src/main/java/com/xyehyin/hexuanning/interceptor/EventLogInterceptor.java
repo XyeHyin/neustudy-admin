@@ -29,7 +29,7 @@ public class EventLogInterceptor implements HandlerInterceptor {
                                 Object handler,
                                 Exception ex) throws Exception {
         // 仅在 HTTP 200 并且用户已认证的情况下记录日志
-        if (response.getStatus() == HttpServletResponse.SC_OK && "POST".equalsIgnoreCase(request.getMethod())) {
+        if (response.getStatus() == HttpServletResponse.SC_OK && isMutationMethod(request.getMethod())) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof Long) {
                 Long userId = (Long) auth.getPrincipal();
@@ -55,5 +55,11 @@ public class EventLogInterceptor implements HandlerInterceptor {
                 eventLogService.logEvent(userId, username, method, uri, description);
             }
         }
+    }
+
+    private boolean isMutationMethod(String method) {
+        return "POST".equalsIgnoreCase(method)
+                || "PUT".equalsIgnoreCase(method)
+                || "DELETE".equalsIgnoreCase(method);
     }
 } 

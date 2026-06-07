@@ -4,7 +4,7 @@
       <n-a >&lt;/&gt;</n-a> with <n-text type="error">♥</n-text> by <n-a >XyeHyin</n-a>. Licensed under the
       <n-a >MIT</n-a> License.
     </n-p>
-    <n-p>&copy; {{ new Date().getFullYear() }} Lei’s. All rights reserved.</n-p>
+    <n-p>&copy; {{ new Date().getFullYear() }} XyeHyin’s. All rights reserved.</n-p>
   </n-layout-footer>
 </template>
 

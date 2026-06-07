@@ -11,6 +11,7 @@
         <n-tree
           :data="permissionTree"
           checkable
+          check-on-click
           cascade
           block-line
           :checked-keys="form.permissionIds"

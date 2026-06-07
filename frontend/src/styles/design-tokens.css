@@ -19,12 +19,27 @@
   --surface-shadow-raised: 0 12px 40px rgba(0, 0, 0, 0.1);
   --surface-padding: var(--space-6) var(--space-8);
   --surface-padding-compact: var(--space-5);
+  --app-surface-color: #ffffff;
+  --app-surface-soft: #f6f8fa;
+  --app-border-color: #e5e7eb;
+  --app-text-color: #1f2937;
+  --app-text-muted: #64748b;
   --content-gap-xs: var(--space-2);
   --content-gap-sm: var(--space-3);
   --content-gap: var(--space-4);
   --content-gap-lg: var(--space-6);
   --content-gap-xl: var(--space-8);
   --brand-link: #18a058;
+}
+
+html[data-theme='dark'] {
+  --surface-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+  --surface-shadow-raised: 0 14px 44px rgba(0, 0, 0, 0.36);
+  --app-surface-color: #18181c;
+  --app-surface-soft: #23252b;
+  --app-border-color: #3a3d45;
+  --app-text-color: #f1f5f9;
+  --app-text-muted: #a8b0bf;
 }
 
 @media (max-width: 768px) {

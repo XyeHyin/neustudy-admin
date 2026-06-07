@@ -8,6 +8,7 @@ import com.xyehyin.hexuanning.entity.Course;
 import com.xyehyin.hexuanning.entity.KnowledgePoint;
 import com.xyehyin.hexuanning.repository.KnowledgePointRepository;
 import com.xyehyin.hexuanning.repository.CourseRepository;
+import com.xyehyin.hexuanning.repository.QuestionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,10 +29,12 @@ public class KnowledgePointService extends BaseService<KnowledgePoint, Long> {
     
     private final KnowledgePointRepository knowledgePointRepository;
     private final CourseRepository courseRepository;
+    private final QuestionRepository questionRepository;
 
-    public KnowledgePointService(KnowledgePointRepository knowledgePointRepository, CourseRepository courseRepository) {
+    public KnowledgePointService(KnowledgePointRepository knowledgePointRepository, CourseRepository courseRepository, QuestionRepository questionRepository) {
         this.knowledgePointRepository = knowledgePointRepository;
         this.courseRepository = courseRepository;
+        this.questionRepository = questionRepository;
     }
 
     @Override
@@ -208,17 +211,18 @@ public class KnowledgePointService extends BaseService<KnowledgePoint, Long> {
         for (int i = 0; i < importDTOs.size(); i++) {
             try {
                 KnowledgePointImportDTO dto = importDTOs.get(i);
+                int rowNumber = dto.getRowNumber() != null ? dto.getRowNumber() : i + 2;
                 
                 // 验证必填数据
                 if (dto.getName() == null || dto.getName().trim().isEmpty()) {
-                    errorMessages.add("第" + (i + 2) + "行：知识点名称不能为空");
+                    errorMessages.add("第" + rowNumber + "行：知识点名称不能为空");
                     failCount++;
                     continue;
                 }
                 
                 // 检查重复（这是业务错误，不是解析警告）
                 if (existsByNameAndCourseId(dto.getName(), courseId)) {
-                    errorMessages.add("第" + (i + 2) + "行：知识点名称已存在");
+                    errorMessages.add("第" + rowNumber + "行：知识点名称已存在");
                     failCount++;
                     continue;
                 }
@@ -239,7 +243,9 @@ public class KnowledgePointService extends BaseService<KnowledgePoint, Long> {
                 
             } catch (Exception e) {
                 // 这里捕获的是真正的业务异常，不是解析警告
-                errorMessages.add("第" + (i + 2) + "行：" + e.getMessage());
+                KnowledgePointImportDTO dto = importDTOs.get(i);
+                int rowNumber = dto.getRowNumber() != null ? dto.getRowNumber() : i + 2;
+                errorMessages.add("第" + rowNumber + "行：" + e.getMessage());
                 failCount++;
             }
         }
@@ -254,16 +260,21 @@ public class KnowledgePointService extends BaseService<KnowledgePoint, Long> {
 
     private KnowledgePointExportDTO toExportDTO(KnowledgePoint knowledgePoint) {
         KnowledgePointExportDTO dto = new KnowledgePointExportDTO();
+        dto.setId(knowledgePoint.getId());
+        dto.setCourseId(knowledgePoint.getCourse() != null ? knowledgePoint.getCourse().getId() : null);
         dto.setName(knowledgePoint.getName());
         dto.setDescription(knowledgePoint.getDescription());
-        dto.setCourseName(knowledgePoint.getCourse().getName());
+        dto.setCourseName(knowledgePoint.getCourse() != null ? knowledgePoint.getCourse().getName() : "");
         dto.setDifficulty(knowledgePoint.getDifficulty() != null ? knowledgePoint.getDifficulty().name() : "");
         dto.setOrderNum(knowledgePoint.getOrderNum());
         dto.setContent(knowledgePoint.getContent());
         dto.setKeywords(knowledgePoint.getKeywords());
-        dto.setEnabled(knowledgePoint.getEnabled() ? "启用" : "禁用");
+        dto.setEnabled(Boolean.TRUE.equals(knowledgePoint.getEnabled()) ? "启用" : "禁用");
         dto.setCreateTime(knowledgePoint.getCreateTime() != null ? 
                 knowledgePoint.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : "");
+        dto.setUpdateTime(knowledgePoint.getUpdateTime() != null ?
+                knowledgePoint.getUpdateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : "");
+        dto.setQuestionCount(questionRepository.countByKnowledgePointId(knowledgePoint.getId()));
         return dto;
     }
 }

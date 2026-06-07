@@ -214,6 +214,7 @@ async function handleView(row: RoleVO) {
           labelField: 'label',
           data: permissionTree.value,
           checkable: true,
+          checkOnClick: true,
           blockLine: true,
           defaultCheckedKeys: checked.value,
           'onUpdate:checkedKeys': (val: number[]) => (checked.value = val)

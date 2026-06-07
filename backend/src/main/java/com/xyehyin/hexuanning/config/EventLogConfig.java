@@ -24,6 +24,7 @@ public class EventLogConfig implements WebMvcConfigurer {
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/webjars/**",
+                        "/notifications/**",
                         "/favicon.ico",
                         "/error"
                 );

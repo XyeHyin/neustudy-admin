@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class EventLogService {
 
     private final EventLogRepository eventLogRepository;
+    private final NotificationService notificationService;
 
     /**
      * 记录一个用户事件
@@ -37,7 +38,8 @@ public class EventLogService {
                 .description(description)
                 .createTime(LocalDateTime.now())
                 .build();
-        eventLogRepository.save(event);
+        EventLog saved = eventLogRepository.save(event);
+        notificationService.publish(saved);
     }
 
     /**
