@@ -7,7 +7,7 @@
       <n-form-item label="导入模板">
         <n-space>
           <n-button type="info" :loading="downloadingTemplate" @click="downloadTemplate">下载导入模板</n-button>
-          <n-text depth="3" style="font-size: 12px">请先下载模板，按格式填写后上传</n-text>
+          <n-text depth="3" style="font-size: var(--text-xs); line-height: 1.45">请先下载模板，按格式填写后上传</n-text>
         </n-space>
       </n-form-item>
       <n-form-item label="选择文件">

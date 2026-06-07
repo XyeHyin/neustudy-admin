@@ -413,8 +413,9 @@ watch(
 }
 
 .question-title {
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-weight: var(--weight-medium);
   margin-bottom: 12px;
 }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="admin-page">
-    <n-card :bordered="false" class="overview-card" title="练习统计概览">
+    <n-card :bordered="false" class="admin-card overview-card" title="练习统计概览">
       <n-grid :cols="4" :x-gap="16">
         <n-grid-item>
           <n-statistic label="总练习次数" :value="statistics.totalPractices || 0" />
@@ -17,10 +17,10 @@
       </n-grid>
     </n-card>
     <!-- 详细统计 -->
-    <n-grid :cols="2" :x-gap="16" style="margin-top: 16px">
+    <n-grid :cols="2" :x-gap="16" class="statistics-grid">
       <!-- 按难度统计 -->
       <n-grid-item>
-        <n-card title="练习试卷统计">
+        <n-card class="admin-card statistic-card" title="练习试卷统计">
           <n-grid :cols="3" :x-gap="16">
             <n-grid-item>
               <n-statistic label="总试卷数" :value="statistics.totalPapers || 0" />
@@ -37,7 +37,7 @@
 
       <!-- 成绩分布 -->
       <n-grid-item>
-        <n-card title="成绩分布">
+        <n-card class="admin-card statistic-card" title="成绩分布">
           <n-grid :cols="3" :x-gap="16">
             <n-grid-item>
               <n-statistic label="优秀(90+)" :value="statistics.excellentCount || 0" />
@@ -54,14 +54,14 @@
     </n-grid>
 
     <!-- 试卷练习详情 -->
-    <n-card :bordered="false" class="course-statistics" title="试卷练习详情" style="margin-top: 16px">
+    <n-card :bordered="false" class="admin-card course-statistics" title="试卷练习详情">
       <n-data-table :columns="paperColumns" :data="paperStatistics" :pagination="false" :bordered="false" :loading="loadingStatistics" />
     </n-card>
 
     <!-- 近期练习记录 -->
-    <n-card :bordered="false" class="recent-records" title="近期练习记录" style="margin-top: 16px">
+    <n-card :bordered="false" class="admin-card recent-records" title="近期练习记录">
       <n-data-table :columns="recordColumns" :data="recentRecords" :pagination="{ pageSize: 5 }" :bordered="false" />
-      <div style="text-align: center; margin-top: 16px">
+      <div class="record-actions">
         <n-button @click="goToAllRecords">查看全部记录</n-button>
       </div>
     </n-card>
@@ -242,23 +242,20 @@ function goToAllRecords() {
 
 <style scoped>
 .overview-card {
-  margin-bottom: 16px;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
+  margin-bottom: var(--content-gap);
 }
 
 .course-statistics,
 .recent-records {
-  margin-top: 16px;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
+  margin-top: var(--content-gap);
 }
 
-.n-card[style] {
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
+.statistics-grid {
+  margin-top: var(--content-gap);
+}
+
+.record-actions {
+  margin-top: var(--content-gap);
+  text-align: center;
 }
 </style>

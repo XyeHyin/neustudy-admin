@@ -1,0 +1,34 @@
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --page-max-width: 1200px;
+  --page-max-width-wide: 1400px;
+  --page-padding-block: var(--space-8) 0 var(--space-6);
+  --page-padding-block-compact: var(--space-5) 0 var(--space-4);
+  --app-content-padding: var(--space-5) var(--space-10);
+  --surface-radius: 12px;
+  --surface-radius-sm: 8px;
+  --surface-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --surface-shadow-raised: 0 12px 40px rgba(0, 0, 0, 0.1);
+  --surface-padding: var(--space-6) var(--space-8);
+  --surface-padding-compact: var(--space-5);
+  --content-gap-xs: var(--space-2);
+  --content-gap-sm: var(--space-3);
+  --content-gap: var(--space-4);
+  --content-gap-lg: var(--space-6);
+  --content-gap-xl: var(--space-8);
+  --brand-link: #18a058;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --app-content-padding: var(--space-4);
+  }
+}

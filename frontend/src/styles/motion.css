@@ -1,0 +1,262 @@
+:root {
+  --motion-duration-fast: 140ms;
+  --motion-duration-base: 220ms;
+  --motion-duration-strong: 360ms;
+  --motion-ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --motion-ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-motion-enter-active {
+  animation: page-motion-enter var(--motion-duration-strong) var(--motion-ease-out-expo) both;
+}
+
+.page-motion-leave-active {
+  animation: page-motion-leave var(--motion-duration-base) var(--motion-ease-out-quart) both;
+}
+
+.app-motion-enter-active,
+.app-motion-leave-active {
+  transition:
+    opacity var(--motion-duration-base) var(--motion-ease-out-quart),
+    transform var(--motion-duration-base) var(--motion-ease-out-quart),
+    filter var(--motion-duration-base) var(--motion-ease-out-quart);
+}
+
+.app-motion-enter-from,
+.app-motion-leave-to {
+  opacity: 0;
+  filter: blur(6px);
+  transform: scale(0.992);
+}
+
+.motion-scope .admin-card,
+.motion-scope .auth-card,
+.motion-scope .welcome-card,
+.motion-scope .stat-card,
+.motion-scope .chart-card,
+.motion-scope .action-card,
+.motion-scope .activity-card,
+.motion-scope .status-card {
+  animation: card-enter var(--motion-duration-strong) var(--motion-ease-out-expo) both;
+  animation-delay: min(calc(var(--motion-index, 0) * 46ms), 276ms);
+  transform-origin: center top;
+}
+
+.motion-scope > :nth-child(1),
+.motion-scope .n-grid-item:nth-child(1) {
+  --motion-index: 0;
+}
+
+.motion-scope > :nth-child(2),
+.motion-scope .n-grid-item:nth-child(2) {
+  --motion-index: 1;
+}
+
+.motion-scope > :nth-child(3),
+.motion-scope .n-grid-item:nth-child(3) {
+  --motion-index: 2;
+}
+
+.motion-scope > :nth-child(4),
+.motion-scope .n-grid-item:nth-child(4) {
+  --motion-index: 3;
+}
+
+.motion-scope > :nth-child(5),
+.motion-scope .n-grid-item:nth-child(5) {
+  --motion-index: 4;
+}
+
+.motion-scope > :nth-child(6),
+.motion-scope .n-grid-item:nth-child(6) {
+  --motion-index: 5;
+}
+
+.motion-scope > :nth-child(n + 7),
+.motion-scope .n-grid-item:nth-child(n + 7) {
+  --motion-index: 6;
+}
+
+.motion-scope .admin-toolbar,
+.motion-scope .auth-actions,
+.motion-scope .section-title,
+.motion-scope .n-data-table,
+.motion-scope .n-pagination,
+.motion-scope .n-timeline-item {
+  animation: soft-rise var(--motion-duration-strong) var(--motion-ease-out-quart) both;
+  animation-delay: min(calc(var(--motion-index, 0) * 34ms), 204ms);
+}
+
+.n-button,
+.n-a,
+.n-avatar,
+.n-menu .n-menu-item-content,
+.n-menu .n-submenu,
+.n-card[hoverable],
+.action-card,
+.stat-card {
+  transition:
+    color var(--motion-duration-base) var(--motion-ease-out-quart),
+    background-color var(--motion-duration-base) var(--motion-ease-out-quart),
+    border-color var(--motion-duration-base) var(--motion-ease-out-quart),
+    box-shadow var(--motion-duration-base) var(--motion-ease-out-quart),
+    transform var(--motion-duration-fast) var(--motion-ease-out-quint),
+    opacity var(--motion-duration-base) var(--motion-ease-out-quart);
+}
+
+.n-button:not(.n-button--disabled):active,
+.n-a:active,
+.n-card[hoverable]:active,
+.action-card:active,
+.stat-card:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.n-button:not(.n-button--disabled):hover,
+.n-a:hover,
+.n-avatar:hover {
+  transform: translateY(-1px);
+}
+
+.n-menu .n-menu-item-content:hover,
+.n-menu .n-menu-item-content.n-menu-item-content--selected {
+  transform: translateX(3px);
+}
+
+.n-layout-sider,
+.n-layout-header,
+.logo,
+.logo svg {
+  transition:
+    width var(--motion-duration-strong) var(--motion-ease-out-expo),
+    max-width var(--motion-duration-strong) var(--motion-ease-out-expo),
+    padding var(--motion-duration-base) var(--motion-ease-out-quart),
+    color var(--motion-duration-base) var(--motion-ease-out-quart),
+    background-color var(--motion-duration-base) var(--motion-ease-out-quart),
+    box-shadow var(--motion-duration-base) var(--motion-ease-out-quart),
+    transform var(--motion-duration-base) var(--motion-ease-out-quart),
+    opacity var(--motion-duration-base) var(--motion-ease-out-quart);
+}
+
+.n-layout-header {
+  backdrop-filter: saturate(1.2) blur(8px);
+}
+
+.n-popover,
+.n-dropdown-menu,
+.n-modal,
+.n-dialog {
+  animation: overlay-pop var(--motion-duration-base) var(--motion-ease-out-expo) both;
+  transform-origin: top right;
+}
+
+.n-input,
+.n-base-selection,
+.n-checkbox-box,
+.n-radio,
+.n-switch {
+  transition:
+    border-color var(--motion-duration-base) var(--motion-ease-out-quart),
+    box-shadow var(--motion-duration-base) var(--motion-ease-out-quart),
+    transform var(--motion-duration-fast) var(--motion-ease-out-quint),
+    background-color var(--motion-duration-base) var(--motion-ease-out-quart);
+}
+
+.n-input:focus-within,
+.n-base-selection:focus-within {
+  transform: translateY(-1px);
+}
+
+.n-progress .n-progress-graph-line-fill {
+  transition: stroke-dashoffset 520ms var(--motion-ease-out-expo);
+}
+
+@keyframes page-motion-enter {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(16px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes page-motion-leave {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(-6px) scale(0.996);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(14px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes soft-rise {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes overlay-pop {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .page-motion-enter-from,
+  .page-motion-leave-to,
+  .app-motion-enter-from,
+  .app-motion-leave-to {
+    filter: none;
+    transform: none;
+  }
+}

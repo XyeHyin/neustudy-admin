@@ -4,7 +4,7 @@
       <n-h1 class="auth-title" v-if="show">NEU智教通</n-h1>
     </transition>
     <transition name="fade-slide" appear>
-      <n-card class="auth-card" v-if="show">
+      <n-card class="auth-card auth-card-wide" v-if="show">
         <n-h2 class="auth-subtitle">注册</n-h2>
         <n-form ref="formRef" :model="model" :rules="rules" label-width="80" @submit="handleRegister">
           <div class="form-row">
@@ -187,42 +187,12 @@ const handleRegister = (e: MouseEvent) => {
 </script>
 
 <style scoped>
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.auth-title {
-  margin-bottom: 24px;
-  font-size: 2.8rem;
-  letter-spacing: 5px;
-  opacity: 0.8;
-  text-align: center;
-}
-.auth-card {
-  max-width: 600px;
-  width: 100%;
-  box-shadow: var(--box-shadow);
-  padding: 32px 32px 24px 32px;
-  border-radius: 12px;
-}
-.auth-subtitle {
-  text-align: center;
-  margin-bottom: 18px;
-  font-weight: 400;
-  font-size: 1.5rem;
-}
 .form-row {
   display: flex;
-  gap: 32px;
+  gap: var(--content-gap-xl);
 }
 .form-col {
   flex: 1;
-}
-.auth-actions {
-  margin-top: 18px;
 }
 .register-btn-wrap {
   display: flex;
@@ -231,20 +201,6 @@ const handleRegister = (e: MouseEvent) => {
 .register-btn-wrap .n-button {
   width: 100%;
   max-width: 100%;
-}
-.auth-links {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
-  font-size: 14px;
-}
-.auth-links a {
-  color: #409eff;
-  text-decoration: none;
-}
-.register-btn-wrap {
-  display: flex;
-  justify-content: center;
 }
 .fade-slide-enter-active,
 .fade-slide-leave-active {

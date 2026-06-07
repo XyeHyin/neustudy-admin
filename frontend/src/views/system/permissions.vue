@@ -138,11 +138,12 @@ function handleSearch() {
 <style scoped>
 .permissions-tree {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #0001;
+  border-radius: var(--surface-radius);
+  box-shadow: var(--surface-shadow);
   padding: 18px 24px;
   min-height: 320px;
-  font-size: 15px;
+  font-size: var(--text-sm);
+  line-height: 1.55;
 }
 .permissions-tree .n-tree-node {
   border-radius: 6px;
@@ -153,7 +154,7 @@ function handleSearch() {
 }
 .permissions-tree .n-tree-node--selected {
   background: #e6f7ff;
-  color: #409eff;
+  color: var(--brand-link);
 }
 .permissions-tree .n-tree-node-switcher {
   color: #bbb;

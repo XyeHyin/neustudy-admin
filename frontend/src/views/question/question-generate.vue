@@ -1,7 +1,7 @@
 <template>
-  <div class="question-generate-page">
-    <n-card :bordered="false" class="question-generate-card">
-      <n-h1 class="question-generate-title">智能题目生成</n-h1>
+  <div class="admin-page">
+    <n-card :bordered="false" class="admin-card question-generate-card">
+      <n-h1 class="admin-title question-generate-title">智能题目生成</n-h1>
       <n-form ref="formRef" :model="form" :rules="rules" label-width="100" class="question-generate-form" @submit.prevent="handleGenerate">
         <div class="form-row">
           <div class="form-col">
@@ -78,7 +78,7 @@
           :row-key="rowKey"
           :checked-row-keys="selectedRowKeys"
           @update:checked-row-keys="updateSelectedRowKeys"
-          style="margin-top: 16px"
+          class="generated-table"
         />
       </div>
     </n-card>
@@ -89,13 +89,13 @@
         <n-divider>题目内容</n-divider>
         <div class="question-content">
           <n-text strong>{{ previewQuestion.title }}</n-text>
-          <div v-if="previewQuestion.content" style="margin-top: 8px">
+          <div v-if="previewQuestion.content" class="question-content-detail">
             <n-text depth="2">{{ previewQuestion.content }}</n-text>
           </div>
         </div>
 
         <!-- 选择题选项 -->
-        <div v-if="showOptions(previewQuestion.type)" style="margin-top: 16px">
+        <div v-if="showOptions(previewQuestion.type)" class="preview-options">
           <n-divider>选项</n-divider>
           <div v-for="option in getOptions(previewQuestion.options)" :key="option.key" class="option-item">
             <n-text>{{ option.key }}. {{ option.value }}</n-text>
@@ -107,9 +107,9 @@
           <n-text strong>正确答案：</n-text>
           <n-tag type="success" style="margin-left: 8px">{{ previewQuestion.answer }}</n-tag>
         </div>
-        <div v-if="previewQuestion.explanation" style="margin-top: 12px; margin-left: 8px">
+        <div v-if="previewQuestion.explanation" class="preview-explanation">
           <n-text strong>解析：</n-text>
-          <div style="margin-top: 4px">
+          <div class="preview-explanation-body">
             <n-text>{{ previewQuestion.explanation }}</n-text>
           </div>
         </div>
@@ -581,34 +581,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.question-generate-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 0 24px;
-}
-
-.question-generate-card {
-  width: 100%;
-  box-shadow: var(--n-shadow-2);
-  border-radius: 12px;
-  padding: 24px 32px;
-}
-
 .question-generate-title {
-  margin-bottom: 24px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
+  margin-bottom: var(--content-gap-lg);
   color: var(--n-color-primary);
 }
 
 .question-generate-form {
   max-width: 800px;
-  margin-bottom: 32px;
+  margin-bottom: var(--content-gap-xl);
 }
 
 .form-row {
   display: flex;
-  gap: 32px;
+  gap: var(--content-gap-xl);
 }
 
 .form-col {
@@ -616,18 +601,22 @@ onMounted(() => {
 }
 
 .generated-results {
-  margin-top: 32px;
+  margin-top: var(--content-gap-xl);
+}
+
+.generated-table {
+  margin-top: var(--content-gap);
 }
 
 .question-generate-toolbar {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--content-gap);
   flex-wrap: wrap;
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-bottom: var(--content-gap);
+  padding: var(--content-gap);
   background: var(--n-color-fill-2);
-  border-radius: 8px;
+  border-radius: var(--surface-radius-sm);
 }
 
 .question-preview {
@@ -635,11 +624,19 @@ onMounted(() => {
   overflow-y: auto;
 }
 
+.question-content-detail {
+  margin-top: var(--content-gap-xs);
+}
+
 .question-content {
-  padding: 16px;
+  padding: var(--content-gap);
   background: var(--n-popover-color);
-  border-left: 4px solid var(--n-color-primary);
-  border-radius: 8px;
+  border: 1px solid var(--n-color-primary);
+  border-radius: var(--surface-radius-sm);
+}
+
+.preview-options {
+  margin-top: var(--content-gap);
 }
 .answer-section n-tag {
   display: inline-block; /* 让 n-tag 能按块级元素换行 */
@@ -648,16 +645,25 @@ onMounted(() => {
   max-width: 100%; /* 根据容器宽度折行 */
 }
 .option-item {
-  padding: 8px 12px;
-  margin: 4px 0;
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-1) 0;
   background: var(--n-divider-color);
   border-radius: 4px;
 }
 
 .answer-section {
-  padding: 12px;
+  padding: var(--content-gap-sm);
   background: var(--n-popover-color);
-  border-radius: 8px;
-  border-left: 4px solid var(--n-color-info);
+  border-radius: var(--surface-radius-sm);
+  border: 1px solid var(--n-color-info);
+}
+
+.preview-explanation {
+  margin-top: var(--content-gap-sm);
+  margin-left: var(--content-gap-xs);
+}
+
+.preview-explanation-body {
+  margin-top: var(--space-1);
 }
 </style>

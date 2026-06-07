@@ -541,15 +541,15 @@ watch(chartPeriod, () => {
 
 <style scoped>
 .dashboard-container {
-  max-width: 1400px;
+  max-width: var(--page-max-width-wide);
   margin: 0 auto;
-  padding: 24px;
+  padding: var(--content-gap-lg);
   min-height: 100vh;
 }
 
 /* 欢迎区域 */
 .welcome-section {
-  margin-bottom: 32px;
+  margin-bottom: var(--content-gap-xl);
 }
 
 .welcome-card {
@@ -560,8 +560,8 @@ watch(chartPeriod, () => {
 .welcome-content {
   display: flex;
   align-items: center;
-  gap: 32px;
-  padding: 32px;
+  gap: var(--content-gap-xl);
+  padding: var(--content-gap-xl);
 }
 
 .logo-section {
@@ -578,15 +578,17 @@ watch(chartPeriod, () => {
 }
 
 .welcome-title {
-  margin: 0 0 8px 0;
-  font-size: 2.5rem;
-  font-weight: 600;
+  margin: 0 0 var(--content-gap-xs) 0;
+  font-size: var(--text-display);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-bold);
   color: var(--n-text-color-base);
 }
 
 .welcome-desc {
-  margin: 0 0 16px 0;
-  font-size: 1.1rem;
+  margin: 0 0 var(--content-gap) 0;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
   opacity: 0.9;
   color: var(--n-text-color-base);
 }
@@ -594,8 +596,9 @@ watch(chartPeriod, () => {
 .weather-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: var(--content-gap-xs);
+  font-size: var(--text-sm);
+  line-height: 1.45;
   opacity: 0.8;
   color: var(--n-text-color-base);
 }
@@ -614,37 +617,38 @@ watch(chartPeriod, () => {
 .actions-section,
 .activity-section,
 .status-section {
-  margin-bottom: 32px;
+  margin-bottom: var(--content-gap-xl);
 }
 
 .section-title {
-  margin: 0 0 20px 0;
-  font-size: 1.5rem;
-  font-weight: 600;
+  margin: 0 0 var(--space-5) 0;
+  font-size: var(--text-xl);
+  line-height: var(--leading-title);
+  font-weight: var(--weight-bold);
   color: var(--n-text-color-base);
 }
 
 .stat-card {
-  border-radius: 12px;
+  border-radius: var(--surface-radius);
   transition: all 0.3s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--surface-shadow-raised);
 }
 
 .stat-content {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
+  gap: var(--content-gap);
+  padding: var(--space-5);
 }
 
 .stat-icon {
   width: 60px;
   height: 60px;
-  border-radius: 12px;
+  border-radius: var(--surface-radius);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -677,31 +681,34 @@ watch(chartPeriod, () => {
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
+  line-height: 1.45;
   color: var(--n-text-color-disabled);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .stat-value {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: var(--text-title);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-bold);
   color: var(--n-text-color-base);
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .stat-unit {
-  font-size: 1rem;
+  font-size: var(--text-body);
   color: var(--n-text-color-disabled);
 }
 
 .stat-trend {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.85rem;
-  margin-top: 4px;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  margin-top: var(--space-1);
 }
 
 .trend-up {
@@ -713,7 +720,7 @@ watch(chartPeriod, () => {
 
 /* 图表卡片 */
 .chart-card {
-  border-radius: 12px;
+  border-radius: var(--surface-radius);
   min-height: 400px;
 }
 
@@ -725,21 +732,21 @@ watch(chartPeriod, () => {
 
 /* 快捷操作 */
 .action-card {
-  border-radius: 12px;
+  border-radius: var(--surface-radius);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .action-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--surface-shadow-raised);
 }
 
 .action-content {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
+  gap: var(--content-gap);
+  padding: var(--space-5);
 }
 
 .action-icon {
@@ -778,14 +785,16 @@ watch(chartPeriod, () => {
 }
 
 .action-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: var(--text-md);
+  line-height: var(--leading-title);
+  font-weight: var(--weight-semibold);
   color: var(--n-text-color-base);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .action-desc {
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
+  line-height: 1.45;
   color: var(--n-text-color-disabled);
 }
 
@@ -800,57 +809,60 @@ watch(chartPeriod, () => {
 
 /* 活动区域 */
 .activity-card {
-  border-radius: 12px;
+  border-radius: var(--surface-radius);
 }
 
 .activity-content {
-  padding: 8px 0;
+  padding: var(--content-gap-xs) 0;
 }
 
 .activity-time {
-  font-size: 0.85rem;
+  font-size: var(--text-xs);
+  line-height: 1.45;
   color: var(--n-text-color-disabled);
 }
 
 .activity-title {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   color: var(--n-text-color-base);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .activity-desc {
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
+  line-height: 1.45;
   color: var(--n-text-color-disabled);
 }
 
 .activity-more {
   text-align: center;
-  padding: 16px 0 0 0;
+  padding: var(--content-gap) 0 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.09);
-  margin-top: 16px;
+  margin-top: var(--content-gap);
 }
 
 /* 系统状态 */
 .status-card {
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: var(--surface-radius);
+  padding: var(--space-5);
 }
 
 .status-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--content-gap);
 }
 
 .status-label {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   color: var(--n-text-color-base);
 }
 
 .status-detail {
-  margin-top: 8px;
-  font-size: 0.85rem;
+  margin-top: var(--content-gap-xs);
+  font-size: var(--text-xs);
+  line-height: 1.45;
   color: var(--n-text-color-disabled);
 }
 
@@ -863,22 +875,22 @@ watch(chartPeriod, () => {
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 16px;
+    padding: var(--content-gap);
   }
 
   .welcome-content {
     flex-direction: column;
     text-align: center;
-    gap: 20px;
+    gap: var(--space-5);
   }
 
   .welcome-title {
-    font-size: 2rem;
+    font-size: var(--text-title);
   }
 
   .stat-content,
   .action-content {
-    padding: 16px;
+    padding: var(--content-gap);
   }
 
   .chart-container {
@@ -891,7 +903,7 @@ watch(chartPeriod, () => {
 
   .stat-card:hover,
   .action-card:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--surface-shadow-raised);
   }
 }
 

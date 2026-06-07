@@ -170,4 +170,8 @@ watchEffect(() => {
 .logo svg {
   height: 32px;
 }
+
+.logo:hover svg {
+  transform: translateY(-1px) scale(1.03);
+}
 </style>

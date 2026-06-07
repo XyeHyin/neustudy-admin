@@ -1,53 +1,55 @@
 .admin-page {
-  max-width: 1200px;
+  max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 32px 0 24px;
+  padding: var(--page-padding-block);
 }
 
 .admin-page-wide {
-  max-width: 1400px;
+  max-width: var(--page-max-width-wide);
 }
 
 .admin-card {
   width: 100%;
-  box-shadow: 0 2px 12px #0001;
-  border-radius: 12px;
-  padding: 24px 32px;
+  box-shadow: var(--surface-shadow);
+  border-radius: var(--surface-radius);
+  padding: var(--surface-padding);
 }
 
 .admin-title {
-  margin-bottom: 16px;
-  font-size: 2.2rem;
-  letter-spacing: 2px;
+  margin-bottom: var(--content-gap);
+  font-size: var(--text-title);
+  line-height: var(--leading-title);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0;
 }
 
 .admin-toolbar {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--content-gap);
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: var(--content-gap);
 }
 
 .admin-pagination {
-  margin-top: 16px;
+  margin-top: var(--content-gap);
   text-align: right;
 }
 
 .admin-card > .n-data-table {
-  margin-top: 24px;
+  margin-top: var(--content-gap-lg);
 }
 
 @media (max-width: 768px) {
   .admin-page {
-    padding: 20px 0 16px;
+    padding: var(--page-padding-block-compact);
   }
 
   .admin-card {
-    padding: 18px 20px;
+    padding: var(--surface-padding-compact);
   }
 
   .admin-title {
-    font-size: 1.8rem;
+    font-size: var(--text-xl);
   }
 }

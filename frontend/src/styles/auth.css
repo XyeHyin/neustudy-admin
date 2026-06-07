@@ -1,46 +1,69 @@
 .auth-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--app-content-padding);
 }
 
 .auth-title {
-    margin-bottom: 24px;
-    font-size: 2.8rem;
-    letter-spacing: 5px;
-    opacity: 0.8;
-    text-align: center;
+  margin-bottom: var(--content-gap-lg);
+  font-size: var(--text-display);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0;
+  opacity: 0.86;
+  text-align: center;
 }
 
 .auth-card {
-    max-width: 380px;
-    width: 100%;
-    box-shadow: var(--box-shadow);
-    padding: 32px 32px 24px 32px;
-    border-radius: 12px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: var(--surface-shadow);
+  padding: var(--space-8) var(--space-8) var(--space-6);
+  border-radius: var(--surface-radius);
+}
+
+.auth-card-wide {
+  max-width: 600px;
 }
 
 .auth-subtitle {
-    text-align: center;
-    margin-bottom: 18px;
-    font-weight: 400;
-    font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: var(--space-5);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  line-height: var(--leading-title);
 }
 
 .auth-actions {
-    margin-top: 18px;
+  margin-top: var(--space-5);
 }
 
 .auth-links {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 12px;
-    font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--content-gap-sm);
+  font-size: var(--text-sm);
+  line-height: 1.45;
 }
 
 .auth-links a {
-    color: #409eff;
-    text-decoration: none;
+  color: var(--brand-link);
+  text-decoration: none;
+}
+
+.auth-links-between {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--content-gap-sm);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.auth-links-between a {
+  color: var(--brand-link);
+  text-decoration: none;
 }

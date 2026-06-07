@@ -5,7 +5,11 @@ import naive from './naive'
 import router from './router'
 import pinia from './store'
 import permission from './directives/permission'
+import './styles/design-tokens.css'
+import './styles/typography.css'
 import './styles/admin-page.css'
+import './styles/auth.css'
+import './styles/motion.css'
 import './styles/scrollbar.css'
 
 const app = createApp(App)

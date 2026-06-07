@@ -201,7 +201,7 @@ const historyColumns: DataTableColumns<QuestionHistoryVO> = [
     title: '版本号',
     key: 'revision',
     width: 80,
-    render: row => h('span', { style: 'font-weight: bold' }, `v${row.revision}`)
+    render: row => h('span', { style: 'font-weight: var(--weight-bold)' }, `v${row.revision}`)
   },
   {
     title: '修改时间',
