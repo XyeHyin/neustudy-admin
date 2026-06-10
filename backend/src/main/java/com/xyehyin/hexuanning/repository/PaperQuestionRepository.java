@@ -1,6 +1,7 @@
 package com.xyehyin.hexuanning.repository;
 
 import com.xyehyin.hexuanning.entity.PaperQuestion;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +14,9 @@ import java.util.Optional;
 @Repository
 public interface PaperQuestionRepository extends JpaRepository<PaperQuestion, Long> {
     // 可根据需要添加自定义查询方法
+    @EntityGraph(attributePaths = {"paper", "question"})
     List<PaperQuestion> findByPaperId(Long paperId);
+
+    @EntityGraph(attributePaths = {"paper", "question"})
     Optional<PaperQuestion> findByPaperIdAndQuestionId(Long paperId, Long questionId);
-} 
+}

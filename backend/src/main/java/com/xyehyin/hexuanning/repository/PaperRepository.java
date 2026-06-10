@@ -10,12 +10,17 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 /**
  * 试卷数据访问接口
  */
 @Repository
 public interface PaperRepository extends JpaRepository<Paper, Long>, JpaSpecificationExecutor<Paper> {
+
+    @Override
+    @EntityGraph(attributePaths = {"teacher"})
+    List<Paper> findAll();
 
     @Override
     @EntityGraph(attributePaths = {"teacher"})

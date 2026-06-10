@@ -6,11 +6,20 @@
         <n-input v-model:value="searchKeyword" placeholder="搜索分类名称/描述" clearable style="width: 240px" @input="handleSearch" />
         <n-button v-permission="'category:create:all'" type="primary" @click="handleAddCategory">新增分类</n-button>
         <n-button v-permission="'category:delete:all'" type="error" :disabled="!selectedRowKeys.length" @click="handleBatchDelete">批量删除</n-button>
-        <n-button quaternary circle @click="handleToggleView" style="margin-left: 8px">
-          <template #icon>
-            <Icon :type="treeMode ? 'list' : 'grid'" />
-          </template>
-        </n-button>
+        <div class="category-view-switch" role="group" aria-label="分类展示方式">
+          <n-button size="small" :type="!treeMode ? 'primary' : 'default'" secondary @click="treeMode = false">
+            <template #icon>
+              <Icon type="list" />
+            </template>
+            表格
+          </n-button>
+          <n-button size="small" :type="treeMode ? 'primary' : 'default'" secondary :disabled="loadingCategories" @click="treeMode = true">
+            <template #icon>
+              <Icon type="grid" />
+            </template>
+            树形
+          </n-button>
+        </div>
       </div>
       <n-data-table
         v-if="!treeMode"
@@ -25,7 +34,7 @@
         @update:checked-row-keys="updateSelectedRowKeys"
         @update:page="handlePageChange"
       />
-      <n-tree v-else :data="categoryTree" :key-field="'id'" :label-field="'name'" :default-expand-all="true" />
+      <n-tree v-else class="categories-tree" :data="categoryTree" :key-field="'id'" :label-field="'name'" :default-expand-all="true" block-line />
     </n-card>
   </div>
 </template>
@@ -98,11 +107,6 @@ function buildCategoryTree(list: CategoryFlatVO[]): CategoryTreeNode[] {
   }
 
   return roots.map(prune)
-}
-
-// 切换树/表格视图
-function handleToggleView() {
-  treeMode.value = !treeMode.value
 }
 
 const pagination = reactive({
@@ -425,3 +429,68 @@ function handleBatchDelete() {
   })
 }
 </script>
+
+<style scoped>
+.category-view-switch {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: var(--surface-radius-sm);
+  background: color-mix(in srgb, var(--primary-color, var(--brand-link)) 7%, transparent);
+}
+
+.categories-tree {
+  min-height: 320px;
+  margin-top: 24px;
+  padding: 18px 24px;
+  border: 1px solid color-mix(in srgb, var(--app-border-color) 82%, transparent);
+  border-radius: var(--surface-radius);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--primary-color, var(--brand-link)) 5%, transparent), transparent 160px),
+    var(--app-surface-color);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.categories-tree :deep(.n-tree-node) {
+  min-height: 32px;
+  border-radius: 8px;
+  transition:
+    background-color var(--motion-duration-base) var(--motion-ease-out-quart),
+    transform var(--motion-duration-fast) var(--motion-ease-out-quint);
+}
+
+.categories-tree :deep(.n-tree-node:hover) {
+  background: color-mix(in srgb, var(--primary-color, var(--brand-link)) 8%, transparent);
+  transform: translateX(2px);
+}
+
+.categories-tree :deep(.n-tree-node--selected) {
+  background: color-mix(in srgb, var(--primary-color, var(--brand-link)) 13%, transparent);
+  color: var(--primary-color, var(--brand-link));
+}
+
+.categories-tree :deep(.n-tree-node-switcher) {
+  color: var(--app-text-muted);
+}
+
+.categories-tree :deep(.n-tree-node-content) {
+  padding: 5px 0;
+}
+
+@media (max-width: 768px) {
+  .categories-tree {
+    padding: 14px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .categories-tree :deep(.n-tree-node) {
+    transition: background-color var(--motion-duration-fast) ease-out;
+  }
+
+  .categories-tree :deep(.n-tree-node:hover) {
+    transform: none;
+  }
+}
+</style>

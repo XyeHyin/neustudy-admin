@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { createDiscreteApi } from 'naive-ui'
 
+import router from '@/router'
 import { isJwtToken, useAuthStore } from '@/store/auth'
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
@@ -33,6 +34,67 @@ function isAuthFreeRequest(url?: string) {
   return AUTH_FREE_URLS.has(getRequestPath(url))
 }
 
+function normalizeStatus(status?: number | string) {
+  const normalized = Number(status)
+  return Number.isFinite(normalized) ? normalized : undefined
+}
+
+function redirectToLogin() {
+  const current = router.currentRoute.value
+  if (current.name === 'login') return
+
+  router.replace({
+    name: 'login',
+    query: current.fullPath ? { redirect: current.fullPath } : undefined
+  })
+}
+
+function redirectToError(status: number) {
+  const currentName = router.currentRoute.value.name
+  if (status === 403) {
+    if (currentName !== 'forbidden') router.replace({ name: 'forbidden' })
+    return
+  }
+
+  if (status === 404) {
+    if (currentName !== 'not-found') router.replace('/not-found')
+    return
+  }
+
+  if (status >= 500) {
+    if (currentName !== 'error') router.replace({ name: 'error', query: { status: String(status) } })
+  }
+}
+
+function handleHttpError(status: number | undefined, errorMessage?: string, url?: string) {
+  if (status === 401) {
+    useAuthStore().logout()
+    message.error(errorMessage || '登录已失效，请重新登录')
+    redirectToLogin()
+    return
+  }
+
+  if (status === 403) {
+    message.error(`${errorMessage || '没有权限访问该资源'}${url ? `: ${url}` : ''}`)
+    redirectToError(status)
+    return
+  }
+
+  if (status === 404) {
+    message.error(errorMessage || '请求的资源不存在')
+    redirectToError(status)
+    return
+  }
+
+  if (status && status >= 500) {
+    message.error(errorMessage || '服务器异常，请稍后重试')
+    redirectToError(status)
+    return
+  }
+
+  message.error(errorMessage || '网络异常，请检查连接')
+}
+
 // 请求拦截器
 service.interceptors.request.use(
   config => {
@@ -49,6 +111,7 @@ service.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${auth.token.trim()}`
     } else if (auth.token) {
       auth.logout()
+      redirectToLogin()
       delete config.headers['Authorization']
       delete config.headers['authorization']
     }
@@ -67,22 +130,23 @@ service.interceptors.response.use(
     if (response.config.responseType === 'blob') {
       return response
     }
-    if (res.code !== 200) {
-      message.error(res.message || '请求失败')
+    const bodyStatus = normalizeStatus(res?.code)
+    if (bodyStatus && bodyStatus !== 200) {
+      if (bodyStatus === 401 || bodyStatus === 403 || bodyStatus === 404 || bodyStatus >= 500) {
+        handleHttpError(bodyStatus, res.message, response.config.url)
+      } else {
+        message.error(res.message || '请求失败')
+      }
     }
     return response
   },
   error => {
     const response = error.response
-    const status = response?.status ?? response?.data?.code
+    const status = normalizeStatus(response?.status ?? response?.data?.code)
     const url = response?.config?.url
+    const errorMessage = response?.data?.message
 
-    if (status === 401) {
-      useAuthStore().logout()
-      message.error(response?.data?.message ?? '登录已失效，请重新登录')
-    } else if (status === 403) {
-      message.error(`${response?.data?.message ?? '没有权限访问该资源'}${url ? `: ${url}` : ''}`)
-    }
+    handleHttpError(status, errorMessage, url)
     return Promise.reject(response ? response.data : error)
   }
 )

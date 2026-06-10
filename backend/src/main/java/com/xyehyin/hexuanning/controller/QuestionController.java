@@ -32,6 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -104,19 +105,7 @@ public class QuestionController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "知识点不存在");
         }
 
-        // 检查权限：如果只有查看自己的权限，需要验证所有权
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-
-        boolean hasViewAll = authorities.stream()
-                .anyMatch(a -> a.getAuthority().equals(PermissionConstants.QUESTION_LIST_ALL));
-
-        if (!hasViewAll) {
-            Long currentUserId = getCurrentUserId(request);
-            if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
-                throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能查看自己的题目");
-            }
-        }
+        checkKnowledgePointQuestionAccess(knowledgePoint, request, PermissionConstants.QUESTION_LIST_ALL, "您只能查看自己的题目");
 
         List<Question> questions;
         if (enabled != null) {
@@ -186,7 +175,7 @@ public class QuestionController extends BaseController {
     }
 
     @Operation(summary = "创建题目", description = "教师创建题目")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_CREATE_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_CREATE_SELF + "') or hasAuthority('" + PermissionConstants.QUESTION_CREATE_ALL + "')")
     @PostMapping
     public ApiResponse<QuestionVO> create(@RequestBody @Valid CreateQuestionDTO createQuestionDTO,
                                          HttpServletRequest request) {
@@ -197,7 +186,7 @@ public class QuestionController extends BaseController {
 
         // 检查权限：验证是否是自己的知识点
         Long currentUserId = getCurrentUserId(request);
-        if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
+        if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId) && !hasAuthority(PermissionConstants.QUESTION_CREATE_ALL)) {
             throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能为自己的知识点创建题目");
         }
 
@@ -234,25 +223,13 @@ public class QuestionController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "题目不存在");
         }
 
-        // 检查权限：如果只有查看自己的权限，需要验证所有权
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-
-        boolean hasViewAll = authorities.stream()
-                .anyMatch(a -> a.getAuthority().equals(PermissionConstants.QUESTION_VIEW_ALL));
-
-        if (!hasViewAll) {
-            Long currentUserId = getCurrentUserId(request);
-            if (!questionService.isQuestionOwnedByTeacher(questionId, currentUserId)) {
-                throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能查看自己的题目");
-            }
-        }
+        checkQuestionOwnershipOrAdminPermission(questionId, request, PermissionConstants.QUESTION_VIEW_ALL, "您只能查看自己的题目");
 
         return ApiResponse.success(questionMapper.toQuestionDetailVO(question));
     }
 
     @Operation(summary = "更新题目", description = "教师更新自己的题目")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.QUESTION_EDIT_ALL + "')")
     @PutMapping("/{questionId}")
     public ApiResponse<QuestionVO> update(@PathVariable Long questionId,
                                          @RequestBody @Valid UpdateQuestionDTO updateQuestionDTO,
@@ -262,18 +239,15 @@ public class QuestionController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "题目不存在");
         }
 
-        // 检查权限：验证是否是自己的题目
         Long currentUserId = getCurrentUserId(request);
-        if (!questionService.isQuestionOwnedByTeacher(questionId, currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能编辑自己的题目");
-        }
+        checkQuestionOwnershipOrAdminPermission(questionId, request, PermissionConstants.QUESTION_EDIT_ALL, "您只能编辑自己的题目");
 
         // 验证新的知识点是否存在且属于自己
         KnowledgePoint newKnowledgePoint = knowledgePointService.findById(updateQuestionDTO.getKnowledgePointId());
         if (newKnowledgePoint == null) {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "知识点不存在");
         }
-        if (!newKnowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
+        if (!newKnowledgePoint.getCourse().getTeacher().getId().equals(currentUserId) && !hasAuthority(PermissionConstants.QUESTION_EDIT_ALL)) {
             throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能选择自己的知识点");
         }
 
@@ -308,7 +282,7 @@ public class QuestionController extends BaseController {
     }
 
     @Operation(summary = "删除题目", description = "教师删除自己的题目")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_DELETE_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_DELETE_SELF + "') or hasAuthority('" + PermissionConstants.QUESTION_DELETE_ALL + "')")
     @DeleteMapping("/{questionId}")
     public ApiResponse<Boolean> delete(@PathVariable Long questionId, HttpServletRequest request) {
         Question question = questionService.findById(questionId);
@@ -316,11 +290,7 @@ public class QuestionController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "题目不存在");
         }
 
-        // 检查权限：验证是否是自己的题目
-        Long currentUserId = getCurrentUserId(request);
-        if (!questionService.isQuestionOwnedByTeacher(questionId, currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能删除自己的题目");
-        }
+        checkQuestionOwnershipOrAdminPermission(questionId, request, PermissionConstants.QUESTION_DELETE_ALL, "您只能删除自己的题目");
 
         return ApiResponse.success(questionService.delete(questionId));
     }
@@ -364,7 +334,7 @@ public class QuestionController extends BaseController {
     }
 
     @Operation(summary = "更新题目状态", description = "启用或禁用题目")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.QUESTION_EDIT_ALL + "')")
     @PutMapping("/{questionId}/status")
     public ApiResponse<QuestionVO> updateStatus(@PathVariable Long questionId,
                                                @RequestParam Boolean enabled,
@@ -374,11 +344,7 @@ public class QuestionController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "题目不存在");
         }
 
-        // 检查权限：验证是否是自己的题目
-        Long currentUserId = getCurrentUserId(request);
-        if (!questionService.isQuestionOwnedByTeacher(questionId, currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能修改自己的题目状态");
-        }
+        checkQuestionOwnershipOrAdminPermission(questionId, request, PermissionConstants.QUESTION_EDIT_ALL, "您只能修改自己的题目状态");
 
         question = questionService.updateEnabled(questionId, enabled);
         return ApiResponse.success(questionMapper.toQuestionVO(question));
@@ -439,6 +405,32 @@ public class QuestionController extends BaseController {
         return ApiResponse.success(statistics);
     }
 
+    private void checkQuestionOwnershipOrAdminPermission(Long questionId, HttpServletRequest request,
+                                                         String adminPermission, String message) {
+        Long currentUserId = getCurrentUserId(request);
+        if (questionService.isQuestionOwnedByTeacher(questionId, currentUserId)) {
+            return;
+        }
+        if (hasAuthority(adminPermission)) {
+            return;
+        }
+        throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, message);
+    }
+
+    private void checkKnowledgePointQuestionAccess(KnowledgePoint knowledgePoint, HttpServletRequest request,
+                                                   String adminPermission, String message) {
+        Long currentUserId = getCurrentUserId(request);
+        if (knowledgePoint.getCourse() != null
+                && knowledgePoint.getCourse().getTeacher() != null
+                && knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
+            return;
+        }
+        if (hasAuthority(adminPermission)) {
+            return;
+        }
+        throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, message);
+    }
+
     /**
      * 批量创建题目DTO
      */
@@ -459,7 +451,7 @@ public class QuestionController extends BaseController {
     @PreAuthorize("hasAuthority('" + PermissionConstants.QUESTION_CREATE_SELF + "') or " +
             "hasAuthority('" + PermissionConstants.QUESTION_CREATE_ALL + "')")
     @PostMapping("/batch")
-    public ApiResponse<List<QuestionVO>> batchCreate(
+    public ResponseEntity<ApiResponse<List<QuestionVO>>> batchCreate(
             @RequestBody @Valid BatchCreateQuestionDTO batchCreateDTO,
             HttpServletRequest request) {
 
@@ -524,10 +516,11 @@ public class QuestionController extends BaseController {
 
         // 如果有错误，在响应中包含错误信息
         if (!errors.isEmpty()) {
-            return ApiResponse.error(400, "部分题目创建失败: " + String.join("; ", errors), savedQuestions);
+            return ResponseEntity.status(207)
+                    .body(ApiResponse.error(207, "部分题目创建失败: " + String.join("; ", errors), savedQuestions));
         }
 
-        return ApiResponse.success(savedQuestions);
+        return ResponseEntity.ok(ApiResponse.success(savedQuestions));
     }
 
     /**
@@ -595,8 +588,11 @@ public class QuestionController extends BaseController {
                         .name("start")
                         .data(Map.of("total", total)));
 
+                List<CreateQuestionDTO> generatedQuestions = new ArrayList<>();
                 for (int index = 1; index <= total; index++) {
-                    CreateQuestionDTO question = questionService.generateSingleQuestionWithAI(requestDTO, index, total);
+                    CreateQuestionDTO question = questionService.generateSingleQuestionWithAI(
+                            requestDTO, index, total, generatedQuestions);
+                    generatedQuestions.add(question);
                     emitter.send(SseEmitter.event()
                             .name("question")
                             .id(String.valueOf(index))
@@ -639,7 +635,9 @@ public class QuestionController extends BaseController {
     public ApiResponse<PageResult<QuestionHistoryVO>> getQuestionHistory(
             @PathVariable("id") Long questionId,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+        checkQuestionOwnershipOrAdminPermission(questionId, request, PermissionConstants.QUESTION_VIEW_ALL, "您只能查看自己的题目");
         return ApiResponse.success(questionService.getQuestionHistory(questionId, page, size));
     }
 
@@ -648,7 +646,9 @@ public class QuestionController extends BaseController {
     @PostMapping("/{id}/history/{revision}")
     public ApiResponse<QuestionVO> revertQuestion(
             @PathVariable("id") Long questionId,
-            @PathVariable("revision") Number revision) {
+            @PathVariable("revision") Number revision,
+            HttpServletRequest request) {
+        checkQuestionOwnershipOrAdminPermission(questionId, request, PermissionConstants.QUESTION_EDIT_ALL, "您只能编辑自己的题目");
         return ApiResponse.success(questionService.revertQuestion(questionId, revision));
     }
 }

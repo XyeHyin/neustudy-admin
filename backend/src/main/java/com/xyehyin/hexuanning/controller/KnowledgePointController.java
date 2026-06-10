@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.xyehyin.hexuanning.dto.knowledgepoint.KnowledgePointExportDTO;
@@ -48,9 +47,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
 @Tag(name = "知识点管理", description = "知识点相关接口")
@@ -153,7 +149,7 @@ public class KnowledgePointController extends BaseController {
     }
 
     @Operation(summary = "创建知识点", description = "教师创建知识点")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_CREATE_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_CREATE_SELF + "') or hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_CREATE_ALL + "')")
     @PostMapping
     public ApiResponse<KnowledgePointVO> create(@RequestBody @Valid CreateKnowledgePointDTO createKnowledgePointDTO,
                                                 HttpServletRequest request) {
@@ -163,7 +159,7 @@ public class KnowledgePointController extends BaseController {
         if (course == null) {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "课程不存在");
         }
-        if (!course.getTeacher().getId().equals(teacherId)) {
+        if (!course.getTeacher().getId().equals(teacherId) && !hasAuthority(PermissionConstants.KNOWLEDGE_POINT_CREATE_ALL)) {
             throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能为自己的课程创建知识点");
         }
 
@@ -224,25 +220,13 @@ public class KnowledgePointController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "知识点不存在");
         }
 
-        // 检查权限：如果只有查看自己的权限，需要验证所有权
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-
-        boolean hasViewAll = authorities.stream()
-                .anyMatch(a -> a.getAuthority().equals(PermissionConstants.KNOWLEDGE_POINT_VIEW_ALL));
-
-        if (!hasViewAll) {
-            Long currentUserId = getCurrentUserId(request);
-            if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
-                throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能查看自己的知识点");
-            }
-        }
+        checkKnowledgePointOwnershipOrAdminPermission(knowledgePoint, request, PermissionConstants.KNOWLEDGE_POINT_VIEW_ALL, "您只能查看自己的知识点");
 
         return ApiResponse.success(knowledgePointMapper.toKnowledgePointDetailVO(knowledgePoint));
     }
 
     @Operation(summary = "更新知识点", description = "教师更新自己的知识点")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_ALL + "')")
     @PutMapping("/{knowledgePointId}")
     public ApiResponse<KnowledgePointVO> update(@PathVariable Long knowledgePointId,
                                                 @RequestBody @Valid UpdateKnowledgePointDTO updateKnowledgePointDTO,
@@ -252,11 +236,7 @@ public class KnowledgePointController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "知识点不存在");
         }
 
-        // 检查权限：验证是否是自己的知识点
-        Long currentUserId = getCurrentUserId(request);
-        if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能编辑自己的知识点");
-        }
+        checkKnowledgePointOwnershipOrAdminPermission(knowledgePoint, request, PermissionConstants.KNOWLEDGE_POINT_EDIT_ALL, "您只能编辑自己的知识点");
 
         // 检查知识点名称是否重复（排除自身）
         if (!knowledgePoint.getName().equals(updateKnowledgePointDTO.getName()) &&
@@ -293,7 +273,7 @@ public class KnowledgePointController extends BaseController {
     }
 
     @Operation(summary = "删除知识点", description = "教师删除自己的知识点")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_DELETE_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_DELETE_SELF + "') or hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_DELETE_ALL + "')")
     @DeleteMapping("/{knowledgePointId}")
     public ApiResponse<Boolean> delete(@PathVariable Long knowledgePointId, HttpServletRequest request) {
         KnowledgePoint knowledgePoint = knowledgePointService.findById(knowledgePointId);
@@ -301,11 +281,7 @@ public class KnowledgePointController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "知识点不存在");
         }
 
-        // 检查权限：验证是否是自己的知识点
-        Long currentUserId = getCurrentUserId(request);
-        if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能删除自己的知识点");
-        }
+        checkKnowledgePointOwnershipOrAdminPermission(knowledgePoint, request, PermissionConstants.KNOWLEDGE_POINT_DELETE_ALL, "您只能删除自己的知识点");
 
         return ApiResponse.success(knowledgePointService.delete(knowledgePointId));
     }
@@ -338,7 +314,7 @@ public class KnowledgePointController extends BaseController {
     }
 
     @Operation(summary = "更新知识点状态", description = "启用或禁用知识点")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_ALL + "')")
     @PutMapping("/{knowledgePointId}/status")
     public ApiResponse<KnowledgePointVO> updateStatus(@PathVariable Long knowledgePointId,
                                                       @RequestParam Boolean enabled,
@@ -348,18 +324,14 @@ public class KnowledgePointController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "知识点不存在");
         }
 
-        // 检查权限：验证是否是自己的知识点
-        Long currentUserId = getCurrentUserId(request);
-        if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能修改自己的知识点状态");
-        }
+        checkKnowledgePointOwnershipOrAdminPermission(knowledgePoint, request, PermissionConstants.KNOWLEDGE_POINT_EDIT_ALL, "您只能修改自己的知识点状态");
 
         knowledgePoint = knowledgePointService.updateEnabled(knowledgePointId, enabled);
         return ApiResponse.success(knowledgePointMapper.toKnowledgePointVO(knowledgePoint));
     }
 
     @Operation(summary = "更新知识点排序", description = "更新知识点排序号")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.KNOWLEDGE_POINT_EDIT_ALL + "')")
     @PutMapping("/{knowledgePointId}/order")
     public ApiResponse<KnowledgePointVO> updateOrder(@PathVariable Long knowledgePointId,
                                                      @RequestParam Integer orderNum,
@@ -369,14 +341,24 @@ public class KnowledgePointController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "知识点不存在");
         }
 
-        // 检查权限：验证是否是自己的知识点
-        Long currentUserId = getCurrentUserId(request);
-        if (!knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能修改自己的知识点排序");
-        }
+        checkKnowledgePointOwnershipOrAdminPermission(knowledgePoint, request, PermissionConstants.KNOWLEDGE_POINT_EDIT_ALL, "您只能修改自己的知识点排序");
 
         knowledgePoint = knowledgePointService.updateOrder(knowledgePointId, orderNum);
         return ApiResponse.success(knowledgePointMapper.toKnowledgePointVO(knowledgePoint));
+    }
+
+    private void checkKnowledgePointOwnershipOrAdminPermission(KnowledgePoint knowledgePoint, HttpServletRequest request,
+                                                               String adminPermission, String message) {
+        Long currentUserId = getCurrentUserId(request);
+        if (knowledgePoint.getCourse() != null
+                && knowledgePoint.getCourse().getTeacher() != null
+                && knowledgePoint.getCourse().getTeacher().getId().equals(currentUserId)) {
+            return;
+        }
+        if (hasAuthority(adminPermission)) {
+            return;
+        }
+        throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, message);
     }
 
     @Operation(summary = "导出知识点", description = "导出知识点到Excel文件")

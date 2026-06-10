@@ -507,6 +507,12 @@ async function handleSaveSelected() {
           // 从 generatedQuestions 中移除已保存的题目
           generatedQuestions.value = generatedQuestions.value.filter(q => !selectedQuestions.includes(q))
           selectedRowKeys.value = []
+        } else if (res.code === 207) {
+          const savedQuestions = res.data || []
+          const savedQuestionKeys = new Set(savedQuestions.map(q => `${q.title}|${q.knowledgePoint?.id || ''}`))
+          message.warning(`${res.message || '部分题目保存失败'}，已成功保存 ${savedQuestions.length} 道`)
+          generatedQuestions.value = generatedQuestions.value.filter(q => !savedQuestionKeys.has(`${q.title}|${q.knowledgePointId}`))
+          selectedRowKeys.value = []
         } else {
           message.error(res.message || '保存失败')
         }

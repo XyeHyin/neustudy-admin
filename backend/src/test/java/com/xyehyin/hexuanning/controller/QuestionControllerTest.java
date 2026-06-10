@@ -1,7 +1,6 @@
 package com.xyehyin.hexuanning.controller;
 
 import com.xyehyin.hexuanning.common.ApiResponse;
-import com.xyehyin.hexuanning.constant.PermissionConstants;
 import com.xyehyin.hexuanning.dto.question.CreateQuestionDTO;
 import com.xyehyin.hexuanning.entity.Question;
 import com.xyehyin.hexuanning.entity.KnowledgePoint;
@@ -21,8 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -33,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,13 +112,6 @@ class QuestionControllerTest {
         when(authentication.getPrincipal()).thenReturn(userId);
     }
 
-    private void mockAuthorities(String... permissions) {
-        List<GrantedAuthority> authorities = Arrays.stream(permissions)
-                .<GrantedAuthority>map(SimpleGrantedAuthority::new)
-                .toList();
-        doReturn(authorities).when(authentication).getAuthorities();
-    }
-
     @Test
     void testListAll() {
         // Given
@@ -171,7 +160,6 @@ class QuestionControllerTest {
     void testDetail() {
         // Given
         mockCurrentUser(1L);
-        mockAuthorities(PermissionConstants.QUESTION_VIEW_SELF);
         when(questionService.findById(1L)).thenReturn(testQuestion);
         when(questionService.isQuestionOwnedByTeacher(1L, 1L)).thenReturn(true);
         when(questionMapper.toQuestionDetailVO(any(Question.class))).thenReturn(testQuestionDetailVO);

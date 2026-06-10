@@ -24,9 +24,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -148,14 +144,7 @@ public class CourseController extends BaseController {
         Course course = courseMapper.toCourse(createCourseDTO);
         course.setTeacher(teacher);
 
-        // 设置分类（如果提供）
-        if (createCourseDTO.getCategoryId() != null) {
-            Category category = categoryService.findById(createCourseDTO.getCategoryId());
-            if (category == null) {
-                throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "分类不存在");
-            }
-            course.setCategory(category);
-        }
+        applyCourseCategory(course, createCourseDTO.getCategoryId(), createCourseDTO.getSubject(), false);
 
         course = courseService.save(course);
         return ApiResponse.success(courseMapper.toCourseVO(course));
@@ -178,14 +167,7 @@ public class CourseController extends BaseController {
         Course course = courseMapper.toCourse(createCourseDTO);
         course.setTeacher(teacher);
 
-        // 设置分类（如果提供）
-        if (createCourseDTO.getCategoryId() != null) {
-            Category category = categoryService.findById(createCourseDTO.getCategoryId());
-            if (category == null) {
-                throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "分类不存在");
-            }
-            course.setCategory(category);
-        }
+        applyCourseCategory(course, createCourseDTO.getCategoryId(), createCourseDTO.getSubject(), false);
 
         course = courseService.save(course);
         return ApiResponse.success(courseMapper.toCourseVO(course));
@@ -201,25 +183,13 @@ public class CourseController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "课程不存在");
         }
         
-        // 检查权限：如果只有查看自己的权限，需要验证所有权
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-        
-        boolean hasViewAll = authorities.stream()
-                .anyMatch(a -> a.getAuthority().equals(PermissionConstants.COURSE_VIEW_ALL));
-        
-        if (!hasViewAll) {
-            Long currentUserId = getCurrentUserId(request);
-            if (!course.getTeacher().getId().equals(currentUserId)) {
-                throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能查看自己的课程");
-            }
-        }
+        checkCourseOwnershipOrAdminPermission(course, request, PermissionConstants.COURSE_VIEW_ALL, "您只能查看自己的课程");
         
         return ApiResponse.success(courseMapper.toCourseDetailVO(course));
     }
 
     @Operation(summary = "更新课程", description = "教师更新自己的课程")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.COURSE_EDIT_ALL + "')")
     @PutMapping("/{courseId}")
     public ApiResponse<CourseVO> update(@PathVariable Long courseId, 
                                        @RequestBody @Valid UpdateCourseDTO updateCourseDTO,
@@ -229,11 +199,7 @@ public class CourseController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "课程不存在");
         }
         
-        // 检查权限：验证是否是自己的课程
-        Long currentUserId = getCurrentUserId(request);
-        if (!course.getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能编辑自己的课程");
-        }
+        checkCourseOwnershipOrAdminPermission(course, request, PermissionConstants.COURSE_EDIT_ALL, "您只能编辑自己的课程");
 
         // 检查课程名称是否重复（排除自身）
         if (!course.getName().equals(updateCourseDTO.getName()) &&
@@ -243,16 +209,7 @@ public class CourseController extends BaseController {
 
         courseMapper.updateCourseFromDto(updateCourseDTO, course);
 
-        // 更新分类
-        if (updateCourseDTO.getCategoryId() != null) {
-            Category category = categoryService.findById(updateCourseDTO.getCategoryId());
-            if (category == null) {
-                throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "分类不存在");
-            }
-            course.setCategory(category);
-        } else {
-            course.setCategory(null);
-        }
+        applyCourseCategory(course, updateCourseDTO.getCategoryId(), updateCourseDTO.getSubject(), true);
 
         course = courseService.save(course);
         return ApiResponse.success(courseMapper.toCourseVO(course));
@@ -269,23 +226,14 @@ public class CourseController extends BaseController {
 
         courseMapper.updateCourseFromDto(updateCourseDTO, course);
 
-        // 更新分类
-        if (updateCourseDTO.getCategoryId() != null) {
-            Category category = categoryService.findById(updateCourseDTO.getCategoryId());
-            if (category == null) {
-                throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "分类不存在");
-            }
-            course.setCategory(category);
-        } else {
-            course.setCategory(null);
-        }
+        applyCourseCategory(course, updateCourseDTO.getCategoryId(), updateCourseDTO.getSubject(), true);
 
         course = courseService.save(course);
         return ApiResponse.success(courseMapper.toCourseVO(course));
     }
 
     @Operation(summary = "删除课程", description = "教师删除自己的课程")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_DELETE_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_DELETE_SELF + "') or hasAuthority('" + PermissionConstants.COURSE_DELETE_ALL + "')")
     @DeleteMapping("/{courseId}")
     public ApiResponse<Boolean> delete(@PathVariable Long courseId, HttpServletRequest request) {
         Course course = courseService.findById(courseId);
@@ -293,11 +241,7 @@ public class CourseController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "课程不存在");
         }
         
-        // 检查权限：验证是否是自己的课程
-        Long currentUserId = getCurrentUserId(request);
-        if (!course.getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能删除自己的课程");
-        }
+        checkCourseOwnershipOrAdminPermission(course, request, PermissionConstants.COURSE_DELETE_ALL, "您只能删除自己的课程");
         
         return ApiResponse.success(courseService.delete(courseId));
     }
@@ -322,7 +266,7 @@ public class CourseController extends BaseController {
     }
 
     @Operation(summary = "更新课程进度", description = "更新课程完成进度")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.COURSE_EDIT_ALL + "')")
     @PutMapping("/{courseId}/progress")
     public ApiResponse<CourseVO> updateProgress(@PathVariable Long courseId, 
                                                @RequestParam Integer completedHours,
@@ -332,18 +276,14 @@ public class CourseController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "课程不存在");
         }
         
-        // 检查权限：验证是否是自己的课程
-        Long currentUserId = getCurrentUserId(request);
-        if (!course.getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能更新自己的课程进度");
-        }
+        checkCourseOwnershipOrAdminPermission(course, request, PermissionConstants.COURSE_EDIT_ALL, "您只能更新自己的课程进度");
         
         course = courseService.updateProgress(courseId, completedHours);
         return ApiResponse.success(courseMapper.toCourseVO(course));
     }
 
     @Operation(summary = "发布课程", description = "发布课程")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.COURSE_EDIT_ALL + "')")
     @PutMapping("/{courseId}/publish")
     public ApiResponse<CourseVO> publishCourse(@PathVariable Long courseId, HttpServletRequest request) {
         Course course = courseService.findById(courseId);
@@ -351,18 +291,14 @@ public class CourseController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "课程不存在");
         }
         
-        // 检查权限：验证是否是自己的课程
-        Long currentUserId = getCurrentUserId(request);
-        if (!course.getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能发布自己的课程");
-        }
+        checkCourseOwnershipOrAdminPermission(course, request, PermissionConstants.COURSE_EDIT_ALL, "您只能发布自己的课程");
         
         course = courseService.publishCourse(courseId);
         return ApiResponse.success(courseMapper.toCourseVO(course));
     }
 
     @Operation(summary = "归档课程", description = "归档课程")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "')")
+    @PreAuthorize("hasAuthority('" + PermissionConstants.COURSE_EDIT_SELF + "') or hasAuthority('" + PermissionConstants.COURSE_EDIT_ALL + "')")
     @PutMapping("/{courseId}/archive")
     public ApiResponse<CourseVO> archiveCourse(@PathVariable Long courseId, HttpServletRequest request) {
         Course course = courseService.findById(courseId);
@@ -370,11 +306,7 @@ public class CourseController extends BaseController {
             throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "课程不存在");
         }
         
-        // 检查权限：验证是否是自己的课程
-        Long currentUserId = getCurrentUserId(request);
-        if (!course.getTeacher().getId().equals(currentUserId)) {
-            throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, "您只能归档自己的课程");
-        }
+        checkCourseOwnershipOrAdminPermission(course, request, PermissionConstants.COURSE_EDIT_ALL, "您只能归档自己的课程");
         
         course = courseService.archiveCourse(courseId);
         return ApiResponse.success(courseMapper.toCourseVO(course));
@@ -413,5 +345,45 @@ public class CourseController extends BaseController {
         );
 
         return ApiResponse.success(statistics);
+    }
+
+    private void checkCourseOwnershipOrAdminPermission(Course course, HttpServletRequest request, String adminPermission, String message) {
+        Long currentUserId = getCurrentUserId(request);
+        if (course.getTeacher() != null && course.getTeacher().getId().equals(currentUserId)) {
+            return;
+        }
+        if (hasAuthority(adminPermission)) {
+            return;
+        }
+        throw new StatefulException(HttpStatus.HTTP_FORBIDDEN, message);
+    }
+
+    private void applyCourseCategory(Course course, Long categoryId, String subject, boolean keepCurrentIfMissing) {
+        Category category = resolveCourseCategory(categoryId, subject);
+        if (category != null) {
+            course.setCategory(category);
+        } else if (!keepCurrentIfMissing) {
+            course.setCategory(null);
+        }
+    }
+
+    private Category resolveCourseCategory(Long categoryId, String subject) {
+        if (categoryId != null) {
+            Category category = categoryService.findById(categoryId);
+            if (category == null) {
+                throw new StatefulException(HttpStatus.HTTP_NOT_FOUND, "分类不存在");
+            }
+            return category;
+        }
+
+        if (subject == null || subject.isBlank()) {
+            return null;
+        }
+
+        return categoryService.findAll().stream()
+                .filter(category -> subject.equals(category.getName()))
+                .filter(category -> category.getParent() != null && "学科".equals(category.getParent().getName()))
+                .findFirst()
+                .orElse(null);
     }
 }

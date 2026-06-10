@@ -100,6 +100,7 @@ const showDetailModal = ref(false)
 const showCreateModal = ref(false)
 
 const rowKey = (row: CourseVO) => row.id
+const currentUserId = computed(() => auth.user?.id)
 
 const pagination = reactive({
   page: 1,
@@ -220,17 +221,18 @@ const columns: DataTableColumns<CourseVO> = [
     render: (row: CourseVO) =>
       [
         // 查看按钮
-        h(
-          NButton,
-          {
-            size: 'small',
-            type: 'primary',
-            ghost: true,
-            style: 'margin-right: 8px',
-            onClick: () => handleViewCourse(row)
-          },
-          { default: () => '查看' }
-        ),
+        canViewCourse(row) &&
+          h(
+            NButton,
+            {
+              size: 'small',
+              type: 'primary',
+              ghost: true,
+              style: 'margin-right: 8px',
+              onClick: () => handleViewCourse(row)
+            },
+            { default: () => '查看' }
+          ),
         // 删除按钮（有权限才显示）
         auth.hasPermission('course:delete:all') &&
           h(
@@ -283,6 +285,10 @@ function updateCreateModalShow(show: boolean) {
   showCreateModal.value = show
 }
 
+function canViewCourse(course: CourseVO) {
+  return auth.hasPermission('course:view:all') || (auth.hasPermission('course:view:self') && Number(course.teacherId) === Number(currentUserId.value))
+}
+
 function handleCreateCourse() {
   showCreateModal.value = true
 }
@@ -330,7 +336,7 @@ async function handleUpdateCourse({ id, data }: { id: number; data: UpdateCourse
   updatingCourse.value = true
   try {
     let res
-    if (auth.hasPermission('course:edit:admin')) {
+    if (auth.hasPermission('course:edit:all')) {
       res = await adminUpdateCourse(id, data)
     } else {
       res = await updateCourse(id, data)

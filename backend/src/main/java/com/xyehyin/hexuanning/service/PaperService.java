@@ -68,6 +68,7 @@ public class PaperService {
     /**
      * 分页查询试卷，支持按 title, teacherId, status 过滤
      */
+    @Transactional(readOnly = true)
     public Page<Paper> page(String title, Long teacherId, String status, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page != null && page > 0 ? page - 1 : 0,
                 size != null && size > 0 ? size : 10,
@@ -90,6 +91,7 @@ public class PaperService {
     /**
      * 根据ID查找试卷，不存在则抛异常
      */
+    @Transactional(readOnly = true)
     public Paper findByIdOrThrow(Long id) {
         return paperRepository.findById(id)
                 .orElseThrow(() -> new StatefulException(HttpStatus.HTTP_NOT_FOUND, "试卷不存在"));
@@ -234,6 +236,7 @@ public class PaperService {
     /**
      * 查询试卷题目列表，支持乱序
      */
+    @Transactional(readOnly = true)
     public List<PaperQuestionVO> listQuestions(Long paperId, boolean randomOrder) {
         Paper paper = findByIdOrThrow(paperId);
         List<PaperQuestion> list = paperQuestionRepository.findByPaperId(paperId);
@@ -317,6 +320,10 @@ public class PaperService {
         if (selected.size() > total) {
             selected = new ArrayList<>(selected.subList(0, total));
         }
+        selected = selected.stream()
+                .filter(q -> q.getId() != null)
+                .collect(Collectors.toCollection(ArrayList::new));
+
         // 5. 创建试卷
         Paper paper = new Paper();
         paper.setTitle("智能组卷-" + System.currentTimeMillis());
@@ -330,26 +337,81 @@ public class PaperService {
         }
         paper.setQuestions(new ArrayList<>());
         paper = paperRepository.save(paper);
+
+        List<Integer> scaledScores = allocateScaledScores(selected, resolveTargetTotalScore(dto));
+
         // 6. 关联题目
-        int order = 1;
-        for (Question q : selected) {
-            if (q.getId() == null) continue; // 跳过无效题目
+        for (int i = 0; i < selected.size(); i++) {
+            Question q = selected.get(i);
             PaperQuestion pq = new PaperQuestion();
             pq.setPaper(paper);
             pq.setQuestion(questionRepository.getReferenceById(q.getId()));
-            pq.setOrderNum(order++);
-            pq.setScore(q.getScore() != null ? q.getScore() : 1);
+            pq.setOrderNum(i + 1);
+            pq.setScore(scaledScores.get(i));
             paperQuestionRepository.save(pq);
         }
-        // 7. 计算总分
-        int totalScore = selected.stream().mapToInt(q -> q.getScore() != null ? q.getScore() : 1).sum();
+        // 7. 记录卷面总分
+        int totalScore = scaledScores.stream().mapToInt(Integer::intValue).sum();
         paper.setTotalScore(totalScore);
         return paperRepository.save(paper);
+    }
+
+    private int resolveTargetTotalScore(SmartPaperDTO dto) {
+        return dto.getTotalScore() != null && dto.getTotalScore() > 0 ? dto.getTotalScore() : 100;
+    }
+
+    private List<Integer> allocateScaledScores(List<Question> questions, int targetTotalScore) {
+        if (questions == null || questions.isEmpty()) {
+            return List.of();
+        }
+
+        int questionCount = questions.size();
+        int minScore = targetTotalScore >= questionCount ? 1 : 0;
+        int remainingScore = targetTotalScore - minScore * questionCount;
+
+        List<Integer> weights = questions.stream()
+                .map(this::resolveQuestionWeight)
+                .toList();
+        int totalWeight = weights.stream().mapToInt(Integer::intValue).sum();
+        if (totalWeight <= 0) {
+            totalWeight = questionCount;
+        }
+
+        List<Integer> scores = new ArrayList<>();
+        List<Integer> indexes = new ArrayList<>();
+        double[] remainders = new double[questionCount];
+        int allocated = 0;
+
+        for (int i = 0; i < questionCount; i++) {
+            double exactScore = (double) weights.get(i) * remainingScore / totalWeight;
+            int integerScore = minScore + (int) Math.floor(exactScore);
+            scores.add(integerScore);
+            allocated += integerScore;
+            remainders[i] = exactScore - Math.floor(exactScore);
+            indexes.add(i);
+        }
+
+        int remainderScore = targetTotalScore - allocated;
+        indexes.sort((left, right) -> Double.compare(remainders[right], remainders[left]));
+        for (int i = 0; i < remainderScore; i++) {
+            int index = indexes.get(i % indexes.size());
+            scores.set(index, scores.get(index) + 1);
+        }
+
+        return scores;
+    }
+
+    private int resolveQuestionWeight(Question question) {
+        if (question == null || question.getScore() == null || question.getScore() <= 0) {
+            return 1;
+        }
+        return question.getScore();
     }
 
     /**
      * 统计试卷完成情况、分数、正确率等
      */
+    @Transactional(readOnly = true)
     public PaperStatisticsVO statistics(Long paperId) {
         Paper paper = findByIdOrThrow(paperId);
         List<PracticeSession> sessions = practiceSessionRepository.findAll().stream()

@@ -29,6 +29,10 @@ import java.util.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import com.xyehyin.hexuanning.vo.question.QuestionVO;
 
 /**
@@ -37,6 +41,10 @@ import com.xyehyin.hexuanning.vo.question.QuestionVO;
 @Slf4j
 @Service
 public class QuestionService extends BaseService<Question, Long> {
+
+    private static final int AI_SINGLE_QUESTION_MAX_ATTEMPTS = 3;
+    private static final int QUESTION_SUMMARY_MAX_LENGTH = 140;
+    private static final double QUESTION_SIMILARITY_THRESHOLD = 0.72;
 
     private final QuestionRepository questionRepository;
     private final KnowledgePointService knowledgePointService;
@@ -218,6 +226,39 @@ public class QuestionService extends BaseService<Question, Long> {
      * AI流式生成时按单题生成，便于前端一题完成就展示一题。
      */
     public CreateQuestionDTO generateSingleQuestionWithAI(AIGenerateQuestionDTO requestDTO, int index, int total) {
+        return generateSingleQuestionWithAI(requestDTO, index, total, Collections.emptyList());
+    }
+
+    /**
+     * AI流式生成时按单题生成，并基于本次已生成题目做上下文约束和相似度重试。
+     */
+    public CreateQuestionDTO generateSingleQuestionWithAI(AIGenerateQuestionDTO requestDTO, int index, int total,
+                                                          List<CreateQuestionDTO> existingQuestions) {
+        List<CreateQuestionDTO> previousQuestions = existingQuestions == null
+                ? Collections.emptyList()
+                : existingQuestions;
+        CreateQuestionDTO lastQuestion = null;
+
+        for (int attempt = 1; attempt <= AI_SINGLE_QUESTION_MAX_ATTEMPTS; attempt++) {
+            CreateQuestionDTO question = generateSingleQuestionAttempt(requestDTO, index, total, previousQuestions, attempt);
+            lastQuestion = question;
+
+            if (!isSimilarToExistingQuestions(question, previousQuestions)) {
+                return question;
+            }
+
+            log.warn("AI生成的第{}/{}道题与已生成题目相似，准备重试，第{}次结果标题: {}",
+                    index, total, attempt, question.getTitle());
+        }
+
+        log.warn("AI生成的第{}/{}道题连续{}次相似，返回最后一次结果，标题: {}",
+                index, total, AI_SINGLE_QUESTION_MAX_ATTEMPTS,
+                lastQuestion == null ? null : lastQuestion.getTitle());
+        return lastQuestion;
+    }
+
+    private CreateQuestionDTO generateSingleQuestionAttempt(AIGenerateQuestionDTO requestDTO, int index, int total,
+                                                           List<CreateQuestionDTO> existingQuestions, int attempt) {
         AIGenerateQuestionDTO singleRequest = new AIGenerateQuestionDTO();
         singleRequest.setKnowledgePointId(requestDTO.getKnowledgePointId());
         singleRequest.setType(requestDTO.getType());
@@ -225,7 +266,7 @@ public class QuestionService extends BaseService<Question, Long> {
         singleRequest.setCount(1);
 
         String baseRequirement = requestDTO.getExtraRequirement() == null ? "" : requestDTO.getExtraRequirement().trim();
-        String sequenceRequirement = "这是本次批量生成的第 " + index + "/" + total + " 道题，请避免与前面题目重复。";
+        String sequenceRequirement = buildSequenceRequirement(index, total, existingQuestions, attempt);
         singleRequest.setExtraRequirement(baseRequirement.isEmpty()
                 ? sequenceRequirement
                 : baseRequirement + "；" + sequenceRequirement);
@@ -238,6 +279,144 @@ public class QuestionService extends BaseService<Question, Long> {
         question.setKnowledgePointId(requestDTO.getKnowledgePointId());
         question.setIsAiGenerated(true);
         return question;
+    }
+
+    private String buildSequenceRequirement(int index, int total, List<CreateQuestionDTO> existingQuestions, int attempt) {
+        StringBuilder requirement = new StringBuilder();
+        requirement.append("这是本次批量生成的第 ").append(index).append("/").append(total).append(" 道题。")
+                .append("必须与本次已生成题目在考查角度、题干场景、答案结论、选项设计和解析侧重点上明显不同，")
+                .append("不要只替换名称、数字、选项顺序或同义改写。")
+                .append("请在概念定义、流程步骤、场景应用、边界条件、风险判断、对比辨析等角度中选择新的角度。");
+
+        if (attempt > 1) {
+            requirement.append("前一次生成结果被系统判定为相似，请换一个完全不同的考查切入点。");
+        }
+
+        if (existingQuestions == null || existingQuestions.isEmpty()) {
+            return requirement.toString();
+        }
+
+        requirement.append("已生成题目摘要如下，禁止重复或改写这些题目：");
+        for (int i = 0; i < existingQuestions.size(); i++) {
+            CreateQuestionDTO question = existingQuestions.get(i);
+            requirement.append("\n").append(i + 1).append(". 标题：")
+                    .append(truncateForPrompt(question.getTitle(), QUESTION_SUMMARY_MAX_LENGTH))
+                    .append("；题干：")
+                    .append(truncateForPrompt(question.getContent(), QUESTION_SUMMARY_MAX_LENGTH))
+                    .append("；答案：")
+                    .append(truncateForPrompt(question.getAnswer(), QUESTION_SUMMARY_MAX_LENGTH));
+        }
+
+        return requirement.toString();
+    }
+
+    private boolean isSimilarToExistingQuestions(CreateQuestionDTO question, List<CreateQuestionDTO> existingQuestions) {
+        if (question == null || existingQuestions == null || existingQuestions.isEmpty()) {
+            return false;
+        }
+
+        for (CreateQuestionDTO existingQuestion : existingQuestions) {
+            if (areSimilarQuestions(question, existingQuestion)) {
+                log.info("检测到AI生成题目相似，新题: {}，已有题: {}",
+                        question.getTitle(), existingQuestion.getTitle());
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean areSimilarQuestions(CreateQuestionDTO current, CreateQuestionDTO existing) {
+        String currentTitle = normalizeQuestionText(current.getTitle());
+        String existingTitle = normalizeQuestionText(existing.getTitle());
+        if (!currentTitle.isEmpty() && currentTitle.equals(existingTitle)) {
+            return true;
+        }
+
+        String currentCore = normalizeQuestionText(current.getTitle() + current.getContent());
+        String existingCore = normalizeQuestionText(existing.getTitle() + existing.getContent());
+        if (isContainedDuplicate(currentCore, existingCore)) {
+            return true;
+        }
+
+        double titleSimilarity = calculateBigramJaccard(currentTitle, existingTitle);
+        if (titleSimilarity >= 0.85) {
+            return true;
+        }
+
+        double coreSimilarity = calculateBigramJaccard(currentCore, existingCore);
+        if (coreSimilarity >= QUESTION_SIMILARITY_THRESHOLD) {
+            return true;
+        }
+
+        String currentAnswer = normalizeQuestionText(current.getAnswer());
+        String existingAnswer = normalizeQuestionText(existing.getAnswer());
+        return currentAnswer.length() >= 4
+                && currentAnswer.equals(existingAnswer)
+                && coreSimilarity >= 0.55;
+    }
+
+    private boolean isContainedDuplicate(String currentCore, String existingCore) {
+        int minLength = Math.min(currentCore.length(), existingCore.length());
+        if (minLength < 18) {
+            return false;
+        }
+        return currentCore.contains(existingCore) || existingCore.contains(currentCore);
+    }
+
+    private double calculateBigramJaccard(String left, String right) {
+        Set<String> leftBigrams = toBigrams(left);
+        Set<String> rightBigrams = toBigrams(right);
+        if (leftBigrams.isEmpty() || rightBigrams.isEmpty()) {
+            return 0D;
+        }
+
+        Set<String> intersection = new HashSet<>(leftBigrams);
+        intersection.retainAll(rightBigrams);
+
+        Set<String> union = new HashSet<>(leftBigrams);
+        union.addAll(rightBigrams);
+
+        return (double) intersection.size() / union.size();
+    }
+
+    private Set<String> toBigrams(String text) {
+        if (text == null || text.length() < 2) {
+            return Collections.emptySet();
+        }
+
+        Set<String> bigrams = new HashSet<>();
+        for (int i = 0; i < text.length() - 1; i++) {
+            bigrams.add(text.substring(i, i + 2));
+        }
+        return bigrams;
+    }
+
+    private String normalizeQuestionText(String text) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+
+        String lowerText = text.toLowerCase(Locale.ROOT);
+        StringBuilder normalized = new StringBuilder(lowerText.length());
+        for (int i = 0; i < lowerText.length(); i++) {
+            char ch = lowerText.charAt(i);
+            if (Character.isLetterOrDigit(ch)) {
+                normalized.append(ch);
+            }
+        }
+        return normalized.toString();
+    }
+
+    private String truncateForPrompt(String value, int maxLength) {
+        if (value == null || value.isBlank()) {
+            return "无";
+        }
+        String trimmed = value.trim();
+        if (trimmed.length() <= maxLength) {
+            return trimmed;
+        }
+        return trimmed.substring(0, maxLength) + "...";
     }
 
     /**
@@ -599,13 +778,23 @@ public class QuestionService extends BaseService<Question, Long> {
      * @param size 每页大小
      * @return 历史版本分页列表
      */
+    @Transactional(readOnly = true)
     public PageResult<QuestionHistoryVO> getQuestionHistory(Long questionId, int page, int size) {
         AuditReader reader = AuditReaderFactory.get(entityManager);
         List<Number> revisions = reader.getRevisions(Question.class, questionId);
         long total = revisions.size();
         int p = Math.max(page, 1) - 1;
-        int from = p * size;
-        int to = Math.min(from + size, revisions.size());
+        int pageSize = Math.max(size, 1);
+        int from = p * pageSize;
+        if (from >= revisions.size()) {
+            return PageResult.<QuestionHistoryVO>builder()
+                    .content(List.of())
+                    .total(total)
+                    .page(page)
+                    .size(pageSize)
+                    .build();
+        }
+        int to = Math.min(from + pageSize, revisions.size());
         List<QuestionHistoryVO> content = new ArrayList<>();
         for (Number rev : revisions.subList(from, to)) {
             Date revDate = reader.getRevisionDate(rev);
@@ -621,7 +810,7 @@ public class QuestionService extends BaseService<Question, Long> {
                 .content(content)
                 .total(total)
                 .page(page)
-                .size(size)
+                .size(pageSize)
                 .build();
     }
 

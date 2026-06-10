@@ -1,5 +1,8 @@
 package com.xyehyin.hexuanning.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceUnitUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,10 +12,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public abstract class BaseService<T, ID> {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     protected abstract JpaRepository<T, ID> getRepository();
 
+    @SuppressWarnings("unchecked")
     public T save(T entity) {
-        return getRepository().save(entity);
+        T saved = getRepository().saveAndFlush(entity);
+        PersistenceUnitUtil persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
+        Object id = persistenceUnitUtil.getIdentifier(saved);
+        if (id == null) {
+            return saved;
+        }
+        return getRepository().findById((ID) id).orElse(saved);
     }
 
     public T findById(ID id) {

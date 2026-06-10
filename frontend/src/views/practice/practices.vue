@@ -5,7 +5,7 @@
       <div class="admin-toolbar">
         <n-select v-model:value="paperFilter" :options="paperOptions" clearable placeholder="选择试卷" style="width: 200px" @update:value="handleSearch" />
         <n-select v-model:value="submittedFilter" :options="submittedOptions" clearable placeholder="提交状态" style="width: 120px" @update:value="handleSearch" />
-        <n-button type="primary" @click="handleStartPractice" :disabled="!paperFilter">开始练习</n-button>
+        <n-button type="primary" :loading="startingPractice" @click="handleStartPractice" :disabled="!paperFilter || startingPractice">开始练习</n-button>
       </div>
 
       <n-tabs v-model:value="activeTab" type="line">
@@ -20,7 +20,7 @@
             :bordered="false"
             :row-key="paperRowKey"
             @update:page="handlePaperPageChange"
-            @update:page-size="handleRecordPageSizeChange"
+            @update:page-size="handlePaperPageSizeChange"
           />
         </n-tab-pane>
 
@@ -35,14 +35,22 @@
             :bordered="false"
             :row-key="recordRowKey"
             @update:page="handleRecordPageChange"
-            @update:page-size="handlePaperPageSizeChange"
+            @update:page-size="handleRecordPageSizeChange"
           />
         </n-tab-pane>
       </n-tabs>
     </n-card>
 
     <!-- 练习会话模态框 -->
-    <practice-session-modal :show="showPracticeModal" :session-id="currentSessionId" @update:show="updatePracticeModalShow" @submit="handlePracticeSubmit" />
+    <practice-session-modal :show="showPracticeModal" :session-id="currentSessionId" :submitting="submittingPractice" @update:show="updatePracticeModalShow" @submit="handlePracticeSubmit" />
+
+    <n-modal :show="submittingPractice" :mask-closable="false" :close-on-esc="false" transform-origin="center">
+      <div class="grading-feedback-panel">
+        <n-spin size="large" />
+        <div class="grading-feedback-title">正在提交并判分</div>
+        <div class="grading-feedback-text">如果包含主观题，AI 判题可能需要等待一小会儿，请不要关闭页面。</div>
+      </div>
+    </n-modal>
 
     <!-- 练习结果模态框 -->
     <practice-result-modal :show="showResultModal" :result="practiceResult" :stats="currentRecordStats" @update:show="updateResultModalShow" />
@@ -103,6 +111,7 @@ const showResultModal = ref(false)
 const showAnalysisModal = ref(false)
 const currentSessionId = ref<number | null>(null)
 const selectedPaperData = ref<PracticePaperStatVO | null>(null)
+const startingPaperId = ref<number | null>(null)
 
 // 选项
 
@@ -176,6 +185,8 @@ const paperColumns = [
             {
               size: 'small',
               type: 'primary',
+              loading: startingPractice.value && startingPaperId.value === row.paperId,
+              disabled: startingPractice.value,
               onClick: () => handleStartPracticeWithPaper(row.paperId!)
             },
             { default: () => '开始练习' }
@@ -303,10 +314,10 @@ const { loading: loadingRecords, run: fetchRecords } = useRequest(
 )
 
 // 开始练习
-const { runAsync: runStartPractice } = useRequest(startPractice, { manual: true })
+const { loading: startingPractice, runAsync: runStartPractice } = useRequest(startPractice, { manual: true })
 
 // 提交练习
-const { runAsync: runSubmitPractice } = useRequest(submitPractice, { manual: true })
+const { loading: submittingPractice, runAsync: runSubmitPractice } = useRequest(submitPractice, { manual: true })
 
 // 新增：当前记录的统计
 const currentRecordStats = reactive({ maxScore: 0, minScore: 0 })
@@ -317,6 +328,39 @@ function paperRowKey(row: PracticePaperStatVO) {
 
 function recordRowKey(row: PracticeRecordVO) {
   return row.practiceSessionId
+}
+
+function syncSubmittedPaperScore(result: PracticeResultVO) {
+  const index = availablePapers.value.findIndex(paper => paper.paperId === result.paperId)
+  if (index < 0) return
+
+  const paper = availablePapers.value[index]
+  const previousAttempts = paper.totalAttempts ?? 0
+  const nextAttempts = previousAttempts + 1
+  const previousMax = paper.maxScore
+  const previousMin = paper.minScore
+  const nextMaxScore = previousMax == null ? result.totalScore : Math.max(previousMax, result.totalScore)
+  const nextMinScore = previousMin == null ? result.totalScore : Math.min(previousMin, result.totalScore)
+  const previousAvg = paper.avgScore ?? 0
+  const nextAvgScore = previousAttempts > 0 ? (previousAvg * previousAttempts + result.totalScore) / nextAttempts : result.totalScore
+
+  availablePapers.value[index] = {
+    ...paper,
+    totalAttempts: nextAttempts,
+    maxScore: nextMaxScore,
+    minScore: nextMinScore,
+    avgScore: nextAvgScore,
+    hasFullScore: paper.totalScore != null ? nextMaxScore >= paper.totalScore : paper.hasFullScore,
+    scoreTrend: [...(paper.scoreTrend || []), result.totalScore]
+  }
+
+  currentRecordStats.maxScore = nextMaxScore
+  currentRecordStats.minScore = nextMinScore
+}
+
+function refreshPracticeData() {
+  fetchPapers()
+  fetchRecords()
 }
 
 // 事件处理
@@ -359,6 +403,7 @@ async function handleStartPractice() {
 }
 
 async function handleStartPracticeWithPaper(paperId: number) {
+  startingPaperId.value = paperId
   try {
     const res = await runStartPractice({ paperId })
     if (res.code === 200) {
@@ -382,6 +427,8 @@ async function handleStartPracticeWithPaper(paperId: number) {
     } else {
       message.error(error.message || '开始练习失败')
     }
+  } finally {
+    startingPaperId.value = null
   }
 }
 
@@ -391,9 +438,10 @@ async function handlePracticeSubmit(data: PracticeSubmitDTO) {
     if (res.code === 200) {
       message.success('提交成功')
       practiceResult.value = res.data
+      syncSubmittedPaperScore(res.data)
       showPracticeModal.value = false
       showResultModal.value = true
-      fetchRecords()
+      refreshPracticeData()
     } else {
       message.error(res.message || '提交失败')
     }
@@ -460,3 +508,26 @@ onMounted(() => {
   fetchRecords()
 })
 </script>
+
+<style scoped>
+.grading-feedback-panel {
+  width: min(360px, calc(100vw - 48px));
+  padding: 28px 24px;
+  border-radius: 8px;
+  background: var(--n-color, #fff);
+  box-shadow: var(--n-box-shadow, 0 12px 40px rgba(0, 0, 0, 0.16));
+  text-align: center;
+}
+
+.grading-feedback-title {
+  margin-top: 16px;
+  font-size: var(--text-subtitle, 18px);
+  font-weight: var(--weight-semibold, 600);
+}
+
+.grading-feedback-text {
+  margin-top: 8px;
+  color: var(--n-text-color-2, #606266);
+  line-height: var(--leading-body, 1.6);
+}
+</style>

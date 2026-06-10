@@ -60,6 +60,7 @@ public class PracticeService {
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public Optional<PracticeSession> findById(Long id) {
         return practiceSessionRepository.findById(id);
     }
@@ -224,6 +225,7 @@ public class PracticeService {
         return vo;
     }
 
+    @Transactional(readOnly = true)
     public PracticeSessionVO getPracticeSession(Long id) {
         PracticeSession session = practiceSessionRepository.findById(id).orElseThrow(() -> new StatefulException(HttpStatus.HTTP_NOT_FOUND, "练习会话不存在"));
 
@@ -266,6 +268,7 @@ public class PracticeService {
         return vo;
     }
 
+    @Transactional(readOnly = true)
     public List<PracticeRecordVO> listPracticeRecords(Long paperId, Long studentId, Boolean submitted, Integer page, Integer size) {
         // 根据查询条件构建高效查询
         List<PracticeSession> sessions;
@@ -332,6 +335,7 @@ public class PracticeService {
         return list;
     }
 
+    @Transactional(readOnly = true)
     public PracticeResultVO getPracticeResult(Long id) {
         PracticeSession session = practiceSessionRepository.findById(id).orElseThrow(() -> new StatefulException(HttpStatus.HTTP_NOT_FOUND, "练习会话不存在"));
 
@@ -392,6 +396,7 @@ public class PracticeService {
         studentAnswerRepository.save(answer);
     }
 
+    @Transactional(readOnly = true)
     public PracticeOverviewVO getPracticeOverview(Long id) {
         PracticeSession session = practiceSessionRepository.findById(id).orElseThrow(() -> new StatefulException(HttpStatus.HTTP_NOT_FOUND, "练习会话不存在"));
 
@@ -431,6 +436,7 @@ public class PracticeService {
     /**
      * 查询某学生的练习历史
      */
+    @Transactional(readOnly = true)
     public List<PracticeRecordVO> getPracticeHistory(Long studentId) {
         // 使用优化后的查询方法
         List<PracticeSession> sessions = practiceSessionRepository.findByStudentId(studentId);
@@ -455,6 +461,7 @@ public class PracticeService {
     /**
      * 查询某学生某试卷的练习统计
      */
+    @Transactional(readOnly = true)
     public PracticeRecordVO getPracticeStatistics(Long studentId, Long paperId) {
         // 使用优化后的查询方法
         List<PracticeSession> sessions = practiceSessionRepository.findByStudentIdAndPaperId(studentId, paperId);
@@ -503,6 +510,7 @@ public class PracticeService {
      * @param id 练习会话ID
      * @return 练习详情VO
      */
+    @Transactional(readOnly = true)
     public PracticeDetailVO getPracticeDetail(Long id) {
         // 获取练习会话
         PracticeSession session = practiceSessionRepository.findById(id).orElseThrow(() -> new StatefulException(HttpStatus.HTTP_NOT_FOUND, "练习会话不存在"));
@@ -570,6 +578,7 @@ public class PracticeService {
     /**
      * 获取所有可用试卷及当前用户的练习统计信息
      */
+    @Transactional(readOnly = true)
     public List<PracticePaperStatVO> listAvailablePapersWithStats(Long userId) {
         // 查询所有已发布试卷
         List<Paper> papers = paperRepository.findAll().stream().filter(p -> Paper.PaperStatus.PUBLISHED.equals(p.getStatus())).collect(Collectors.toList());

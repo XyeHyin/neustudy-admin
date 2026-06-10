@@ -45,9 +45,7 @@ public class DataInitConfig implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         // 初始化权限
-        if (permissionRepository.count() == 0) {
-            initPermissions();
-        }
+        initPermissions();
 
         // 初始化角色
         initRoles();
@@ -60,9 +58,21 @@ public class DataInitConfig implements CommandLineRunner {
     }
 
     private void initPermissions() {
-        PermissionSeed.defaults().stream()
-                .map(PermissionSeed::toEntity)
-                .forEach(permissionRepository::save);
+        Map<String, Permission> permissionsByCode = permissionRepository.findAll().stream()
+                .collect(Collectors.toMap(Permission::getCode, permission -> permission, (left, right) -> left));
+
+        for (PermissionSeed seed : PermissionSeed.defaults()) {
+            Permission permission = permissionsByCode.get(seed.code());
+            if (permission == null) {
+                permissionRepository.save(seed.toEntity());
+                continue;
+            }
+
+            if (!seed.name().equals(permission.getName())) {
+                permission.setName(seed.name());
+                permissionRepository.save(permission);
+            }
+        }
     }
 
     private void initRoles() {
@@ -78,11 +88,29 @@ public class DataInitConfig implements CommandLineRunner {
         Map<String, List<Permission>> permissionsByCode = permissionRepository.findAll().stream()
                 .collect(Collectors.groupingBy(Permission::getCode));
 
+        syncAdminPermissions();
         RoleSeed.defaults().forEach(seed -> createRoleIfMissing(seed, permissionsByCode));
     }
 
+    private void syncAdminPermissions() {
+        Role admin = roleRepository.findRoleByName("admin");
+        if (admin == null) {
+            return;
+        }
+
+        Set<Permission> permissions = admin.getPermissions() == null ? new HashSet<>() : new HashSet<>(admin.getPermissions());
+        permissions.addAll(permissionRepository.findAll());
+        admin.setPermissions(permissions);
+        roleRepository.save(admin);
+    }
+
     private void createRoleIfMissing(RoleSeed seed, Map<String, List<Permission>> permissionsByCode) {
-        if (roleRepository.findRoleByName(seed.name()) != null) {
+        Role existingRole = roleRepository.findRoleByName(seed.name());
+        if (existingRole != null) {
+            Set<Permission> permissions = existingRole.getPermissions() == null ? new HashSet<>() : new HashSet<>(existingRole.getPermissions());
+            permissions.addAll(resolvePermissions(seed, permissionsByCode));
+            existingRole.setPermissions(permissions);
+            roleRepository.save(existingRole);
             return;
         }
 

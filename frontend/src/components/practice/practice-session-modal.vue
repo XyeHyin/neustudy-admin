@@ -1,93 +1,96 @@
-﻿<template>
+<template>
   <n-modal :show="show" preset="card" title="练习答题" @close="handleClose" style="width: 90vw; max-width: 1200px; height: 80vh">
     <template v-if="practiceDetail">
-      <!-- 练习头部信息 -->
-      <div class="practice-header">
-        <div class="practice-info">
-          <h3>{{ practiceDetail.paperTitle }}</h3>
-          <n-space>
-            <n-tag type="info">练习中</n-tag>
-            <n-tag :type="practiceDetail.submitted ? 'success' : 'warning'">
-              {{ practiceDetail.submitted ? '已提交' : '答题中' }}
-            </n-tag>
-          </n-space>
+      <n-spin :show="isSubmitting" :description="submittingDescription">
+        <!-- 练习头部信息 -->
+        <div class="practice-header">
+          <div class="practice-info">
+            <h3>{{ practiceDetail.paperTitle }}</h3>
+            <n-space>
+              <n-tag type="info">练习中</n-tag>
+              <n-tag :type="practiceDetail.submitted ? 'success' : 'warning'">
+                {{ practiceDetail.submitted ? '已提交' : '答题中' }}
+              </n-tag>
+            </n-space>
+          </div>
+          <div class="practice-actions">
+            <n-button v-if="!practiceDetail.submitted" type="primary" @click="handleSubmit" :loading="isSubmitting" :disabled="isSubmitting">提交答案</n-button>
+            <n-button :disabled="isSubmitting" @click="handleClose">关闭</n-button>
+          </div>
         </div>
-        <div class="practice-actions">
-          <n-button v-if="!practiceDetail.submitted" type="primary" @click="handleSubmit" :loading="submitting">提交答案</n-button>
-          <n-button @click="handleClose">关闭</n-button>
+
+        <!-- 练习进度 -->
+        <div class="practice-progress">
+          <n-progress :percentage="progressPercentage" />
+          <n-text depth="3">已答题 {{ answeredCount }} / {{ totalQuestions }} 题</n-text>
         </div>
-      </div>
 
-      <!-- 练习进度 -->
-      <div class="practice-progress">
-        <n-progress :percentage="progressPercentage" />
-        <n-text depth="3">已答题 {{ answeredCount }} / {{ totalQuestions }} 题</n-text>
-      </div>
-
-      <!-- 题目导航和答题区域 -->
-      <div class="practice-content">
-        <!-- 题目导航 -->
-        <div class="question-nav">
-          <n-scrollbar style="max-height: 400px">
-            <div class="nav-grid">
-              <div
-                v-for="(question, index) in questions"
-                :key="question.questionId!"
-                class="nav-item"
-                :class="{
-                  'nav-item--active': currentQuestionIndex === index,
-                  'nav-item--answered': isQuestionAnswered(question.questionId!),
-                  'nav-item--marked': isQuestionMarked(question.questionId!)
-                }"
-                @click="setCurrentQuestion(index)"
-              >
-                {{ index + 1 }}
+        <!-- 题目导航和答题区域 -->
+        <div class="practice-content">
+          <!-- 题目导航 -->
+          <div class="question-nav">
+            <n-scrollbar style="max-height: 400px">
+              <div class="nav-grid">
+                <div
+                  v-for="(question, index) in questions"
+                  :key="question.questionId!"
+                  class="nav-item"
+                  :class="{
+                    'nav-item--active': currentQuestionIndex === index,
+                    'nav-item--answered': isQuestionAnswered(question.questionId!),
+                    'nav-item--marked': isQuestionMarked(question.questionId!),
+                    'nav-item--disabled': isSubmitting
+                  }"
+                  @click="setCurrentQuestion(index)"
+                >
+                  {{ index + 1 }}
+                </div>
               </div>
-            </div>
-          </n-scrollbar>
-        </div>
+            </n-scrollbar>
+          </div>
 
-        <!-- 答题区域 -->
-        <div class="question-area">
-          <div v-if="currentQuestion" class="question-content">
-            <!-- 题目标题 -->
-            <div class="question-header">
-              <n-space justify="space-between">
-                <h4>第 {{ currentQuestionIndex + 1 }} 题 ({{ currentQuestion.score }} 分)</h4>
-                <n-space>
-                  <n-button size="small" @click="markQuestion" :type="isCurrentQuestionMarked ? 'warning' : 'default'">
-                    {{ isCurrentQuestionMarked ? '取消标记' : '标记' }}
-                  </n-button>
+          <!-- 答题区域 -->
+          <div class="question-area">
+            <div v-if="currentQuestion" class="question-content">
+              <!-- 题目标题 -->
+              <div class="question-header">
+                <n-space justify="space-between">
+                  <h4>第 {{ currentQuestionIndex + 1 }} 题 ({{ currentQuestion.score }} 分)</h4>
+                  <n-space>
+                    <n-button size="small" :disabled="isSubmitting" @click="markQuestion" :type="isCurrentQuestionMarked ? 'warning' : 'default'">
+                      {{ isCurrentQuestionMarked ? '取消标记' : '标记' }}
+                    </n-button>
+                  </n-space>
                 </n-space>
-              </n-space>
-            </div>
-
-            <!-- 题目内容 -->
-            <div class="question-body">
-              <div class="question-title">{{ currentQuestion.content }}</div>
-              <div class="question-type">
-                <n-tag size="small" :type="getQuestionTypeColor(currentQuestion.type)">
-                  {{ getQuestionTypeText(currentQuestion.type) }}
-                </n-tag>
               </div>
 
-              <!-- 答题区域 -->
-              <div class="answer-area">
-                <!-- 由 formattedQuestion 传入完整的 PracticeAnswerVO -->
-                <question-answer-input v-model:value="currentAnswer" :question="formattedQuestion" :disabled="practiceDetail.submitted" @update:value="handleAnswerChange" />
-              </div>
-            </div>
+              <!-- 题目内容 -->
+              <div class="question-body">
+                <div class="question-title">{{ currentQuestion.content }}</div>
+                <div class="question-type">
+                  <n-tag size="small" :type="getQuestionTypeColor(currentQuestion.type)">
+                    {{ getQuestionTypeText(currentQuestion.type) }}
+                  </n-tag>
+                </div>
 
-            <!-- 题目导航按钮 -->
-            <div class="question-nav-buttons">
-              <n-space justify="space-between">
-                <n-button @click="previousQuestion" :disabled="currentQuestionIndex === 0">上一题</n-button>
-                <n-button @click="nextQuestion" :disabled="currentQuestionIndex === questions.length - 1">下一题</n-button>
-              </n-space>
+                <!-- 答题区域 -->
+                <div class="answer-area">
+                  <!-- 由 formattedQuestion 传入完整的 PracticeAnswerVO -->
+                  <question-answer-input v-model:value="currentAnswer" :question="formattedQuestion" :disabled="practiceDetail.submitted || isSubmitting" @update:value="handleAnswerChange" />
+                </div>
+              </div>
+
+              <!-- 题目导航按钮 -->
+              <div class="question-nav-buttons">
+                <n-space justify="space-between">
+                  <n-button @click="previousQuestion" :disabled="isSubmitting || currentQuestionIndex === 0">上一题</n-button>
+                  <n-button @click="nextQuestion" :disabled="isSubmitting || currentQuestionIndex === questions.length - 1">下一题</n-button>
+                </n-space>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </n-spin>
     </template>
 
     <div v-else class="loading-container">
@@ -109,6 +112,7 @@ import type { PracticeAnswerVO, PracticeDetailVO, PracticeSubmitDTO } from '@/ap
 const props = defineProps<{
   show: boolean
   sessionId: number | null
+  submitting?: boolean
 }>()
 
 const emit = defineEmits(['update:show', 'submit'])
@@ -158,6 +162,9 @@ const progressPercentage = computed(() => {
 })
 
 const isCurrentQuestionMarked = computed(() => markStatus.value.get(currentQuestion.value!.questionId!) || false)
+const hasSubjectiveQuestions = computed(() => questions.value.some(q => q.type === 'SHORT_ANSWER' || q.type === 'ESSAY'))
+const isSubmitting = computed(() => submitting.value || !!props.submitting)
+const submittingDescription = computed(() => (hasSubjectiveQuestions.value ? '正在提交答案并等待 AI 判题，请稍候' : '正在提交答案，请稍候'))
 
 // 获取练习详情
 const { run: fetchPracticeDetail } = useRequest((id: number) => getPracticeDetail(id), {
@@ -230,16 +237,19 @@ function isQuestionMarked(questionId?: number) {
 
 // 事件处理
 function setCurrentQuestion(index: number) {
+  if (isSubmitting.value) return
   currentQuestionIndex.value = index
 }
 
 function previousQuestion() {
+  if (isSubmitting.value) return
   if (currentQuestionIndex.value > 0) {
     currentQuestionIndex.value--
   }
 }
 
 function nextQuestion() {
+  if (isSubmitting.value) return
   if (currentQuestionIndex.value < questions.value.length - 1) {
     currentQuestionIndex.value++
   }
@@ -250,7 +260,7 @@ function handleAnswerChange(value: string) {
 }
 
 async function markQuestion() {
-  if (!practiceDetail.value || !currentQuestion.value) return
+  if (isSubmitting.value || !practiceDetail.value || !currentQuestion.value) return
 
   try {
     const isMarked = isCurrentQuestionMarked.value
@@ -268,7 +278,7 @@ async function markQuestion() {
 }
 
 async function handleSubmit() {
-  if (!practiceDetail.value) return
+  if (isSubmitting.value || !practiceDetail.value) return
 
   // 检查是否有未答题目
   const unanswered = questions.value.filter(q => !answers.value.has(q.questionId!))
@@ -300,6 +310,10 @@ async function handleSubmit() {
 }
 
 function handleClose() {
+  if (isSubmitting.value) {
+    message.info('正在提交并判分，请稍候')
+    return
+  }
   emit('update:show', false)
 }
 
@@ -377,6 +391,15 @@ watch(
 
 .nav-item:hover {
   background-color: var(--n-color-hover);
+}
+
+.nav-item--disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.nav-item--disabled:hover {
+  background-color: initial;
 }
 
 .nav-item--active {

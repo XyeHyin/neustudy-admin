@@ -19,6 +19,7 @@ public record RoleSeed(String name, String description, List<String> permissionC
                         PermissionConstants.USER_EDIT_SELF,
                         PermissionConstants.USER_UPDATE_PASSWORD_SELF,
                         PermissionConstants.COURSE_CREATE_SELF,
+                        PermissionConstants.COURSE_VIEW_ALL,
                         PermissionConstants.COURSE_VIEW_SELF,
                         PermissionConstants.COURSE_EDIT_SELF,
                         PermissionConstants.COURSE_DELETE_SELF,

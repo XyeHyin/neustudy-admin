@@ -222,6 +222,14 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    name: 'error',
+    path: '/error',
+    component: () => import('@/views/errors/error.vue'),
+    meta: {
+      title: 'Oh no!'
+    }
+  },
+  {
     name: 'layout',
     path: '/',
     component: () => import('../layouts/index.vue'),

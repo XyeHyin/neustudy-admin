@@ -56,6 +56,7 @@ public class GradingService {
         return gradingResultRepository.save(result);
     }
 
+    @Transactional(readOnly = true)
     public Optional<GradingResult> findById(Long id) {
         return gradingResultRepository.findById(id);
     }
@@ -237,11 +238,13 @@ public class GradingService {
         return toVO(result);
     }
 
+    @Transactional(readOnly = true)
     public GradingResultVO getGradingResult(Long id) {
         GradingResult result = gradingResultRepository.findById(id).orElse(null);
         return result != null ? toVO(result) : null;
     }
 
+    @Transactional(readOnly = true)
     public PageResult<GradingReviewVO> listReview(int page, int size, Long paperId, String questionTitle) {
         int p = Math.max(page, 1) - 1;
         int s = Math.max(size, 1);
@@ -273,6 +276,7 @@ public class GradingService {
      * @param questionTitle 题目标题关键词，可选
      * @return 分页结果
      */
+    @Transactional(readOnly = true)
     public PageResult<GradingResultVO> listReviewed(int page, int size, Long paperId, String questionTitle) {
         int p = Math.max(page, 1) - 1;
         int s = Math.max(size, 1);
@@ -291,7 +295,8 @@ public class GradingService {
     private GradingResultVO toVO(GradingResult result) {
         GradingResultVO vo = new GradingResultVO();
         vo.setGradingResultId(result.getId());
-        vo.setStudentAnswerId(result.getStudentAnswer().getId());
+        StudentAnswer studentAnswer = result.getStudentAnswer();
+        vo.setStudentAnswerId(studentAnswer != null ? studentAnswer.getId() : null);
         vo.setAiScore(result.getAiScore());
         vo.setAiComment(result.getAiComment());
         vo.setAiReason(result.getAiReason());

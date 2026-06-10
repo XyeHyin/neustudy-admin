@@ -39,6 +39,7 @@ public interface CourseMapper {
     /**
      * Course -> CourseDetailVO
      */
+    @Mapping(source = "category", target = "category", qualifiedByName = "categoryFlat")
     CourseDetailVO toCourseDetailVO(Course course);
 
     /**

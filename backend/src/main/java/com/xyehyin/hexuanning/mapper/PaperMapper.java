@@ -36,6 +36,7 @@ public interface PaperMapper {
      */
     @Mapping(source = "teacher.id", target = "teacherId")
     @Mapping(source = "teacher.username", target = "teacherName")
+    @Mapping(target = "questions", ignore = true)
     PaperDetailVO toPaperDetailVO(Paper paper);
 
     /**
@@ -47,4 +48,4 @@ public interface PaperMapper {
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     void updatePaperFromDto(PaperUpdateDTO dto, @MappingTarget Paper paper);
-} 
+}
