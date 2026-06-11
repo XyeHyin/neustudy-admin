@@ -7,7 +7,7 @@
           <n-select v-model:value="courseFilter" :options="courseOptions" clearable placeholder="课程" style="width: 180px" @update:value="handleSearch" />
           <n-select v-model:value="difficultyFilter" :options="difficultyOptions" clearable placeholder="难度" style="width: 120px" @update:value="handleSearch" />
           <n-select v-model:value="statusFilter" :options="statusOptions" clearable placeholder="状态" style="width: 120px" @update:value="handleSearch" />
-          <n-button type="primary" @click="handleCreateKnowledgePoint" v-permission="'knowledge_point:create:all'">新建知识点</n-button>
+          <n-button type="primary" @click="handleCreateKnowledgePoint" v-permission="'knowledge_point:create:self'">新建知识点</n-button>
           <n-button type="info" @click="showImport = true" v-permission="'knowledge_point:import'">导入知识点</n-button>
           <n-button type="warning" @click="showExport = true" v-permission="'knowledge_point:export'">导出知识点</n-button>
           <n-button type="error" :disabled="!selectedRowKeys.length" @click="handleBatchDelete" v-permission="'knowledge_point:delete:all'">批量删除</n-button>
@@ -35,8 +35,8 @@
         :updating-status="updatingStatus"
         :courses="courses"
         :knowledge-point="selectedKnowledgePoint"
-        :can-edit="true"
-        :can-update-status="true"
+        :can-edit="canEditKnowledgePoint(selectedKnowledgePoint || undefined)"
+        :can-update-status="canEditKnowledgePoint(selectedKnowledgePoint || undefined)"
         @update:show="updateDetailModalShow"
         @submit="handleUpdateKnowledgePoint"
         @toggle-status="handleToggleStatus"
@@ -200,14 +200,14 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
       width: 100,
       render: (row: KnowledgePointVO) => {
         // 有权限可切换状态，否则显示标签
-        if (auth.hasPermission('knowledge_point:edit:all')) {
+        if (canEditKnowledgePoint(row)) {
           return h(
             NSwitch,
             {
               size: 'small',
               value: row.enabled,
               onClick: async () => {
-                if (!auth.hasPermission('knowledge_point:edit:all')) return
+                if (!canEditKnowledgePoint(row)) return
                 try {
                   const res = await runUpdateStatus(row.id, !row.enabled)
                   if (res.code === 200) {
@@ -260,7 +260,7 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
             { default: () => '查看' }
           ),
           // 删除按钮（有权限才显示）
-          auth.hasPermission('knowledge_point:delete:all') &&
+          canDeleteKnowledgePoint(row) &&
             h(
               NButton,
               {
@@ -305,6 +305,14 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
   function handleCreateKnowledgePoint() {
     showCreateModal.value = true
   }
+
+  function canEditKnowledgePoint(row?: { id: number }) {
+    return auth.hasPermission('knowledge_point:edit:all') || (auth.hasPermission('knowledge_point:edit:self') && !!row)
+  }
+
+  function canDeleteKnowledgePoint(row?: { id: number }) {
+    return auth.hasPermission('knowledge_point:delete:all') || (auth.hasPermission('knowledge_point:delete:self') && !!row)
+  }
   
   // 创建知识点提交
   async function handleCreateKnowledgePointSubmit(data: CreateKnowledgePointDTO & { createdBy?: number }) {
@@ -341,7 +349,7 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
   // 更新知识点
   async function handleUpdateKnowledgePoint({ id, data }: { id: number; data: UpdateKnowledgePointDTO }) {
     try {
-      const updateFn = auth.hasPermission('knowledge:edit:admin') ? adminUpdateKnowledgePoint : runUpdateKnowledgePoint
+      const updateFn = auth.hasPermission('knowledge_point:edit:all') ? adminUpdateKnowledgePoint : runUpdateKnowledgePoint
       const res = await updateFn(id, data)
       if (res.code === 200) {
         message.success('更新知识点成功')
@@ -385,7 +393,7 @@ import { getEnabledStatusText as getStatusText, getEnabledStatusType as getStatu
       preset: 'dialog',
       onPositiveClick: async () => {
         try {
-          const deleteFn = auth.hasPermission('knowledge:delete:admin') ? adminDeleteKnowledgePoint : deleteKnowledgePoint
+          const deleteFn = auth.hasPermission('knowledge_point:delete:all') ? adminDeleteKnowledgePoint : deleteKnowledgePoint
           const res = await deleteFn(knowledgePoint.id)
           if (res.code === 200) {
             message.success('删除成功')

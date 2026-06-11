@@ -19,4 +19,18 @@ public class CategoryService extends BaseService<Category, Long> {
     public boolean isCategoryNameExistsWithNoParent(String name) {
         return categoryRepository.existsCategoryByNameAndParentIsNull(name);
     }
+
+    public boolean existsByNameAndParentId(String name, Long parentId) {
+        if (parentId == null) {
+            return categoryRepository.existsCategoryByNameAndParentIsNull(name);
+        }
+        return categoryRepository.existsCategoryByNameAndParent_Id(name, parentId);
+    }
+
+    public boolean existsByNameAndParentIdExcludingId(String name, Long parentId, Long excludedId) {
+        if (parentId == null) {
+            return categoryRepository.existsCategoryByNameAndParentIsNullAndIdNot(name, excludedId);
+        }
+        return categoryRepository.existsCategoryByNameAndParent_IdAndIdNot(name, parentId, excludedId);
+    }
 }

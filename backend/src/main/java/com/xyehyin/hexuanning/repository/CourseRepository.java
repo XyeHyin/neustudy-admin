@@ -74,6 +74,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      */
     long countByTeacherId(Long teacherId);
 
+    long countByTeacherIdAndStatus(Long teacherId, Course.CourseStatus status);
+
     /**
      * 分页查询所有课程（支持关键字搜索）
      */

@@ -64,6 +64,10 @@ public class CourseService extends BaseService<Course, Long> {
         return courseRepository.countByTeacherId(teacherId);
     }
 
+    public long countByTeacherIdAndStatus(Long teacherId, Course.CourseStatus status) {
+        return courseRepository.countByTeacherIdAndStatus(teacherId, status);
+    }
+
     /**
      * 检查课程名称是否存在（同一教师下）
      */

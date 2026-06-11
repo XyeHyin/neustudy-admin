@@ -159,7 +159,7 @@ const { run: fetchCourses } = useRequest(getCourses, {
 })
 
 const { loading: creatingKnowledgePoint, runAsync: runCreateKnowledgePoint } = useRequest(adminCreateKnowledgePoint, { manual: true })
-const { loading: updatingKnowledgePoint, runAsync: runUpdateKnowledgePoint } = useRequest(adminUpdateKnowledgePoint, { manual: true })
+const updatingKnowledgePoint = ref(false)
 const { loading: updatingStatus, runAsync: runUpdateStatus } = useRequest(updateKnowledgePointStatus, { manual: true })
 
 onMounted(() => {
@@ -334,9 +334,9 @@ async function handleViewKnowledgePoint(knowledgePoint: KnowledgePointVO) {
 
 // 更新知识点
 async function handleUpdateKnowledgePoint({ id, data }: { id: number; data: UpdateKnowledgePointDTO }) {
+  updatingKnowledgePoint.value = true
   try {
-    const updateFn = auth.hasPermission('knowledge:edit:admin') ? adminUpdateKnowledgePoint : runUpdateKnowledgePoint
-    const res = await updateFn(id, data)
+    const res = await adminUpdateKnowledgePoint(id, data)
     if (res.code === 200) {
       message.success('更新知识点成功')
       showDetailModal.value = false
@@ -346,6 +346,8 @@ async function handleUpdateKnowledgePoint({ id, data }: { id: number; data: Upda
     }
   } catch (e: any) {
     message.error(e.message || '更新知识点异常')
+  } finally {
+    updatingKnowledgePoint.value = false
   }
 }
 

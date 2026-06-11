@@ -114,7 +114,7 @@ class PaperControllerTest {
         when(paperMapper.toPaperListVO(any(Paper.class))).thenReturn(paperListVO);
 
         // When
-        ApiResponse<PageResult<PaperListVO>> result = paperController.page(null, null, null, 1, 10);
+        ApiResponse<PageResult<PaperListVO>> result = paperController.page(null, null, null, 1, 10, request);
 
         // Then
         assertNotNull(result);
@@ -134,7 +134,7 @@ class PaperControllerTest {
         when(paperService.listQuestions(anyLong(), anyBoolean())).thenReturn(questions);
 
         // When
-        ApiResponse<PaperDetailVO> result = paperController.getPaper(1L);
+        ApiResponse<PaperDetailVO> result = paperController.getPaper(1L, request);
 
         // Then
         assertNotNull(result);
@@ -144,6 +144,7 @@ class PaperControllerTest {
         assertEquals(120, result.getData().getTimeLimit());
 
         verify(paperService).findByIdOrThrow(1L);
+        verify(paperService).ensurePaperOwnershipOrAdminPermission(testPaper, null, "paper:view:all");
         verify(paperService).listQuestions(1L, false);
     }
 
@@ -172,7 +173,7 @@ class PaperControllerTest {
         when(paperService.statistics(1L)).thenReturn(paperStatsVO);
 
         // When
-        ApiResponse<PaperStatisticsVO> result = paperController.statistics(1L);
+        ApiResponse<PaperStatisticsVO> result = paperController.statistics(1L, request);
 
         // Then
         assertNotNull(result);
@@ -182,6 +183,7 @@ class PaperControllerTest {
         assertEquals(30, result.getData().getTotalAttempts());
         assertEquals(78.5, result.getData().getAverageScore());
 
+        verify(paperService).ensurePaperOwnershipOrAdminPermission(1L, null, "paper:view:all");
         verify(paperService).statistics(1L);
     }
 }

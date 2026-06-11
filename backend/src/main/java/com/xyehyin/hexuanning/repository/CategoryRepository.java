@@ -22,4 +22,10 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Category findByName(String name);
 
     boolean existsCategoryByNameAndParentIsNull(String name);
+
+    boolean existsCategoryByNameAndParent_Id(String name, Long parentId);
+
+    boolean existsCategoryByNameAndParent_IdAndIdNot(String name, Long parentId, Long id);
+
+    boolean existsCategoryByNameAndParentIsNullAndIdNot(String name, Long id);
 }

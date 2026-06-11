@@ -29,7 +29,7 @@ import java.io.IOException;
 public class FileController {
     private final FileService fileService;
 
-    @Operation(summary = "文件上传", description = "上传文件到腾讯云COS")
+    @Operation(summary = "文件上传", description = "上传文件到云存储或本地存储")
     @PreAuthorize("hasAuthority('" + PermissionConstants.FILE_UPLOAD + "')")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<String> upload(@RequestParam("file") MultipartFile file) throws IOException {
@@ -45,7 +45,7 @@ public class FileController {
                 !(contentType.equals("image/png") || contentType.equals("image/jpeg") || contentType.equals("image/jpg"))) {
             throw new StatefulException(HttpStatus.HTTP_UNSUPPORTED_TYPE, "只允许上传PNG/JPG图片");
         }
-        String url = fileService.uploadToCos(file);
+        String url = fileService.upload(file);
         return ApiResponse.success(url);
     }
 }

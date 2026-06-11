@@ -10,6 +10,14 @@ export function getUsers() {
   })
 }
 
+// 获取所有教师
+export function getTeachers() {
+  return request<ApiResponse<UserVO[]>>({
+    url: '/users/teachers',
+    method: 'GET'
+  })
+}
+
 // 分页获取用户列表
 export function getUserPage(params: { page?: number; size?: number; keyword?: string, enabled?: number }) {
   return request<ApiResponse<PageResultUserVO>>({

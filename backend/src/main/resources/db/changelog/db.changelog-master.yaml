@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/001_schema_core.sql
+  - include:
+      file: db/changelog/changes/002_schema_learning_assessment.sql
+  - include:
+      file: db/changelog/changes/003_schema_notifications_logs.sql
+  - include:
+      file: db/changelog/changes/004_seed_security_data.sql
+  - include:
+      file: db/changelog/changes/005_seed_learning_content.sql
+  - include:
+      file: db/changelog/changes/006_seed_assessment_demo_data.sql

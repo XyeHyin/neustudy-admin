@@ -25,6 +25,7 @@ public class EventLogConfig implements WebMvcConfigurer {
                         "/v3/api-docs/**",
                         "/webjars/**",
                         "/notifications/**",
+                        "/uploads/**",
                         "/favicon.ico",
                         "/error"
                 );

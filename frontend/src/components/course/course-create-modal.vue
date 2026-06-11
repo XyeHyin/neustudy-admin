@@ -129,14 +129,23 @@ const gradeOptions = computed(() => {
 })
 
 // 教师选项
-const userOptions = computed(() => props.users?.map(u => ({ label: u.nickname, value: u.id })) || [])
+const userOptions = computed(() => props.users?.map(u => ({ label: u.nickname || u.username, value: u.id })) || [])
 
 // 表单校验规则
 const rules = {
   name: { required: true, message: '请输入课程名称', trigger: 'blur' },
   description: { required: true, message: '请输入课程描述', trigger: 'blur' },
   subject: { required: true, message: '请选择学科', trigger: 'change' },
-  grade: { required: true, message: '请选择年级', trigger: 'change' }
+  grade: { required: true, message: '请选择年级', trigger: 'change' },
+  teacherId: {
+    validator: (_rule: any, value?: number) => {
+      if (props.isAdmin && !value) {
+        return new Error('请选择授课教师')
+      }
+      return true
+    },
+    trigger: 'change'
+  }
 }
 
 const message = useMessage()

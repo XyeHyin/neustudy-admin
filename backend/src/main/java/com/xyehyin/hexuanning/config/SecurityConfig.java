@@ -20,7 +20,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, UserService userService) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authorizeHttpRequests(auth -> auth
                 // 登录、注册 放行
-                .requestMatchers("/auth/login", "/auth/register", "/auth/code", "/auth/reset-password").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**").permitAll().requestMatchers(HttpMethod.GET, "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/index.html", "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/favicon.ico").permitAll()
+                .requestMatchers("/auth/login", "/auth/register", "/auth/code", "/auth/reset-password").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**").permitAll().requestMatchers(HttpMethod.HEAD, "/uploads/**").permitAll().requestMatchers(HttpMethod.GET, "/uploads/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/index.html", "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/favicon.ico").permitAll()
                 // 其他所有接口都需要认证
                 .anyRequest().authenticated()).exceptionHandling(eh -> eh.authenticationEntryPoint((request, response, authException) -> {
             response.setStatus(HttpStatus.HTTP_UNAUTHORIZED);

@@ -3,9 +3,9 @@
     <n-card :bordered="false" class="admin-card">
       <n-h1 class="admin-title">判分管理</n-h1>
       <n-space :size="16" style="margin-bottom: 16px">
-        <!-- 新：试卷下拉 -->
+        <!-- 试卷下拉 -->
         <n-select v-model:value="filterPaperId" :options="paperOptions" placeholder="请选择试卷" clearable style="width: 200px" @update:value="handleSearch" />
-        <!-- 新：题目关键词 -->
+        <!-- 题目关键词 -->
         <n-input v-model:value="searchQuestionTitle" placeholder="搜索题目" clearable style="width: 240px" @input="handleSearch" />
       </n-space>
       <n-tabs v-model:value="activeTab" type="line">

@@ -59,7 +59,7 @@ import { getCourseStatusText as getStatusText, getCourseStatusType as getStatusT
 import { NButton, NTag, useMessage, useModal } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref } from 'vue'
 import { useRequest } from 'vue-hooks-plus'
-import { getUsers } from '@/api/user'
+import { getTeachers } from '@/api/user'
 
 import { getCategories } from '@/api/categories'
 import {
@@ -164,7 +164,7 @@ const { loading: loadingCourses, run: fetchCourses } = useRequest(
   }
 )
 
-const { run: fetchUsers } = useRequest(getUsers, {
+const { run: fetchTeachers } = useRequest(getTeachers, {
   onSuccess: (res: any) => {
     if (res.code === 200) {
       users.value = res.data
@@ -183,7 +183,7 @@ onMounted(() => {
   fetchCategories()
   fetchCourses()
   if (auth.hasPermission('course:create:all')) {
-    fetchUsers()
+    fetchTeachers()
   }
 })
 
@@ -297,7 +297,11 @@ async function handleCreateCourseSubmit(data: CreateCourseDTO & { teacherId?: nu
   creatingCourse.value = true
   try {
     let res
-    if (auth.hasPermission('course:create:all') && data.teacherId) {
+    if (auth.hasPermission('course:create:all')) {
+      if (!data.teacherId) {
+        message.error('请选择授课教师')
+        return
+      }
       res = await adminCreateCourse(data, data.teacherId)
     } else {
       res = await createCourse(data)

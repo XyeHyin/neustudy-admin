@@ -100,7 +100,7 @@ public class PaperService {
     /**
      * 校验当前用户是否有权操作试卷（教师只能操作自己试卷，除非拥有对应的全局管理权限）
      */
-    private void checkPaperOwnershipOrAdminPermission(Paper paper, Long currentUserId, String adminPermissionConstant) {
+    public void ensurePaperOwnershipOrAdminPermission(Paper paper, Long currentUserId, String adminPermissionConstant) {
         if (paper.getTeacher() != null && paper.getTeacher().getId().equals(currentUserId)) {
             return;
         }
@@ -114,13 +114,17 @@ public class PaperService {
         }
     }
 
+    public void ensurePaperOwnershipOrAdminPermission(Long paperId, Long currentUserId, String adminPermissionConstant) {
+        ensurePaperOwnershipOrAdminPermission(findByIdOrThrow(paperId), currentUserId, adminPermissionConstant);
+    }
+
     /**
      * 编辑试卷
      */
     @Transactional
     public Paper updatePaper(Long id, PaperUpdateDTO dto, Long currentUserId) {
         Paper paper = findByIdOrThrow(id);
-        checkPaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
+        ensurePaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
         paperMapper.updatePaperFromDto(dto, paper);
         return paperRepository.save(paper);
     }
@@ -131,7 +135,7 @@ public class PaperService {
     @Transactional
     public void deletePaper(Long id, Long currentUserId) {
         Paper paper = findByIdOrThrow(id);
-        checkPaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_DELETE_ALL);
+        ensurePaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_DELETE_ALL);
         paperRepository.delete(paper);
     }
 
@@ -141,7 +145,7 @@ public class PaperService {
     @Transactional
     public void publishPaper(Long id, Long currentUserId) {
         Paper paper = findByIdOrThrow(id);
-        checkPaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_PUBLISH_ALL);
+        ensurePaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_PUBLISH_ALL);
         // 校验：不能重复发布
         if (paper.getStatus() == Paper.PaperStatus.PUBLISHED) {
             throw new cn.hutool.core.exceptions.StatefulException(cn.hutool.http.HttpStatus.HTTP_BAD_REQUEST, "试卷已发布");
@@ -165,7 +169,7 @@ public class PaperService {
     @Transactional
     public void archivePaper(Long id, Long currentUserId) {
         Paper paper = findByIdOrThrow(id);
-        checkPaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_ARCHIVE_ALL);
+        ensurePaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_ARCHIVE_ALL);
         // 校验：不能归档未发布试卷
         if (paper.getStatus() != Paper.PaperStatus.PUBLISHED) {
             throw new cn.hutool.core.exceptions.StatefulException(cn.hutool.http.HttpStatus.HTTP_BAD_REQUEST, "未发布试卷不能归档");
@@ -180,7 +184,7 @@ public class PaperService {
     @Transactional
     public void addQuestions(Long paperId, List<PaperQuestionDTO> dtos, Long currentUserId) {
         Paper paper = findByIdOrThrow(paperId);
-        checkPaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
+        ensurePaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
         for (PaperQuestionDTO dto : dtos) {
             if (paperQuestionRepository.findByPaperIdAndQuestionId(paperId, dto.getQuestionId()).isPresent()) {
                 continue;
@@ -206,7 +210,7 @@ public class PaperService {
     @Transactional
     public void removeQuestion(Long paperId, Long questionId, Long currentUserId) {
         Paper paper = findByIdOrThrow(paperId);
-        checkPaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
+        ensurePaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
         paperQuestionRepository.findByPaperIdAndQuestionId(paperId, questionId)
                 .ifPresent(paperQuestionRepository::delete);
         // 重新计算总分
@@ -222,7 +226,7 @@ public class PaperService {
     @Transactional
     public void updateQuestions(Long paperId, List<PaperQuestionDTO> dtos, Long currentUserId) {
         Paper paper = findByIdOrThrow(paperId);
-        checkPaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
+        ensurePaperOwnershipOrAdminPermission(paper, currentUserId, PermissionConstants.PAPER_EDIT_ALL);
         for (PaperQuestionDTO dto : dtos) {
             paperQuestionRepository.findByPaperIdAndQuestionId(paperId, dto.getQuestionId())
                     .ifPresent(pq -> {

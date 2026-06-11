@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class AppProperties {
     private Jwt jwt = new Jwt();
     private Admin admin = new Admin();
+    private Upload upload = new Upload();
 
     @Data
     public static class Jwt {
@@ -23,5 +24,11 @@ public class AppProperties {
         private String nickname = "Super Admin";
         private String email = "admin@example.com";
         private String phone = "10000000000";
+    }
+
+    @Data
+    public static class Upload {
+        private String dir = "uploads";
+        private String urlPrefix = "/api/uploads";
     }
 }

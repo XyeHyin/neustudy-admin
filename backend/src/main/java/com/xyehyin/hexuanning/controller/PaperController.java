@@ -64,8 +64,12 @@ public class PaperController extends BaseController {
             @RequestParam(required = false) Long teacherId,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
     ) {
+        if (!hasAuthority(PermissionConstants.PAPER_LIST_ALL)) {
+            teacherId = getCurrentUserId(request);
+        }
         Page<Paper> pageResult = paperService.page(title, teacherId, status, page, size);
         List<PaperListVO> voList = pageResult.getContent().stream().map(paperMapper::toPaperListVO).toList();
         PageResult<PaperListVO> result = new PageResult<>();
@@ -79,8 +83,9 @@ public class PaperController extends BaseController {
     @Operation(summary = "获取试卷详情", description = "获取试卷详情")
     @PreAuthorize("hasAuthority('" + PermissionConstants.PAPER_VIEW_SELF + "') or hasAuthority('" + PermissionConstants.PAPER_VIEW_ALL + "')")
     @GetMapping("/{id}")
-    public ApiResponse<PaperDetailVO> getPaper(@PathVariable Long id) {
+    public ApiResponse<PaperDetailVO> getPaper(@PathVariable Long id, HttpServletRequest request) {
         Paper paper = paperService.findByIdOrThrow(id);
+        paperService.ensurePaperOwnershipOrAdminPermission(paper, getCurrentUserId(request), PermissionConstants.PAPER_VIEW_ALL);
         PaperDetailVO vo = paperMapper.toPaperDetailVO(paper);
         vo.setQuestions(paperService.listQuestions(paper.getId(), false));
         vo.setTimeLimit(paper.getTimeLimit());
@@ -155,7 +160,9 @@ public class PaperController extends BaseController {
     @GetMapping("/{paperId}/questions")
     public ApiResponse<List<PaperQuestionVO>> listQuestions(
             @PathVariable Long paperId,
-            @Parameter(description = "是否乱序", example = "false") @RequestParam(defaultValue = "false") boolean randomOrder) {
+            @Parameter(description = "是否乱序", example = "false") @RequestParam(defaultValue = "false") boolean randomOrder,
+            HttpServletRequest request) {
+        paperService.ensurePaperOwnershipOrAdminPermission(paperId, getCurrentUserId(request), PermissionConstants.PAPER_VIEW_ALL);
         return ApiResponse.success(paperService.listQuestions(paperId, randomOrder));
     }
 
@@ -177,8 +184,9 @@ public class PaperController extends BaseController {
     @Operation(summary = "试卷预览", description = "获取试卷预览信息")
     @PreAuthorize("hasAuthority('" + PermissionConstants.PAPER_VIEW_SELF + "') or hasAuthority('" + PermissionConstants.PAPER_VIEW_ALL + "')")
     @GetMapping("/{id}/preview")
-    public ApiResponse<PaperPreviewVO> previewPaper(@PathVariable Long id) {
+    public ApiResponse<PaperPreviewVO> previewPaper(@PathVariable Long id, HttpServletRequest request) {
         Paper paper = paperService.findByIdOrThrow(id);
+        paperService.ensurePaperOwnershipOrAdminPermission(paper, getCurrentUserId(request), PermissionConstants.PAPER_VIEW_ALL);
         List<PaperQuestionVO> questions = paperService.listQuestions(id, false);
         PaperPreviewVO vo = new PaperPreviewVO();
         vo.setId(paper.getId());
@@ -192,7 +200,8 @@ public class PaperController extends BaseController {
     @Operation(summary = "试卷统计", description = "获取试卷统计信息")
     @PreAuthorize("hasAuthority('" + PermissionConstants.PAPER_VIEW_SELF + "') or hasAuthority('" + PermissionConstants.PAPER_VIEW_ALL + "')")
     @GetMapping("/{id}/statistics")
-    public ApiResponse<PaperStatisticsVO> statistics(@PathVariable Long id) {
+    public ApiResponse<PaperStatisticsVO> statistics(@PathVariable Long id, HttpServletRequest request) {
+        paperService.ensurePaperOwnershipOrAdminPermission(id, getCurrentUserId(request), PermissionConstants.PAPER_VIEW_ALL);
         PaperStatisticsVO vo = paperService.statistics(id);
         return ApiResponse.success(vo);
     }

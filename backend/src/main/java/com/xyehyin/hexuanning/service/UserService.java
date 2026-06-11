@@ -47,7 +47,7 @@ public class UserService extends BaseService<User, Long> {
     }
 
     public long countByRoleId(Long roleId) {
-        return roleRepository.countRoleById(roleId);
+        return userRepository.countByRole_Id(roleId);
     }
 
     /**

@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmail(String email);
 
+    long countByRole_Id(Long roleId);
+
     @Query("SELECT u FROM User u WHERE (:keyword IS NULL OR u.username LIKE %:keyword% OR u.nickname LIKE %:keyword% OR u.email LIKE %:keyword%) AND (:enabled IS NULL OR u.enabled = :enabled)")
     Page<User> findByKeywordAndEnabled(@Param("keyword") String keyword, @Param("enabled") Boolean enabled, Pageable pageable);
 

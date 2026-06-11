@@ -333,9 +333,9 @@ public class CourseController extends BaseController {
         Long teacherId = getCurrentUserId(request);
 
         long totalCourses = courseService.countByTeacherId(teacherId);
-        long draftCourses = courseService.findByStatus(Course.CourseStatus.DRAFT).size();
-        long publishedCourses = courseService.findByStatus(Course.CourseStatus.PUBLISHED).size();
-        long completedCourses = courseService.findByStatus(Course.CourseStatus.COMPLETED).size();
+        long draftCourses = courseService.countByTeacherIdAndStatus(teacherId, Course.CourseStatus.DRAFT);
+        long publishedCourses = courseService.countByTeacherIdAndStatus(teacherId, Course.CourseStatus.PUBLISHED);
+        long completedCourses = courseService.countByTeacherIdAndStatus(teacherId, Course.CourseStatus.COMPLETED);
 
         Map<String, Object> statistics = Map.of(
                 "totalCourses", totalCourses,
